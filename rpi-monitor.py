@@ -20,7 +20,7 @@
 #    - % of used disk space
 #    - CPU load (1m and 5m)
 #    - system security status ("safe" if OS update less than 1 day old (default), and upgrade < 7 days, 
-#							  otherwise "unsafe", thresholds can be set in "config.ini" file)
+#      otherwise "unsafe", thresholds can be set in "config.ini" file)
 #
 #  --------------------------
 #  import necessary libraries
