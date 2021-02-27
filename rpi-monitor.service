@@ -1,6 +1,6 @@
 [Unit]
 Description=RPi Monitor MQTT Client/Daemon
-Documentation=https://github.com/ufankhau/
+Documentation=https://github.com/ufankhau/rpi-monitor
 After=network.target mosquitto.service network-online.target
 Wants=network-online.target
 Requires=network.target
