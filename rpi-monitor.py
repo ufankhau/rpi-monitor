@@ -92,16 +92,6 @@ def print_line(text, error=False, warning=False, info=False, verbose=False, debu
 	if sd_notify:
 		sd_notifier.notify('STATUS={} - {}.'.format(timestamp_sd, unidecode(text)))
 
-#  ------------------
-#  identifier cleanup
-#  ------------------
-#def clean_identifier(name):
-#	clean = name.strip()
-#	for this, that in [[' ', '-'], ['ä', 'ae'], ['Ä', 'Ae'], ['ö', 'oe'], ['Ö', 'Oe'], \
-#		['ü', 'ue'], ['Ü', 'Ue'], ['ß', 'ss']]:
-#		clean = clean.replace(this, that)
-#	clean = unidecode(clean)
-#	return clean
 
 #  --------
 #  argparse
