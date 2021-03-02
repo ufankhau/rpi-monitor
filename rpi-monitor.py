@@ -665,8 +665,10 @@ def getdeltatime(deltatime):
 	hours = rest1 // 3600
 	rest2 = rest1 - (hours * 3600)
 	minutes = rest2 // 60
-	if days != 0:
+	if days != 0 and hours != 0:
 		deltatime = str(days)+'d '+str(hours)+'h'+str('{:02d}'.format(minutes))+'m'
+	elif days != 0 and hours == 0:
+		deltatime = str(days)+'d '+str(minutes)+'m'
 	elif days == 0 and hours == 0:
 		deltatime = str(minutes)+'m'
 	else:
