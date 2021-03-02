@@ -307,7 +307,7 @@ def getDeviceCpuModel():
 		trimmedLines.append(trimmedLine)
 	cpu_model = ''
 	cpu_cores = rpi_nbrCPUs
-	cpu_bogoMIPS = 0
+#	cpu_bogoMIPS = 0
 	cpu_serial = ''
 	cpu_vendor = ''
 	cpu_model_name = ''
@@ -322,8 +322,8 @@ def getDeviceCpuModel():
 			cpu_model = currValue
 		if 'Model name' in currLine:
 			cpu_model_name = currValue
-		if 'BogoMIPS' in currLine:
-			cpu_bogoMIPS = '{:.0f}'.format(cpu_cores * float(currValue))
+#		if 'BogoMIPS' in currLine:
+#			cpu_bogoMIPS = '{:.0f}'.format(cpu_cores * float(currValue))
 	cpu_model = cpu_vendor + " " + cpu_model_name + " r" + cpu_model
 	out = subprocess.Popen(cmdString2,
 		shell=True,
@@ -332,7 +332,7 @@ def getDeviceCpuModel():
 	stdout,_ = out.communicate()
 	lines = stdout.decode('utf-8').replace('\x00', '').lstrip().rstrip()
 	cpu_serial = lines
-	rpi_cpu_tuple = ( cpu_model, cpu_cores, cpu_bogoMIPS, cpu_serial )
+	rpi_cpu_tuple = ( cpu_model, cpu_cores, cpu_serial )
 	print_line('rpi_cpu_tuple=[{}]'.format(rpi_cpu_tuple), debug=True)
 
 
@@ -971,11 +971,11 @@ RPI_NETWORK = "Network Interfaces"
 RPI_OS_UPDATE = rpi_security[0][0]
 RPI_OS_UPGRADE = rpi_security[1][0]
 RPI_SECURITY_STATUS = "Security_Status"
-# tupel cpu (mode name, #cores, bogomips, serial#)
+# tupel cpu (mode name, #cores, serial#)
 RPI_CPU = "CPU"
 RPI_CPU_MODEL = "Model"
 RPI_CPU_CORES = "Cores"
-RPI_CPU_BOGOMIPS = "BogoMIPS"
+#RPI_CPU_BOGOMIPS = "BogoMIPS"
 RPI_CPU_SERIAL = "Serial"
 SCRIPT_REPORT_INTERVAL = "Reporter_Interval [min]"
 
@@ -1046,13 +1046,13 @@ def send_status(timestamp, nothing):
 
 
 def getCPUDictionary():
-	#  tuple (modelname, #cores, bogoMIPS, serial#)
+	#  tuple (modelname, #cores, serial#)
 	cpuDict = OrderedDict()
-	#rpi_cpu_tuple = ( cpu_model, cpu_cores, cpu_bogoMIPS, cpu_serial )
+	#rpi_cpu_tuple = ( cpu_model, cpu_cores, cpu_serial )
 	if rpi_cpu_tuple != '':
 		cpuDict[RPI_CPU_MODEL] = rpi_cpu_tuple[0]
 		cpuDict[RPI_CPU_CORES] = rpi_cpu_tuple[1]
-		cpuDict[RPI_CPU_BOGOMIPS] = int(rpi_cpu_tuple[2], 10)
+#		cpuDict[RPI_CPU_BOGOMIPS] = int(rpi_cpu_tuple[2], 10)
 		cpuDict[RPI_CPU_SERIAL] = rpi_cpu_tuple[3]
 	return cpuDict
 
