@@ -831,9 +831,9 @@ detectorValues = OrderedDict([
 	(LD_CPU_TEMP, dict(title="{} CPU Temp".format(rpi_hostname), device_class="temperature", \
 		no_title_prefix="yes", unit="°C", json_value="Temp_CPU_c", icon='mdi:thermometer')),
 	(LD_CPU_USAGE_1M, dict(title="{} CPU Load (1 min)".format(rpi_hostname.title()), no_title_prefix="yes", \
-		json_value="CPU_Load_1_min", unit="%", icon='mdi:cpu-64-bit')),
+		json_value="CPU_Load_1_min", unit="%", icon='mdi:chip')),
 	(LD_CPU_USAGE_5M, dict(title="{} CPU Load (5 min)".format(rpi_hostname.title()), no_title_prefix="yes", \
-		json_value="CPU_Load_5_min", unit="%", icon='mdi:cpu-64-bit')),
+		json_value="CPU_Load_5_min", unit="%", icon='mdi:chip')),
 	(LD_MEM_USED, dict(title="{} Memory Usage".format(rpi_hostname), no_title_prefix="yes", \
 		json_value="RAM_used_prcnt", unit="%", icon='mdi:memory')),
 	(LD_FS_USED, dict(title="{} Disk Usage".format(rpi_hostname), no_title_prefix="yes", \
