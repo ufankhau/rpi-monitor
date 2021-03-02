@@ -657,19 +657,20 @@ def getLastUpgradeDate():
 
 
 #  -----------------------------------------------------
-#  get deltatime formatted from seconds into xxhyymzzs
+#  get deltatime formatted from seconds into xd yhzm
 #  -----------------------------------------------------
 def getdeltatime(deltatime):
-	hours = deltatime // 3600
-	rest1 = deltatime - (hours * 3600)
-	minutes = rest1 // 60
-	seconds = rest1 - (minutes * 60)
-	if hours != 0:
-		deltatime = str(hours)+'h'+str(minutes)+'m'+str(seconds)+'s'
-	elif hours == 0 and minutes == 0:
-		deltatime = str(seconds)+'s'
+	days = deltatime // 86400
+	rest1 = deltatime - (days * 86400)
+	hours = rest1 // 3600
+	rest2 = rest1 - (hours * 3600)
+	minutes = rest2 // 60
+	if days != 0:
+		deltatime = str(days)+'d '+str(hours)+'h'+str(minutes)+'m'
+	elif days == 0 and hours == 0:
+		deltatime = str(minutes)+'m'
 	else:
-		deltatime = str(minutes)+'m'+str(seconds)+'s'
+		deltatime = str(hours)+'h'+str(minutes)+'m'
 	return deltatime
 
 
