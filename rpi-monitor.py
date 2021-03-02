@@ -1053,7 +1053,7 @@ def getCPUDictionary():
 		cpuDict[RPI_CPU_MODEL] = rpi_cpu_tuple[0]
 		cpuDict[RPI_CPU_CORES] = rpi_cpu_tuple[1]
 #		cpuDict[RPI_CPU_BOGOMIPS] = int(rpi_cpu_tuple[2], 10)
-		cpuDict[RPI_CPU_SERIAL] = rpi_cpu_tuple[3]
+		cpuDict[RPI_CPU_SERIAL] = rpi_cpu_tuple[2]
 	return cpuDict
 
 
