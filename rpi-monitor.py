@@ -1028,12 +1028,12 @@ def send_status(timestamp, nothing):
 	rpiSecurityTop[LDS_PAYLOAD_NAME] = rpiSecurity
 	topic = "home/nodes/binary_sensor/{}".format(sensor_name.lower())
 	_thread.start_new_thread(publishMonitorData, (rpiSecurity, topic))
-	# mqtt_client.publish(topic, payload="{}".format(rpi_security_status), retain=False)
 	if rpi_security_status == 'off':
 		for i in range(len(rpi_security)):
 			if rpi_security[i][1] != 'safe':
 				rpi_security_status = 'on'
 				topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
+				print(topic)
 				_thread.start_new_thread(publishSecurityStatus, ('on', topic))
 				break
 	else:
@@ -1089,7 +1089,8 @@ def publishMonitorData(latestData, topic):
 
 def publishSecurityStatus(status, topic):
 	print_line('Publishing to MQTT topic "{}, Data:{}"'.format(topic, status))
-	mqtt_client.publish('{}'.format(topic), payload='{}'.format(status), retain=False)
+	rc = mqtt_client.publish('{}'.format(topic), payload='{}'.format(status), retain=False)
+	print(rc)
 	sleep(0.5)
 
 def update_values():
