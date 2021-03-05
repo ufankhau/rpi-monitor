@@ -1033,7 +1033,6 @@ def send_status(timestamp, nothing):
 			if rpi_security[i][1] != 'safe':
 				rpi_security_status = 'on'
 				topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
-				print(topic)
 				_thread.start_new_thread(publishSecurityStatus, ('on', topic))
 				break
 	else:
