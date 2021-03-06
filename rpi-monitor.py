@@ -1028,7 +1028,7 @@ def send_status(timestamp, nothing):
 	rpiSecurityTop[LDS_PAYLOAD_NAME] = rpiSecurity
 	topic = "home/nodes/binary_sensor/{}".format(sensor_name.lower())
 	_thread.start_new_thread(publishMonitorData, (rpiSecurity, topic))
-	rpi_security_status = 'off':
+	rpi_security_status = 'off'
 	for i in range(len(rpi_security)):
 		if rpi_security[i][1] != 'safe':
 			rpi_security_status = 'on'
