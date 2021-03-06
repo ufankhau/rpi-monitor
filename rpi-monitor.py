@@ -1028,23 +1028,27 @@ def send_status(timestamp, nothing):
 	rpiSecurityTop[LDS_PAYLOAD_NAME] = rpiSecurity
 	topic = "home/nodes/binary_sensor/{}".format(sensor_name.lower())
 	_thread.start_new_thread(publishMonitorData, (rpiSecurity, topic))
-	if rpi_security_status == 'off':
-		for i in range(len(rpi_security)):
-			if rpi_security[i][1] != 'safe':
-				rpi_security_status = 'on'
-				topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
-				_thread.start_new_thread(publishSecurityStatus, ('on', topic))
-				break
-	else:
-		change = True
-		for i in range(len(rpi_security)):
-			if rpi_security[i][1] != 'safe':
-				change = False
-				break
-		if change:
-			rpi_security_status = 'off'
+	rpi_security_status = 'off':
+	for i in range(len(rpi_security)):
+		if rpi_security[i][1] != 'safe':
+			rpi_security_status = 'on'
 			topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
-			_thread.start_new_thread(publishSecurityStatus, ('off', topic))
+			_thread.start_new_thread(publishSecurityStatus, ('on', topic))
+			break
+	if rpi_security_status == 'off':
+		topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
+		_thread.start_new_thread(publishSecurityStatus, ('off', topic))
+
+	#else:
+	#	change = True
+	#	for i in range(len(rpi_security)):
+	#		if rpi_security[i][1] != 'safe':
+	#			change = False
+	#			break
+	#	if change:
+	#		rpi_security_status = 'off'
+	#		topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
+	#		_thread.start_new_thread(publishSecurityStatus, ('off', topic))
 
 
 def getCPUDictionary():
@@ -1088,8 +1092,7 @@ def publishMonitorData(latestData, topic):
 
 def publishSecurityStatus(status, topic):
 	print_line('Publishing to MQTT topic "{}, Data:{}"'.format(topic, status))
-	rc = mqtt_client.publish('{}'.format(topic), payload='{}'.format(status), retain=False)
-	print(rc)
+	mqtt_client.publish('{}'.format(topic), payload='{}'.format(status), retain=False)
 	sleep(0.5)
 
 def update_values():
