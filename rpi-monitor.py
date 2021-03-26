@@ -1079,7 +1079,7 @@ def getFSmountDictionary():
 	else:
 		for i in range(len(rpi_fs_mount)):
 			lineParts = rpi_fs_mount[i].split(',')
-			fsmountDict[linePart[0]] = lineParts[1]
+			fsmountDict[lineParts[0]] = lineParts[1]
 	print_line('fsmountDict:{}'.format(fsmountDict), debug=True)
 	return fsmountDict
 
