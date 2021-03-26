@@ -1023,7 +1023,8 @@ def send_status(timestamp, nothing):
 	if len(rpi_fs_mount) > 0:
 		rpiData[RPI_FS_MOUNT] = getFSmountDictionary()
 	else:
-		rpiData[RPI_FS_MOUNT] = '-'
+		rpi_fs_mount = 'test'
+		rpiData[RPI_FS_MOUNT] = rpi_fs_mount
 
 	rpiData[RPI_NETWORK] = getNetworkDictionary()
 	
