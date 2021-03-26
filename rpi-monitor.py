@@ -1079,10 +1079,10 @@ def getCPUDictionary():
 def getFSmountDictionary():
 	fsmountDict = OrderedDict()
 	for i in range(len(rpi_fs_mount)):
-		if rpi_fs_mount[i,0] == 'none':
-			fsmountDict[i] = rpi_fs_mount[i,0]
+		if rpi_fs_mount[i][0] == 'none':
+			fsmountDict[i] = rpi_fs_mount[i][0]
 		else:
-			fsmountDict[i] = rpi_fs_mount[i,0] + ' > ' + rpi_fs_mount[i,1]
+			fsmountDict[i] = rpi_fs_mount[i][0] + ' > ' + rpi_fs_mount[i][1]
 	print_line('fsmountDict=[{}]'.format(fsmountDict), debut=True)
 	return fsmountDict
 
