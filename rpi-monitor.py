@@ -1083,7 +1083,7 @@ def getFSmountDictionary():
 			fsmountDict[i] = rpi_fs_mount[i][0]
 		else:
 			fsmountDict[i] = rpi_fs_mount[i][0] + ' > ' + rpi_fs_mount[i][1]
-	print_line('fsmountDict=[{}]'.format(fsmountDict), debut=True)
+	print_line('fsmountDict:{}'.format(fsmountDict), debug=True)
 	return fsmountDict
 
 
