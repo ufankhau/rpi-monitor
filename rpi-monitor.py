@@ -426,7 +426,7 @@ def getFileSystemUsage():
 			rpi_fs_used = '{:.1f}'.format(disk_usage)
 			rpi_fs_space = '{:.0f}'.format(float(lineParts[1]) / 1024)
 		else:
-			rpi_fs_mount.append = lineParts[0] + ' > ' + lineParts[5]
+			rpi_fs_mount.append(lineParts[0] + ' > ' + lineParts[5])
 	print_line('rpi_filesystem_size=[{}GB]'.format(rpi_fs_space), debug=True)
 	print_line('rpi_filesystem_usage=[{}%]'.format(rpi_fs_used), debug=True)
 	print_line('rpi_filesystem_mounted=[{}]'.format(rpi_fs_mount), debug=True)
@@ -1075,10 +1075,10 @@ def getFSmountDictionary():
 	fsmountDict = OrderedDict()
 	i = 0
 	if len(rpi_fs_mount) == 0:
-		fsmountDict.append = 'none'
+		fsmountDict.append('none')
 	else:
 		for i in range(len(rpi_fs_mount)):
-			fsmountDict.append = rpi_fs_mount[i]
+			fsmountDict.append(rpi_fs_mount[i])
 	print_line('fsmountDict:{}'.format(fsmountDict), debug=True)
 	return fsmountDict
 
