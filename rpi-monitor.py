@@ -1020,7 +1020,10 @@ def send_status(timestamp, nothing):
 	if len(rpiCpu) > 0:
 		rpiData[RPI_CPU] = rpiCpu
 
-	rpiData[RPI_FS_MOUNT] = getFSmountDictionary()
+	if len(rpi_fs_mount) > 0:
+		rpiData[RPI_FS_MOUNT] = getFSmountDictionary()
+	else:
+		rpiData[RPI_FS_MOUNT] = 'none'
 
 	rpiData[RPI_NETWORK] = getNetworkDictionary()
 	
@@ -1079,7 +1082,7 @@ def getFSmountDictionary():
 	else:
 		for i in range(len(rpi_fs_mount)):
 			lineParts = rpi_fs_mount[i].split(',')
-			fsmountDict[lineParts[0]] = lineParts[1]
+			fsmountDict[lineParts[0]] = '> '+lineParts[1]
 	print_line('fsmountDict:{}'.format(fsmountDict), debug=True)
 	return fsmountDict
 
