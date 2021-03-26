@@ -181,16 +181,16 @@ interval_in_minutes = config['Daemon'].getint('interval_in_minutes', default_int
 default_domain = ''
 fallback_domain = config['Daemon'].get('fallback_domain', default_domain).lower()
 
-#  the apt update command should be run daily. Hence the default is set to 1
+#  the apt update command should be run daily. Hence the default is set to 3
 min_update_days = 1
-max_update_days = 3
-default_update_days = 1
+max_update_days = 7
+default_update_days = 3
 OS_update_days = config['Daemon'].getint('OS_update_days', default_update_days)
 maxTimesinceUpdate = OS_update_days*24*60*60
 
 #  maximum time since last upgrade of OS to consider heahlth of Raspberry OS as "Safe"
 min_upgrade_days = 1
-max_upgrade_days = 10
+max_upgrade_days = 14
 default_upgrade_days = 7
 OS_upgrade_days = config['Daemon'].getint('OS_upgrade_days', default_upgrade_days)
 maxTimesinceUpgrade = OS_upgrade_days*24*60*60
@@ -236,6 +236,8 @@ rpi_os = ''
 rpi_kernel_version = ''
 rpi_fs_used = ''
 rpi_fs_space = ''
+rpi_fs_mount = []
+rpi_fs_mount[0,1] = "none"
 rpi_mqtt_script = script_info.replace('.py', '')
 rpi_interfaces = []
 rpi_gpu_temp = ''
@@ -400,7 +402,8 @@ def getDeviceMemUsage():
 def getFileSystemUsage():
 	global rpi_fs_space
 	global rpi_fs_used
-	cmdString = "/bin/df -ml | /usr/bin/tail -n +2 | /bin/egrep -v 'tmpfs|boot'"
+	global rpi_fs_mount
+	cmdString = "/bin/df -m | /usr/bin/tail -n +2 | /bin/egrep -v 'tmpfs|boot|overlay|udev'"
 	out = subprocess.Popen(cmdString,
 		shell=True,
 		stdout=subprocess.PIPE,
@@ -413,6 +416,7 @@ def getFileSystemUsage():
 		if len(trimmedLine) > 0:
 			trimmedLines.append(trimmedLine)
 	print_line('getFileSystemUsage () trimmedLines=[{}]'.format(trimmedLines), debug=True)
+	i = 0
 	for currLine in trimmedLines:
 		lineParts = currLine.split()
 		print_line('lineParts({})=[{}]'.format(len(lineParts), lineParts), debug=True)
@@ -422,8 +426,13 @@ def getFileSystemUsage():
 			disk_usage = (disk_used / (disk_avail + disk_used) * 100)
 			rpi_fs_used = '{:.1f}'.format(disk_usage)
 			rpi_fs_space = '{:.0f}'.format(float(lineParts[1]) / 1024)
+		else:
+			rpi_fs_mount[i,0] = lineParts[0]
+			rpi_fs_mount[i,1] = lineParts[5]
+			i += 1
 	print_line('rpi_filesystem_size=[{}GB]'.format(rpi_fs_space), debug=True)
 	print_line('rpi_filesystem_usage=[{}%]'.format(rpi_fs_used), debug=True)
+	print_line('rpi_filesystem_mounted=[{}]'.format(rpi_fs_mount), debug=True)
 
 
 #  -----------
@@ -964,6 +973,7 @@ RPI_OS_LAST_UPDATE = "OS_Last_Update"
 RPI_OS_LAST_UPGRADE = "OS_Last_Upgrade"
 RPI_FS_SPACE = "FS_total_gb"
 RPI_FS_USED = "FS_used_prcnt"
+RPI_FS_MOUNT = "FS_mounted"
 RPI_RAM_USED = "RAM_used_prcnt"
 RPI_CPU_TEMP = "Temp_CPU_c"
 RPI_CPU_USED_1M = "CPU_Load_1_min"
@@ -1013,6 +1023,8 @@ def send_status(timestamp, nothing):
 	if len(rpiCpu) > 0:
 		rpiData[RPI_CPU] = rpiCpu
 
+	rpiData[RPI_FS_MOUNT] = getFSmountDictionary()
+
 	rpiData[RPI_NETWORK] = getNetworkDictionary()
 	
 	rpiTopDict = OrderedDict()
@@ -1061,6 +1073,16 @@ def getCPUDictionary():
 #		cpuDict[RPI_CPU_BOGOMIPS] = int(rpi_cpu_tuple[2], 10)
 		cpuDict[RPI_CPU_SERIAL] = rpi_cpu_tuple[2]
 	return cpuDict
+
+def getFSmountDictionary():
+	fsmountDict = OrderedDict()
+	for i in range(len(rpi_fs_mount)):
+		if rpi_fs_mount[i,1] == 'none':
+			fsmountDict[i] = rpi_fs_mount[i,1]
+		else:
+			fsmountDict[i] = rpi_fs_mount[i,0] + ' > ' + rpi_fs_mount[i,1]
+	print_line('fsmountDict=[{}]'.format(fsmountDict), debut=True)
+	return fsmountDict
 
 
 def getNetworkDictionary():
