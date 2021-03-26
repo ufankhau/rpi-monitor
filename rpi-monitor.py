@@ -1075,10 +1075,10 @@ def getFSmountDictionary():
 	fsmountDict = OrderedDict()
 	i = 0
 	if len(rpi_fs_mount) == 0:
-		fsmountDict.append('none')
+		fsmountDict[0] ='none'
 	else:
 		for i in range(len(rpi_fs_mount)):
-			fsmountDict.append(rpi_fs_mount[i])
+			fsmountDict[i] = rpi_fs_mount[i]
 	print_line('fsmountDict:{}'.format(fsmountDict), debug=True)
 	return fsmountDict
 
