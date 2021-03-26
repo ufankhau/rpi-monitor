@@ -1020,6 +1020,7 @@ def send_status(timestamp, nothing):
 	if len(rpiCpu) > 0:
 		rpiData[RPI_CPU] = rpiCpu
 
+	print('length of rpi_fs_mount: {}'.format(len(rpi_fs_mount)))
 	if len(rpi_fs_mount) > 0:
 		rpiData[RPI_FS_MOUNT] = getFSmountDictionary()
 	else:
