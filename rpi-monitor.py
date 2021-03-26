@@ -236,8 +236,8 @@ rpi_os = ''
 rpi_kernel_version = ''
 rpi_fs_used = ''
 rpi_fs_space = ''
-rpi_fs_mount = [[,]]
-rpi_fs_mount[0][1] = "none"
+rpi_fs_mount = []
+rpi_fs_mount[0][0] = "none"
 rpi_mqtt_script = script_info.replace('.py', '')
 rpi_interfaces = []
 rpi_gpu_temp = ''
@@ -398,7 +398,7 @@ def getDeviceMemUsage():
 #  ------------------
 #  getFileSystemUsage
 #  ------------------
-#  get disk usage from command "bin/df -ml"
+#  get disk usage from command "bin/df -m"
 def getFileSystemUsage():
 	global rpi_fs_space
 	global rpi_fs_used
@@ -427,8 +427,8 @@ def getFileSystemUsage():
 			rpi_fs_used = '{:.1f}'.format(disk_usage)
 			rpi_fs_space = '{:.0f}'.format(float(lineParts[1]) / 1024)
 		else:
-			rpi_fs_mount[i,0] = lineParts[0]
-			rpi_fs_mount[i,1] = lineParts[5]
+			rpi_fs_mount[i][0] = lineParts[0]
+			rpi_fs_mount[i][1] = lineParts[5]
 			i += 1
 	print_line('rpi_filesystem_size=[{}GB]'.format(rpi_fs_space), debug=True)
 	print_line('rpi_filesystem_usage=[{}%]'.format(rpi_fs_used), debug=True)
@@ -1077,8 +1077,8 @@ def getCPUDictionary():
 def getFSmountDictionary():
 	fsmountDict = OrderedDict()
 	for i in range(len(rpi_fs_mount)):
-		if rpi_fs_mount[i,1] == 'none':
-			fsmountDict[i] = rpi_fs_mount[i,1]
+		if rpi_fs_mount[i,0] == 'none':
+			fsmountDict[i] = rpi_fs_mount[i,0]
 		else:
 			fsmountDict[i] = rpi_fs_mount[i,0] + ' > ' + rpi_fs_mount[i,1]
 	print_line('fsmountDict=[{}]'.format(fsmountDict), debut=True)
