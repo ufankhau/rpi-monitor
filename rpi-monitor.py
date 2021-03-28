@@ -992,6 +992,7 @@ SCRIPT_REPORT_INTERVAL = "Reporter_Interval [min]"
 def send_status(timestamp, nothing):
 	# prepare and send update of sensor data
 	global rpi_security_status
+	global rpi_fs_mount
 	rpiData = OrderedDict()
 	rpiData[SCRIPT_TIMESTAMP] = timestamp.astimezone().replace(microsecond=0).isoformat()
 	rpiData[RPI_MODEL] = rpi_model
@@ -1023,7 +1024,6 @@ def send_status(timestamp, nothing):
 	if len(rpi_fs_mount) > 0:
 		rpiData[RPI_FS_MOUNT] = getFSmountDictionary()
 	else:
-		rpi_fs_mount = 'test'
 		rpiData[RPI_FS_MOUNT] = rpi_fs_mount
 
 	rpiData[RPI_NETWORK] = getNetworkDictionary()
