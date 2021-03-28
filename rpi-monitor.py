@@ -236,8 +236,8 @@ rpi_os = ''
 rpi_kernel_version = ''
 rpi_fs_used = ''
 rpi_fs_space = ''
-rpi_fs_mount = []
-rpi_fs_mount.append(',none')
+#rpi_fs_mount = []
+#rpi_fs_mount.append(',none')
 rpi_mqtt_script = script_info.replace('.py', '')
 rpi_interfaces = []
 rpi_gpu_temp = ''
@@ -416,6 +416,10 @@ def getFileSystemUsage():
 		if len(trimmedLine) > 0:
 			trimmedLines.append(trimmedLine)
 	print_line('getFileSystemUsage () trimmedLines=[{}]'.format(trimmedLines), debug=True)
+	if len(trimmedLines) > 1:
+		rpi_fs_mount = []
+	else:
+		rpi_fs_mount = 'none'
 	for currLine in trimmedLines:
 		lineParts = currLine.split()
 		print_line('lineParts({})=[{}]'.format(len(lineParts), lineParts), debug=True)
@@ -1022,8 +1026,10 @@ def send_status(timestamp, nothing):
 		rpiData[RPI_CPU] = rpiCpu
 
 	#print('length of rpi_fs_mount: {}'.format(len(rpi_fs_mount)))
-	#if len(rpi_fs_mount) > 0:
-	rpiData[RPI_FS_MOUNT] = getFSmountDictionary()
+	if rpi_fs_mount == 'none':
+		rpiData[RPI_FS_MOUNT] = rpi_fs_mount
+	else:
+		rpiData[RPI_FS_MOUNT] = getFSmountDictionary()
 	#else:
 	#	rpiData[RPI_FS_MOUNT] = rpi_fs_mount
 
