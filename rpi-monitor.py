@@ -403,7 +403,7 @@ def getFileSystemUsage():
 	global rpi_fs_space
 	global rpi_fs_used
 	global rpi_fs_mount
-	cmdString = "/bin/df -m | /usr/bin/tail -n +2 | /bin/egrep -v 'tmpfs|boot|overlay|udev'"
+	cmdString = "/bin/df | /usr/bin/tail -n +2 | /bin/egrep -v 'tmpfs|boot|overlay|udev'"
 	out = subprocess.Popen(cmdString,
 		shell=True,
 		stdout=subprocess.PIPE,
