@@ -236,7 +236,8 @@ rpi_os = ''
 rpi_kernel_version = ''
 rpi_fs_used = ''
 rpi_fs_space = ''
-rpi_fs_mount = ['none', '']
+rpi_fs_mount = []
+rpi_fs_mount.append('none,')
 rpi_mqtt_script = script_info.replace('.py', '')
 rpi_interfaces = []
 rpi_gpu_temp = ''
@@ -992,7 +993,7 @@ SCRIPT_REPORT_INTERVAL = "Reporter_Interval [min]"
 def send_status(timestamp, nothing):
 	# prepare and send update of sensor data
 	global rpi_security_status
-	global rpi_fs_mount
+	#global rpi_fs_mount
 	rpiData = OrderedDict()
 	rpiData[SCRIPT_TIMESTAMP] = timestamp.astimezone().replace(microsecond=0).isoformat()
 	rpiData[RPI_MODEL] = rpi_model
@@ -1021,10 +1022,10 @@ def send_status(timestamp, nothing):
 		rpiData[RPI_CPU] = rpiCpu
 
 	#print('length of rpi_fs_mount: {}'.format(len(rpi_fs_mount)))
-	if len(rpi_fs_mount) > 0:
-		rpiData[RPI_FS_MOUNT] = getFSmountDictionary()
-	else:
-		rpiData[RPI_FS_MOUNT] = rpi_fs_mount
+	#if len(rpi_fs_mount) > 0:
+	rpiData[RPI_FS_MOUNT] = getFSmountDictionary()
+	#else:
+	#	rpiData[RPI_FS_MOUNT] = rpi_fs_mount
 
 	rpiData[RPI_NETWORK] = getNetworkDictionary()
 	
