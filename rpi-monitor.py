@@ -11,6 +11,7 @@
 #    - hostname, fqdn
 #    - number of CPUs
 #    - architecture
+#    - mounted filesystem(s)
 #  - Operating data of the Raspberry Pi, like
 #    - date of last update and upgrade of OS
 #    - uptime
@@ -43,11 +44,11 @@ from unidecode import unidecode
 import paho.mqtt.client as mqtt
 import sdnotify
 
-script_version = "1.4.3"
+script_version = "1.4.8"
 script_name = 'rpi-monitor.py'
 script_info = '{} v{}'.format(script_name, script_version)
 project_name = 'rpi-monitor'
-project_url = ''
+project_url = 'https://github.com/ufankhau/rpi-monitor'
 
 local_tz = get_localzone()
 
@@ -686,28 +687,6 @@ def getdeltatime(deltatime):
 	return deltatime
 
 
-#  -----------------
-#  last install date
-#  -----------------
-#  extract vom file "/var/log/dpkg.log" date of last "status installed"
-#def getLastInstallDate():
-#	global rpi_last_install_date
-#	cmdString = "/bin/grep --binary-files=text 'status installed' /var/log/dpkg.log 2>/dev/null | sort | tail -1"
-#	out = subprocess.Popen(cmdString,
-#		shell=True,
-#		stdout=subprocess.PIPE,
-#		stderr=subprocess.STDOUT)
-#	stdout,_ = out.communicate()
-#	last_installed_pkg_raw = stdout.decode('utf').rstrip().lstrip()
-#	print_line('last_installed_pkg_raw=[{}]'.format(last_installed_pkg_raw), debug=True)
-#	lineParts = last_installed_pkg_raw.split()
-#	if len(lineParts) > 1:
-#		pkg_date_string = '{} {}'.format(lineParts[0], lineParts[1])
-#		pkg_install_date = datetime.striptime(pkg_date_string, '%d-%m-%Y %H:%M:%S')
-#		rpi_last_install_date = pkg_install_date
-#	print_line('rpi_last_install_date=[{}]'.format(rpi_last_install_date), debug=True)
-
-
 #  get hostnames to setup MQTT
 getHostname()
 if sensor_name == default_sensor_name:
@@ -729,10 +708,12 @@ def publishAliveStatus():
 	print_line('- SEND: yes, still alive - ', debug=True)
 	mqtt_client.publish(lwt_topic, payload=lwt_online_val, retain=False)
 
+
 def aliveTimeoutHandler():
 	print_line('- MQTT TIMER INTERRUPT -', debug=True)
 	_thread.start_new_thread(publishAliveStatus, ())
 	startAliveTimer()
+
 
 def startAliveTimer():
 	global aliveTimeout
@@ -743,12 +724,14 @@ def startAliveTimer():
 	aliveTimerRunningStatus = True
 	print_line('- started MQTT timer - every {} seconds'.format(ALIVE_TIMEOUT_IN_SECONDS), debug=True)
 
+
 def stopAliveTimer():
 	global aliveTimer
 	global aliveTimerRunningStatus
 	aliveTimer.cancel()
 	aliveTimerRunningsStatus = False
 	print_line('- stopped MQTT timer', debug=True)
+
 
 def isAliveTimerRunning():
 	global aliveTimerRunningStatus
@@ -903,7 +886,6 @@ for [sensor, params] in detectorValues.items():
 
 	mqtt_client.publish(discovery_topic, json.dumps(payload), 1, retain=True)
 
-
 #  auto-discovery of binary_sensor
 discovery_topic = '{}/binary_sensor/{}/config'.format(discovery_prefix, \
 	sensor_name.lower())
@@ -933,6 +915,7 @@ def periodTimeoutHandler():
 	handle_interrupt(TIMER_INTERRUPT)     #  '0' means we have a timer interrupt!
 	startPeriodTimer()
 
+
 def startPeriodTimer():
 	global endPeriodTimer
 	global periodTimeRunningStatus
@@ -942,6 +925,7 @@ def startPeriodTimer():
 	periodTimeRunningStatus = True
 	print_line('- started PERIOD timer - every {} seconds'.format(interval_in_minutes * 60.0), debug=True)
 
+
 def stopPeriodTimer():
 	global endPeriodTimer
 	global periodTimeRunningStatus
@@ -949,9 +933,11 @@ def stopPeriodTimer():
 	periodTimeRunningStatus = False
 	print_line('- stopped PERIOD timer', debug=True)
 
+
 def isPeriodTimerRunning():
 	global periodTimeRunningStatus
 	return periodTimeRunningStatus
+
 
 #  TIMER
 endPeriodTimer = threading.Timer(interval_in_minutes * 60.0, periodTimeoutHandler)
@@ -1025,13 +1011,10 @@ def send_status(timestamp, nothing):
 	if len(rpiCpu) > 0:
 		rpiData[RPI_CPU] = rpiCpu
 
-	#print('length of rpi_fs_mount: {}'.format(len(rpi_fs_mount)))
 	if rpi_fs_mount == 'none':
 		rpiData[RPI_FS_MOUNT] = rpi_fs_mount
 	else:
 		rpiData[RPI_FS_MOUNT] = getFSmountDictionary()
-	#else:
-	#	rpiData[RPI_FS_MOUNT] = rpi_fs_mount
 
 	rpiData[RPI_NETWORK] = getNetworkDictionary()
 	
@@ -1059,17 +1042,6 @@ def send_status(timestamp, nothing):
 		topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
 		_thread.start_new_thread(publishSecurityStatus, ('off', topic))
 
-	#else:
-	#	change = True
-	#	for i in range(len(rpi_security)):
-	#		if rpi_security[i][1] != 'safe':
-	#			change = False
-	#			break
-	#	if change:
-	#		rpi_security_status = 'off'
-	#		topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
-	#		_thread.start_new_thread(publishSecurityStatus, ('off', topic))
-
 
 def getCPUDictionary():
 	#  tuple (modelname, #cores, serial#)
@@ -1078,16 +1050,12 @@ def getCPUDictionary():
 	if rpi_cpu_tuple != '':
 		cpuDict[RPI_CPU_MODEL] = rpi_cpu_tuple[0]
 		cpuDict[RPI_CPU_CORES] = rpi_cpu_tuple[1]
-#		cpuDict[RPI_CPU_BOGOMIPS] = int(rpi_cpu_tuple[2], 10)
 		cpuDict[RPI_CPU_SERIAL] = rpi_cpu_tuple[2]
 	return cpuDict
 
+
 def getFSmountDictionary():
 	fsmountDict = OrderedDict()
-	#i = 0
-	#if len(rpi_fs_mount) == 0:
-	#	fsmountDict['none'] =''
-	#else:
 	for i in range(len(rpi_fs_mount)):
 		lineParts = rpi_fs_mount[i].split(',')
 		fsmountDict[lineParts[0]] = '-> '+lineParts[1]
@@ -1127,6 +1095,7 @@ def publishSecurityStatus(status, topic):
 	mqtt_client.publish('{}'.format(topic), payload='{}'.format(status), retain=False)
 	sleep(0.5)
 
+
 def update_values():
 	getUptime()
 	getSystemTemperature()
@@ -1159,6 +1128,7 @@ def afterMQTTConnect():
 	#  do first report
 	handle_interrupt(0)
 
+
 afterMQTTConnect()
 
 #  ------------------------------------------------------------
@@ -1173,5 +1143,3 @@ finally:
 	#  cleanup timers
 	stopPeriodTimer()
 	stopAliveTimer()
-
-
