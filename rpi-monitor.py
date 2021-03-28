@@ -237,7 +237,7 @@ rpi_kernel_version = ''
 rpi_fs_used = ''
 rpi_fs_space = ''
 rpi_fs_mount = []
-rpi_fs_mount.append('none,')
+rpi_fs_mount.append(',none')
 rpi_mqtt_script = script_info.replace('.py', '')
 rpi_interfaces = []
 rpi_gpu_temp = ''
