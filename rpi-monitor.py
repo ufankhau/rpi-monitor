@@ -1084,13 +1084,13 @@ def getCPUDictionary():
 
 def getFSmountDictionary():
 	fsmountDict = OrderedDict()
-	i = 0
-	if len(rpi_fs_mount) == 0:
-		fsmountDict['none'] =''
-	else:
-		for i in range(len(rpi_fs_mount)):
-			lineParts = rpi_fs_mount[i].split(',')
-			fsmountDict[lineParts[0]] = '>'+lineParts[1]
+	#i = 0
+	#if len(rpi_fs_mount) == 0:
+	#	fsmountDict['none'] =''
+	#else:
+	for i in range(len(rpi_fs_mount)):
+		lineParts = rpi_fs_mount[i].split(',')
+		fsmountDict[lineParts[0]] = '-> '+lineParts[1]
 	print_line('fsmountDict:{}'.format(fsmountDict), debug=True)
 	return fsmountDict
 
