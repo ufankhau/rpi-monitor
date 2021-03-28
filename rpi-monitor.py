@@ -415,7 +415,6 @@ def getFileSystemUsage():
 		if len(trimmedLine) > 0:
 			trimmedLines.append(trimmedLine)
 	print_line('getFileSystemUsage () trimmedLines=[{}]'.format(trimmedLines), debug=True)
-	i = 0
 	for currLine in trimmedLines:
 		lineParts = currLine.split()
 		print_line('lineParts({})=[{}]'.format(len(lineParts), lineParts), debug=True)
@@ -1020,7 +1019,7 @@ def send_status(timestamp, nothing):
 	if len(rpiCpu) > 0:
 		rpiData[RPI_CPU] = rpiCpu
 
-	print('length of rpi_fs_mount: {}'.format(len(rpi_fs_mount)))
+	#print('length of rpi_fs_mount: {}'.format(len(rpi_fs_mount)))
 	if len(rpi_fs_mount) > 0:
 		rpiData[RPI_FS_MOUNT] = getFSmountDictionary()
 	else:
