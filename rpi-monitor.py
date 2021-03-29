@@ -1102,6 +1102,7 @@ def update_values():
 	getLastUpdateDate()
 	getLastUpgradeDate()
 	getDeviceMemUsage()
+	getFileSystemUsage()
 
 #  ---------------------------------------------------------------
 
