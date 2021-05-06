@@ -291,14 +291,14 @@ def getNbrCPUs():
 #  -----------------
 #  getDeviceCpuModel
 #  -----------------
-#  use command "/bin/lscpu | /bin/egrep -i 'model|bogo|vendor'" to extract data on the CPU
-#  use command "/bin/cat /sys/firmware/devicetree/base/serial-number" to get the
+#  use command "/usr/bin/lscpu | /bin/egrep -i 'model|bogo|vendor'" to extract data on the CPU
+#  use command "/bin/cat /proc/cpuinfo | /bin/egrep -i 'Serial'" to get the
 #  serial number of the Raspberry Pi
 def getDeviceCpuModel():
 	global rpi_cpu_tuple
 	global rpi_nbrCPUs
 	cmdString1 = "/usr/bin/lscpu | /bin/egrep -i 'model|bogo|vendor'"
-	cmdString2 = "/bin/cat /sys/firmware/devicetree/base/serial-number"
+	cmdString2 = "/bin/cat /proc/cpuinfo | /bin/egrep -i 'Serial'"
 	out = subprocess.Popen(cmdString1,
 		shell=True,
 		stdout=subprocess.PIPE,
@@ -311,7 +311,6 @@ def getDeviceCpuModel():
 		trimmedLines.append(trimmedLine)
 	cpu_model = ''
 	cpu_cores = rpi_nbrCPUs
-#	cpu_bogoMIPS = 0
 	cpu_serial = ''
 	cpu_vendor = ''
 	cpu_model_name = ''
@@ -326,16 +325,14 @@ def getDeviceCpuModel():
 			cpu_model = currValue
 		if 'Model name' in currLine:
 			cpu_model_name = currValue
-#		if 'BogoMIPS' in currLine:
-#			cpu_bogoMIPS = '{:.0f}'.format(cpu_cores * float(currValue))
 	cpu_model = cpu_vendor + " " + cpu_model_name + " r" + cpu_model
 	out = subprocess.Popen(cmdString2,
 		shell=True,
 		stdout=subprocess.PIPE,
 		stderr=subprocess.STDOUT)
 	stdout,_ = out.communicate()
-	lines = stdout.decode('utf-8').replace('\x00', '').lstrip().rstrip()
-	cpu_serial = lines
+	lines = stdout.decode('utf-8').lstrip().rstrip().split(':')
+	cpu_serial = lines[1]
 	rpi_cpu_tuple = ( cpu_model, cpu_cores, cpu_serial )
 	print_line('rpi_cpu_tuple=[{}]'.format(rpi_cpu_tuple), debug=True)
 
