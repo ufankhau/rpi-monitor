@@ -343,23 +343,32 @@ def getDeviceCpuModel():
 #  getOSandKernelVersion
 #  ---------------------
 #  use command "/usr/bin/hostnamectl"
+#  use command "/bin/cat /etc/os-release" to get name of os system
+#  use command "/bin/cat /proc/version" to get kernel version
 def getOSandKernelVersion():
 	global rpi_os
 	global rpi_os_version
-	cmdString = "/usr/bin/hostnamectl"
+	cmdString = "/bin/cat /etc/os-release"
 	out = subprocess.Popen(cmdString,
 		shell=True,
 		stdout=subprocess.PIPE,
 		stderr=subprocess.STDOUT)
 	stdout,_ = out.communicate()
 	lines = stdout.decode('utf-8').split("\n")
-	trimmedLines = []
+	#trimmedLines = []
 	for currLine in lines:
-		trimmedLine = currLine.split(":")
-		if trimmedLine[0].lstrip() == "Operating System":
-			rpi_os = trimmedLine[1].lstrip().rstrip()
-		if trimmedLine[0].lstrip() == "Kernel":
-			rpi_os_version = trimmedLine[1].lstrip().rstrip()
+		trimmedLine = currLine.split("=")
+		if trimmedLine[0].lstrip() == "PRETTY_NAME":
+			rpi_os = trimmedLine[1].lstrip('"').rstrip('"')
+
+	cmdString = "/bin/cat /proc/version"
+	out = subprocess.Popen(cmdString,
+		shell=True,
+		stdout=subprocess.PIPE,
+		stderr=subprocess.STDOUT)
+	stdout,_ = out.communicate()
+	lines = stdout.decode('utf-8').split(" ")
+	rpi_os_version = lines[2].lstrip().rstrip()
 	print_line('rpi_os=[{}]'.format(rpi_os), debug=True)
 	print_line('rpi_os_version=[{}]'.format(rpi_os_version), debug=True)
 
