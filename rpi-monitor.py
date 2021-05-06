@@ -265,7 +265,7 @@ def getDeviceModel():
 		stdout=subprocess.PIPE,
 		stderr=subprocess.STDOUT)
 	stdout,_ = out.communicate()
-	rpi_model_raw = stdout.decode('utf-8').lstrip().rstrip().split(':')
+	rpi_model_raw = stdout.decode('utf-8').rstrip().split(':')
 	print_line('rpi_model_raw=[{}]'.format(rpi_model_raw), debug=True)
 	#  reduce string length (just more compact, same info)
 	rpi_model = rpi_model_raw[1].lstrip().replace(' Model ', '').replace(' Plus ', '+').replace('Rev ', ' r').replace('\n', '')
