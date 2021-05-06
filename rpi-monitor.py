@@ -44,7 +44,7 @@ from unidecode import unidecode
 import paho.mqtt.client as mqtt
 import sdnotify
 
-script_version = "1.4.8"
+script_version = "1.4.9"
 script_name = 'rpi-monitor.py'
 script_info = '{} v{}'.format(script_name, script_version)
 project_name = 'rpi-monitor'
@@ -347,7 +347,7 @@ def getDeviceCpuModel():
 #  use command "/bin/cat /proc/version" to get kernel version
 def getOSandKernelVersion():
 	global rpi_os
-	global rpi_os_version
+	global rpi_os_kernel
 	cmdString = "/bin/cat /etc/os-release"
 	out = subprocess.Popen(cmdString,
 		shell=True,
@@ -368,9 +368,9 @@ def getOSandKernelVersion():
 		stderr=subprocess.STDOUT)
 	stdout,_ = out.communicate()
 	lines = stdout.decode('utf-8').split(" ")
-	rpi_os_version = 'Linus '+lines[2].lstrip().rstrip()
+	rpi_os_kernel = 'Linux '+lines[2].lstrip().rstrip()
 	print_line('rpi_os=[{}]'.format(rpi_os), debug=True)
-	print_line('rpi_os_version=[{}]'.format(rpi_os_version), debug=True)
+	print_line('rpi_os_kernel=[{}]'.format(rpi_os_kernel), debug=True)
 
 
 #  -----------------
@@ -886,7 +886,7 @@ for [sensor, params] in detectorValues.items():
 			'manufacturer' : 'Raspbery Pi (Trading) Ltd.',
 			'name' : params['device_ident'],
 			'model' : '{}'.format(rpi_model),
-			'sw_version' : "{} {}".format(rpi_os, rpi_os_version)
+			'sw_version' : "{} {}".format(rpi_os, rpi_os_kernel)
 		}
 	else:
 		payload['dev'] = {
@@ -963,7 +963,7 @@ RPI_MODEL = "Raspberry_Model"
 RPI_HOSTNAME = "Hostname"
 RPI_FQDN = "Fqdn"
 RPI_OS = "OS"
-RPI_OS_VERSION = "OS_Version"
+RPI_OS_KERNEL = "OS_Kernel"
 RPI_UPTIME = "Up_time"
 RPI_OS_LAST_UPDATE = "OS_Last_Update"
 RPI_OS_LAST_UPGRADE = "OS_Last_Upgrade"
@@ -999,7 +999,7 @@ def send_status(timestamp, nothing):
 	rpiData[RPI_HOSTNAME] = rpi_hostname
 	rpiData[RPI_FQDN] = rpi_fqdn
 	rpiData[RPI_OS] = rpi_os
-	rpiData[RPI_OS_VERSION] = rpi_os_version
+	rpiData[RPI_OS_KERNEL] = rpi_os_kernel
 	rpiData[RPI_OS_LAST_UPDATE] = rpi_timesincelastUpdateDate+' ago - '+rpi_security[0][1]
 	rpiData[RPI_OS_LAST_UPGRADE] = rpi_timesincelastUpgradeDate+' ago - '+rpi_security[1][1]
 	rpiData[RPI_UPTIME] = rpi_uptime
