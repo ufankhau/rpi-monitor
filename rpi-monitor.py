@@ -368,7 +368,7 @@ def getOSandKernelVersion():
 		stderr=subprocess.STDOUT)
 	stdout,_ = out.communicate()
 	lines = stdout.decode('utf-8').split(" ")
-	rpi_os_version = lines[2].lstrip().rstrip()
+	rpi_os_version = 'Linus '+lines[2].lstrip().rstrip()
 	print_line('rpi_os=[{}]'.format(rpi_os), debug=True)
 	print_line('rpi_os_version=[{}]'.format(rpi_os_version), debug=True)
 
