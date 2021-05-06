@@ -268,7 +268,7 @@ def getDeviceModel():
 	rpi_model_raw = stdout.decode('utf-8').split(':')
 	print_line('rpi_model_raw=[{}]'.format(rpi_model_raw), debug=True)
 	#  reduce string length (just more compact, same info)
-	rpi_model = rpi_model_raw[1].replace(' Model ', '').replace(' Plus ', '+').replace('Rev ', ' r').replace('\u0000', '')
+	rpi_model = rpi_model_raw[1].lstrip().replace(' Model ', '').replace(' Plus ', '+').replace('Rev ', ' r').replace('\n', '')
 	print_line('rpi_model=[{}]'.format(rpi_model), debug=True)
 
 
