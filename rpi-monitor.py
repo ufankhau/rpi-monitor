@@ -332,7 +332,7 @@ def getDeviceCpuModel():
 		stderr=subprocess.STDOUT)
 	stdout,_ = out.communicate()
 	lines = stdout.decode('utf-8').lstrip().rstrip().split(':')
-	cpu_serial = lines[1]
+	cpu_serial = lines[1].lstrip().rstrip()
 	rpi_cpu_tuple = ( cpu_model, cpu_cores, cpu_serial )
 	print_line('rpi_cpu_tuple=[{}]'.format(rpi_cpu_tuple), debug=True)
 
