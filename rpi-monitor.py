@@ -255,19 +255,20 @@ rpi_security_status = 'off'
 #  getDeviceModel
 #  --------------
 #  extract info from file /proc/device-tree/model and present it in compacted form
+#  extract info from file /proc/cpuinfo with command "/usr/bin/tail -n1 /proc/cpuinfo"
 def getDeviceModel():
 	global rpi_model
 	global rpi_model_raw
-	cmdString = "/bin/cat /proc/device-tree/model"
+	cmdString = "/usr/bin/tail -n1 /proc/cpuinfo"
 	out = subprocess.Popen(cmdString,
 		shell=True,
 		stdout=subprocess.PIPE,
 		stderr=subprocess.STDOUT)
 	stdout,_ = out.communicate()
-	rpi_model_raw = stdout.decode('utf-8')
+	rpi_model_raw = stdout.decode('utf-8').split(';')
 	print_line('rpi_model_raw=[{}]'.format(rpi_model_raw), debug=True)
 	#  reduce string length (just more compact, same info)
-	rpi_model = rpi_model_raw.replace(' Model ', '').replace(' Plus ', '+').replace('Rev ', ' r').replace('\u0000', '')
+	rpi_model = rpi_model_raw[1].replace(' Model ', '').replace(' Plus ', '+').replace('Rev ', ' r').replace('\u0000', '')
 	print_line('rpi_model=[{}]'.format(rpi_model), debug=True)
 
 
