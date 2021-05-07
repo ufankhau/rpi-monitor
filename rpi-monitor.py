@@ -44,7 +44,7 @@ from unidecode import unidecode
 import paho.mqtt.client as mqtt
 import sdnotify
 
-script_version = "1.4.9"
+script_version = "1.5.3"
 script_name = 'rpi-monitor.py'
 script_info = '{} v{}'.format(script_name, script_version)
 project_name = 'rpi-monitor'
@@ -495,7 +495,7 @@ def getHostname():
 #  getNetworkIFsUsingIP
 #  --------------------
 #  Use the following command  
-#  "ip addr show | /bin/egrep 'eth0:|wlan0:' | /usr/bin/awk '{print $2}' | cut -d':' -f1
+#  "ip addr show | /bin/egrep 'eth0:|wlan0:' | /usr/bin/awk '{print $2}' | /usr/bin/cut -d':' -f1
 #  to get the list of enabled physical interfaces (eth0 and/or wlan0) on the raspberry pi.
 #  Store the result in variable "ifaces" and use the commands "cmdStringIP" and 
 #  "cmdStringMAC" to extract the IP and MAC address for the identified network interface(s).
@@ -504,7 +504,7 @@ def getHostname():
 def getNetworkIFsUsingIP():
 	global rpi_interfaces
 	global rpi_mac
-	cmdString = "ip addr show | /bin/egrep 'eth0:|wlan0:' | /usr/bin/awk '{print $2}' | cut -d':' -f1"
+	cmdString = "ip addr show | /bin/egrep 'eth0:|wlan0:' | /usr/bin/awk '{print $2}' | /usr/bin/cut -d':' -f1"
 	out = subprocess.Popen(cmdString,
 		shell=True,
 		stdout=subprocess.PIPE,
@@ -513,7 +513,7 @@ def getNetworkIFsUsingIP():
 	ifaces = stdout.decode('utf-8').split()
 	tmpInterfaces = []
 	for idx in ifaces:
-		cmdStringIP = "ip -4 addr show "+str(idx)+" | /bin/grep inet | /usr/bin/awk '{print $2}' | cut -d'/' -f1"
+		cmdStringIP = "ip -4 addr show "+str(idx)+" | /bin/grep inet | /usr/bin/awk '{print $2}' | /usr/bin/cut -d'/' -f1"
 		cmdStringMAC = "ip link show "+str(idx)+" | /bin/grep link/ether | /usr/bin/awk '{print $2}'"
 		out = subprocess.Popen(cmdStringIP,
 			shell=True,
@@ -588,22 +588,35 @@ def getUptime():
 	global rpi_uptime
 	global rpi_cpu_usage_1m
 	global rpi_cpu_usage_5m
-	cmdString = "/usr/bin/uptime"
-	out = subprocess.Popen(cmdString,
+	cmdStringCPU = "/usr/bin/uptime | /usr/bin/cut -d':' -f5"
+	cmdStringtime = "/usr/bin/uptime"
+	out = subprocess.Popen(cmdStringCPU,
 		shell=True,
 		stdout=subprocess.PIPE,
 		stderr=subprocess.STDOUT)
 	stdout,_ = out.communicate()
-	rpi_uptime_raw = stdout.decode('utf-8').rstrip().lstrip()
-	print_line('rpi_uptime_raw=[{}]'.format(rpi_uptime_raw), debug=True)
+	rpi_uptime_cpu = stdout.decode('utf-8').rstrip().lstrip().split(',')
+	rpi_cpu_usage_1m = '{:.1f}'.format(float(rpi_uptime_cpu[0]) / rpi_nbrCPUs * 100)
+	rpi_cpu_usage_5m = '{:.1f}'.format(float(rpi_uptime_cpu[1]) / rpi_nbrCPUs * 100)
+	print_line('rpi_uptime_cpu=[{}]'.format(rpi_uptime_cpu), debug=True)
+#	basicParts = rpi_uptime_raw.split()
+#	timeStamp = basicParts[0]
+#	lineParts = rpi_uptime_raw.split(',')
+#	rpi_cpu_usage_1m = '{:.1f}'.format(float(lineParts[3].replace('load average:', '')\
+#		.replace(',', '').lstrip().rstrip()) / rpi_nbrCPUs * 100)
+#	rpi_cpu_usage_5m = '{:.1f}'.format(float(lineParts[4].replace(',', '').lstrip().rstrip()) / rpi_nbrCPUs * 100)
+	print_line('rpi_cpu_usage_1m=[{}%]'.format(rpi_cpu_usage_1m), debug=True)
+	print_line('rpi_cpu_usage_5m=[{}%]'.format(rpi_cpu_usage_5m), debug=True)
+
+	out = subprocess.Popen(cmdStringtime,
+		shell=True,
+		stdout=subprocess.PIPE,
+		stderr=subprocess.STDOUT)
+	stdout,_ = out.communicate()
+	rpi_uptime_raw = stdout.decode('utf-8').rstrip().lstrip().split()
 	basicParts = rpi_uptime_raw.split()
 	timeStamp = basicParts[0]
 	lineParts = rpi_uptime_raw.split(',')
-	rpi_cpu_usage_1m = '{:.1f}'.format(float(lineParts[3].replace('load average:', '')\
-		.replace(',', '').lstrip().rstrip()) / rpi_nbrCPUs * 100)
-	rpi_cpu_usage_5m = '{:.1f}'.format(float(lineParts[4].replace(',', '').lstrip().rstrip()) / rpi_nbrCPUs * 100)
-	print_line('rpi_cpu_usage_1m=[{}%]'.format(rpi_cpu_usage_1m), debug=True)
-	print_line('rpi_cpu_usage_5m=[{}%]'.format(rpi_cpu_usage_5m), debug=True)
 	if 'user' in lineParts[1]:
 		rpi_uptime_raw = lineParts[0].replace(timeStamp, '').lstrip().replace('up ', '')
 		timeParts = rpi_uptime_raw.split(':')
