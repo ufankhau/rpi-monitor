@@ -599,12 +599,6 @@ def getUptime():
 	rpi_cpu_usage_1m = '{:.1f}'.format(float(rpi_uptime_cpu[0]) / rpi_nbrCPUs * 100)
 	rpi_cpu_usage_5m = '{:.1f}'.format(float(rpi_uptime_cpu[1]) / rpi_nbrCPUs * 100)
 	print_line('rpi_uptime_cpu=[{}]'.format(rpi_uptime_cpu), debug=True)
-#	basicParts = rpi_uptime_raw.split()
-#	timeStamp = basicParts[0]
-#	lineParts = rpi_uptime_raw.split(',')
-#	rpi_cpu_usage_1m = '{:.1f}'.format(float(lineParts[3].replace('load average:', '')\
-#		.replace(',', '').lstrip().rstrip()) / rpi_nbrCPUs * 100)
-#	rpi_cpu_usage_5m = '{:.1f}'.format(float(lineParts[4].replace(',', '').lstrip().rstrip()) / rpi_nbrCPUs * 100)
 	print_line('rpi_cpu_usage_1m=[{}%]'.format(rpi_cpu_usage_1m), debug=True)
 	print_line('rpi_cpu_usage_5m=[{}%]'.format(rpi_cpu_usage_5m), debug=True)
 
@@ -629,15 +623,6 @@ def getUptime():
 			rpi_uptime = timeParts[0]+'m'
 		else:
 			rpi_uptime = timeParts[0].lstrip()+'h'+timeParts[1].rstrip()+'m'
-#	else:
-#		lineParts[0] = lineParts[0].replace(timeStamp, '').lstrip().replace('up ', '').\
-#		replace('day', '').replace('s', '').rstrip()
-#		timeParts = lineParts[1].split(':')
-#		if len(timeParts) == 1:
-#			timeParts[0] = timeParts[0].replace('min', '').lstrip().rstrip()
-#			rpi_uptime = lineParts[0]+'d '+timeParts[0]+'m'
-#		else:
-#			rpi_uptime = lineParts[0]+'d '+timeParts[0].lstrip()+'h'+timeParts[1].rstrip()+'m'
 	print_line('rpi_uptime=[{}]'.format(rpi_uptime), debug=True)
 
 
@@ -778,7 +763,6 @@ mqtt_client.on_connect = on_connect
 mqtt_client.on_publish = on_publish
 
 mqtt_client.will_set(lwt_topic, payload=lwt_offline_val, retain=True)
-#mqtt_client.will_set(lwt_topic2, payload=lwt_offline_val, retain=True)
 
 if config['MQTT'].getboolean('tls', False):
 	mqtt_client.tls_set(
@@ -801,8 +785,6 @@ except:
 	sys.exit(1)
 else:
 	mqtt_client.publish(lwt_topic, payload=lwt_online_val, retain=False)
-	#  add additional line for connection to binary_sensor
-	#mqtt_client.publish(lwt_topic2, payload=lwt_online_val, retain=False)
 	mqtt_client.loop_start()
 
 	while mqtt_client_connected == False:     #  wait in loop
