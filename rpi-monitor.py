@@ -503,24 +503,26 @@ def getNetworkIFsUsingIP():
 	global rpi_mac
 	ifaces = [ 'eth0', 'wlan0' ]
 	for idx in ifaces:
-		cmdStringIP = "ip -4 addr show "+str(idx)+" | /bin/grep inet | awk '{print $2}' | cut -d'/' -f1"
+		cmdStringIP = "ip -4 addr show "+str(idx)+" | /bin/grep inet | /usr/bin/awk '{print $2}' | cut -d'/' -f1"
 		print(cmdStringIP)
-		cmdStringMAC = "ip link show "+str(idx)+" | /bin/grep link/ether | awk '{print $2}'"
+		cmdStringMAC = "ip link show "+str(idx)+" | /bin/grep link/ether | /usr/bin/awk '{print $2}'"
 		print(cmdStringMAC)
 		out = subprocess.Popen(cmdStringIP,
 			shell=True,
 			stdout=subprocess.PIPE,
 			stderr=subprocess.STDOUT)
 		stdout,_ = out.communicate()
-		line1 = stdout.decode('utf-8')
+		line1 = stdout.decode('utf-8').lstrip().rstrip()
 		out = subprocess.Popen(cmdStringMAC,
 			shell=True,
 			stdout=subprocess.PIPE,
 			stderr=subprocess.STDOUT)
 		stdout,_ = out.communicate()
-		line2 = stdout.decode('utf-8')
-		print (idx, line1, line2)
-	tmpInterfaces = []
+		line2 = stdout.decode('utf-8').lstrip().rstrip()
+		if not (line1 and line2) == '':
+			newTuple = (idx, line1, line2)
+			tmpInterfaces.append(newTuple)
+		
 #	if lines1 = ""
 #	line_count = len(lines1) - 1
 #	if (line_count == 0 or line_count > 2):
@@ -542,7 +544,7 @@ def getNetworkIFsUsingIP():
 #			if rpi_mac == '':
 #				rpi_mac = lineParts2[2]
 #			tmpInterfaces.append(newTuple)
-#	rpi_interfaces = tmpInterfaces
+	rpi_interfaces = tmpInterfaces
 	print_line('rpi_interfaces=[{}]'.format(rpi_interfaces), debug=True)
 	print_line('rpi_mac=[{}]'.format(rpi_mac), debug=True)
 
