@@ -501,7 +501,13 @@ def getHostname():
 def getNetworkIFsUsingIP():
 	global rpi_interfaces
 	global rpi_mac
-	ifaces = [ 'eth0', 'wlan0' ]
+	cmdString = "ip addr show | /bin/egrep 'eth0:|wlan0:' | /usr/bin/awk '{print $2}' | cut -d':' -f1"
+	out = subprocess.Popen(cmdString,
+		shell=True,
+		stdout=subprocess.PIPE,
+		stderr=subprocess.STDOUT)
+	stdout,_ = out.communicate()
+	ifaces = stdout.decode('utf-8').split()
 	tmpInterfaces = []
 	for idx in ifaces:
 		cmdStringIP = "ip -4 addr show "+str(idx)+" | /bin/grep inet | /usr/bin/awk '{print $2}' | cut -d'/' -f1"
