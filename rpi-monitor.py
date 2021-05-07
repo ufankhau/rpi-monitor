@@ -505,9 +505,9 @@ def getNetworkIFsUsingIP():
 	tmpInterfaces = []
 	for idx in ifaces:
 		cmdStringIP = "ip -4 addr show "+str(idx)+" | /bin/grep inet | /usr/bin/awk '{print $2}' | cut -d'/' -f1"
-		print(cmdStringIP)
+	#	print(cmdStringIP)
 		cmdStringMAC = "ip link show "+str(idx)+" | /bin/grep link/ether | /usr/bin/awk '{print $2}'"
-		print(cmdStringMAC)
+	#	print(cmdStringMAC)
 		out = subprocess.Popen(cmdStringIP,
 			shell=True,
 			stdout=subprocess.PIPE,
@@ -523,6 +523,8 @@ def getNetworkIFsUsingIP():
 		if not (line1 and line2) == '':
 			newTuple = (idx, line1, line2)
 			tmpInterfaces.append(newTuple)
+			if rpi_mac == '':
+				rpi_mac = line2
 		
 #	if lines1 = ""
 #	line_count = len(lines1) - 1
