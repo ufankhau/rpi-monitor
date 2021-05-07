@@ -237,8 +237,6 @@ rpi_os = ''
 rpi_kernel_version = ''
 rpi_fs_used = ''
 rpi_fs_space = ''
-#rpi_fs_mount = []
-#rpi_fs_mount.append(',none')
 rpi_mqtt_script = script_info.replace('.py', '')
 rpi_interfaces = []
 rpi_gpu_temp = ''
@@ -496,8 +494,13 @@ def getHostname():
 #  --------------------
 #  getNetworkIFsUsingIP
 #  --------------------
-#  use command "ip -br addr show" and "ip -br link show" to get interface status (up/down),
-#  MAC and IP addresses
+#  Use the following command  
+#  "ip addr show | /bin/egrep 'eth0:|wlan0:' | /usr/bin/awk '{print $2}' | cut -d':' -f1
+#  to get the list of enabled physical interfaces (eth0 and/or wlan0) on the raspberry pi.
+#  Store the result in variable "ifaces" and use the commands "cmdStringIP" and 
+#  "cmdStringMAC" to extract the IP and MAC address for the identified network interface(s).
+#  Fill the global variable "rpi_mac" with the unique MAC address of the first enabled
+#  network interface 
 def getNetworkIFsUsingIP():
 	global rpi_interfaces
 	global rpi_mac
@@ -511,9 +514,7 @@ def getNetworkIFsUsingIP():
 	tmpInterfaces = []
 	for idx in ifaces:
 		cmdStringIP = "ip -4 addr show "+str(idx)+" | /bin/grep inet | /usr/bin/awk '{print $2}' | cut -d'/' -f1"
-	#	print(cmdStringIP)
 		cmdStringMAC = "ip link show "+str(idx)+" | /bin/grep link/ether | /usr/bin/awk '{print $2}'"
-	#	print(cmdStringMAC)
 		out = subprocess.Popen(cmdStringIP,
 			shell=True,
 			stdout=subprocess.PIPE,
@@ -534,28 +535,6 @@ def getNetworkIFsUsingIP():
 			tmpInterfaces.append(newTuple)
 			if rpi_mac == '':
 				rpi_mac = line2
-		
-#	if lines1 = ""
-#	line_count = len(lines1) - 1
-#	if (line_count == 0 or line_count > 2):
-#		print_line('ERROR by ip(8) filter!', error=True)
-#		sys.exit(1)
-
-#	for lineIdx in range(line_count):
-#		trimmedLine1 = lines1[lineIdx].lstrip().rstrip()
-#		trimmedLine2 = lines2[lineIdx].lstrip().rstrip()
-#		if len(trimmedLine1) > 0:
-#			lineParts1 = trimmedLine1.split()
-#			lineParts2 = trimmedLine2.split()
-#			interfaceName = lineParts1[0]
-#			macAddress = lineParts2[2]
-#			if len(lineParts1) > 2:
-#				newTuple = (interfaceName, 'IP', lineParts1[2])
-#				tmpInterfaces.append(newTuple)
-#			newTuple = (interfaceName, 'mac', lineParts2[2])
-#			if rpi_mac == '':
-#				rpi_mac = lineParts2[2]
-#			tmpInterfaces.append(newTuple)
 	rpi_interfaces = tmpInterfaces
 	print_line('rpi_interfaces=[{}]'.format(rpi_interfaces), debug=True)
 	print_line('rpi_mac=[{}]'.format(rpi_mac), debug=True)
