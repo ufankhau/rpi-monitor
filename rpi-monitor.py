@@ -524,7 +524,7 @@ def getNetworkIFsUsingIP():
 			if not line1 == '':
 				newTuple = (idx, 'IP: ', line1)
 				tmpInterfaces.append(newTuple)
-			newTuple = (idx, 'MAC: 'line2)
+			newTuple = (idx, 'MAC: ', line2)
 			tmpInterfaces.append(newTuple)
 			if rpi_mac == '':
 				rpi_mac = line2
