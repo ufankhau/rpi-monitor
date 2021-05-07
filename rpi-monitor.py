@@ -502,6 +502,7 @@ def getNetworkIFsUsingIP():
 	global rpi_interfaces
 	global rpi_mac
 	ifaces = [ 'eth0', 'wlan0' ]
+	tmpInterfaces = []
 	for idx in ifaces:
 		cmdStringIP = "ip -4 addr show "+str(idx)+" | /bin/grep inet | /usr/bin/awk '{print $2}' | cut -d'/' -f1"
 		print(cmdStringIP)
