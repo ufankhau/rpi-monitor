@@ -503,8 +503,8 @@ def getNetworkIFsUsingIP():
 	global rpi_mac
 	ifaces = [ 'eth0', 'wlan0' ]
 	for idx in range(ifaces-1):
-		cmdStringIP = 'ip -4 addr show '+$ifaces[idx]+' | /bin/grep inet | awk 'print{$2}' | cut -d'/' -f1'
-		cmdStringMAC = 'ip link show '+$ifaces[idx]+' | /bin/grep link/ether | awk 'print{$2}''
+		cmdStringIP = 'ip -4 addr show '+ifaces[idx]+' | /bin/grep inet | awk 'print{$2}' | cut -d'/' -f1'
+		cmdStringMAC = 'ip link show '+ifaces[idx]+' | /bin/grep link/ether | awk 'print{$2}''
 		out = subprocess.Popen(cmdStringIP,
 			shell=True,
 			stdout=subprocess.PIPE,
