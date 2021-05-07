@@ -613,7 +613,7 @@ def getUptime():
 		stdout=subprocess.PIPE,
 		stderr=subprocess.STDOUT)
 	stdout,_ = out.communicate()
-	rpi_uptime_raw = stdout.decode('utf-8').rstrip().lstrip().split()
+	rpi_uptime_raw = stdout.decode('utf-8').rstrip().lstrip()
 	basicParts = rpi_uptime_raw.split()
 	timeStamp = basicParts[0]
 	lineParts = rpi_uptime_raw.split(',')
