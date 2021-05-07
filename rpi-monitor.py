@@ -616,14 +616,14 @@ def getUptime():
 	lineParts = stdout.decode('utf-8').rstrip().lstrip().split()
 	if 'user' in lineParts[1]:
 		day = lineParts[0].lstrip().rstrip()
-		timeParts = lineParts[2].lstrip().rstrip().split(':').replace(',', '')
+		timeParts = lineParts[2].replace(',', '').lstrip().rstrip().split(':')
 		if len(timeParts) == 1:
 			timeParts[0] = timeParts[0].replace('min', '').lstrip().rstrip()
 			rpi_uptime = day+'d '+timeParts[0]+'m'
 		else:
 			rpi_uptime = day+'d '+timeParts[0]+'h'+timeParts[1]+'m'
 	else:
-		timeParts = lineParts[0].lstrip().rstrip().split(':').replace(',', '')
+		timeParts = lineParts[0].replace(',', '').lstrip().rstrip().split(':')
 		if len(timeParts) == 1:
 			timeParts[0] = timeParts[0].replace('min', 'm').lstrip().rstrip()
 			rpi_uptime = timeParts[0]+'m'
