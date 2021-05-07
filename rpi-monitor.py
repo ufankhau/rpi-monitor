@@ -293,7 +293,7 @@ def getNbrCPUs():
 #  -----------------
 #  use command "/usr/bin/lscpu | /bin/egrep -i 'model|bogo|vendor'" to extract data on the CPU
 #  use command "/bin/cat /proc/cpuinfo | /bin/egrep -i 'Serial'" to get the
-#  serial number of the Raspberry Pi
+#              serial number of the Raspberry Pi
 def getDeviceCpuModel():
 	global rpi_cpu_tuple
 	global rpi_nbrCPUs
@@ -340,7 +340,6 @@ def getDeviceCpuModel():
 #  ---------------------
 #  getOSandKernelVersion
 #  ---------------------
-#  use command "/usr/bin/hostnamectl"
 #  use command "/bin/cat /etc/os-release" to get name of os system
 #  use command "/bin/cat /proc/version" to get kernel version
 def getOSandKernelVersion():
@@ -502,43 +501,46 @@ def getHostname():
 def getNetworkIFsUsingIP():
 	global rpi_interfaces
 	global rpi_mac
-	cmdString1 = 'ip -br addr show | /bin/egrep "eth0 |wlan0"'
-	cmdString2 = 'ip -br link show | /bin/egrep "eth0 |wlan0"'
-	out = subprocess.Popen(cmdString1,
-		shell=True,
-		stdout=subprocess.PIPE,
-		stderr=subprocess.STDOUT)
-	stdout,_ = out.communicate()
-	lines1 = stdout.decode('utf-8').split("\n")
-	out = subprocess.Popen(cmdString2,
-		shell=True,
-		stdout=subprocess.PIPE,
-		stderr=subprocess.STDOUT)
-	stdout,_ = out.communicate()
-	lines2 = stdout.decode('utf-8').split("\n")
-	
+	ifaces = [ 'eth0', 'wlan0' ]
+	for idx in range(ifaces-1):
+		cmdStringIP = 'ip -4 addr show '+$ifaces[idx]+' | /bin/grep inet | awk 'print{$2}' | cut -d'/' -f1'
+		cmdStringMAC = 'ip link show '+$ifaces[idx]+' | /bin/grep link/ether | awk 'print{$2}''
+		out = subprocess.Popen(cmdStringIP,
+			shell=True,
+			stdout=subprocess.PIPE,
+			stderr=subprocess.STDOUT)
+		stdout,_ = out.communicate()
+		line1 = stdout.decode('utf-8')
+		out = subprocess.Popen(cmdStringMAC,
+			shell=True,
+			stdout=subprocess.PIPE,
+			stderr=subprocess.STDOUT)
+		stdout,_ = out.communicate()
+		line2 = stdout.decode('utf-8')
+		print (ifaces[idx], line1, line2)
 	tmpInterfaces = []
-	line_count = len(lines1) - 1
-	if (line_count == 0 or line_count > 2):
-		print_line('ERROR by ip(8) filter!', error=True)
-		sys.exit(1)
+#	if lines1 = ""
+#	line_count = len(lines1) - 1
+#	if (line_count == 0 or line_count > 2):
+#		print_line('ERROR by ip(8) filter!', error=True)
+#		sys.exit(1)
 
-	for lineIdx in range(line_count):
-		trimmedLine1 = lines1[lineIdx].lstrip().rstrip()
-		trimmedLine2 = lines2[lineIdx].lstrip().rstrip()
-		if len(trimmedLine1) > 0:
-			lineParts1 = trimmedLine1.split()
-			lineParts2 = trimmedLine2.split()
-			interfaceName = lineParts1[0]
-			macAddress = lineParts2[2]
-			if len(lineParts1) > 2:
-				newTuple = (interfaceName, 'IP', lineParts1[2])
-				tmpInterfaces.append(newTuple)
-			newTuple = (interfaceName, 'mac', lineParts2[2])
-			if rpi_mac == '':
-				rpi_mac = lineParts2[2]
-			tmpInterfaces.append(newTuple)
-	rpi_interfaces = tmpInterfaces
+#	for lineIdx in range(line_count):
+#		trimmedLine1 = lines1[lineIdx].lstrip().rstrip()
+#		trimmedLine2 = lines2[lineIdx].lstrip().rstrip()
+#		if len(trimmedLine1) > 0:
+#			lineParts1 = trimmedLine1.split()
+#			lineParts2 = trimmedLine2.split()
+#			interfaceName = lineParts1[0]
+#			macAddress = lineParts2[2]
+#			if len(lineParts1) > 2:
+#				newTuple = (interfaceName, 'IP', lineParts1[2])
+#				tmpInterfaces.append(newTuple)
+#			newTuple = (interfaceName, 'mac', lineParts2[2])
+#			if rpi_mac == '':
+#				rpi_mac = lineParts2[2]
+#			tmpInterfaces.append(newTuple)
+#	rpi_interfaces = tmpInterfaces
 	print_line('rpi_interfaces=[{}]'.format(rpi_interfaces), debug=True)
 	print_line('rpi_mac=[{}]'.format(rpi_mac), debug=True)
 
