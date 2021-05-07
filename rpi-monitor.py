@@ -520,11 +520,11 @@ def getNetworkIFsUsingIP():
 			stderr=subprocess.STDOUT)
 		stdout,_ = out.communicate()
 		line2 = stdout.decode('utf-8').lstrip().rstrip()
-		if not (line1 and line2) == '':
+		if not (line1 =='' and line2 == ''):
 			if not line1 == '':
-				newTuple = (idx, 'IP: ', line1)
+				newTuple = (idx, 'IP', line1)
 				tmpInterfaces.append(newTuple)
-			newTuple = (idx, 'MAC: ', line2)
+			newTuple = (idx, 'MAC', line2)
 			tmpInterfaces.append(newTuple)
 			if rpi_mac == '':
 				rpi_mac = line2
