@@ -614,7 +614,7 @@ def getUptime():
 		stderr=subprocess.STDOUT)
 	stdout,_ = out.communicate()
 	lineParts = stdout.decode('utf-8').rstrip().lstrip().split()
-	if 'user' in lineParts[1]:
+	if 'day' in lineParts[1]:
 		day = lineParts[0].lstrip().rstrip()
 		timeParts = lineParts[2].replace(',', '').lstrip().rstrip().split(':')
 		if len(timeParts) == 1:
