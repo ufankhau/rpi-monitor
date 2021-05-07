@@ -589,7 +589,7 @@ def getUptime():
 	global rpi_cpu_usage_1m
 	global rpi_cpu_usage_5m
 	cmdStringCPU = "/usr/bin/uptime | /usr/bin/cut -d':' -f5"
-	cmdStringtime = "/usr/bin/uptime"
+	cmdStringtime = "/usr/bin/uptime | /usr/bin/cut -d' ' -f4-6"
 	out = subprocess.Popen(cmdStringCPU,
 		shell=True,
 		stdout=subprocess.PIPE,
@@ -613,28 +613,31 @@ def getUptime():
 		stdout=subprocess.PIPE,
 		stderr=subprocess.STDOUT)
 	stdout,_ = out.communicate()
-	rpi_uptime_raw = stdout.decode('utf-8').rstrip().lstrip()
-	basicParts = rpi_uptime_raw.split()
-	timeStamp = basicParts[0]
-	lineParts = rpi_uptime_raw.split(',')
+	lineParts = stdout.decode('utf-8').rstrip().lstrip().split()
 	if 'user' in lineParts[1]:
-		rpi_uptime_raw = lineParts[0].replace(timeStamp, '').lstrip().replace('up ', '')
-		timeParts = rpi_uptime_raw.split(':')
+		day = lineParts[0].lstrip().rstrip()
+		timeParts = lineParts[2].lstrip().rstrip().split(':')
 		if len(timeParts) == 1:
-			# rpi_uptime_raw = timeParts[0].lstrip()+'m'
 			timeParts[0] = timeParts[0].replace('min', '').lstrip().rstrip()
+			rpi_uptime = day+'d '+timeParts[0]+'m'
+		else:
+			rpi_uptime = day+'d '+timeParts[0]+'h'+timeParts[1]+'m'
+	else:
+		timeParts = lineParts[0].lstrip().rstrip().split(':')
+		if len(timeParts) == 1:
+			timeParts[0] = timeParts[0].replace('min', 'm').lstrip().rstrip()
 			rpi_uptime = timeParts[0]+'m'
 		else:
 			rpi_uptime = timeParts[0].lstrip()+'h'+timeParts[1].rstrip()+'m'
-	else:
-		lineParts[0] = lineParts[0].replace(timeStamp, '').lstrip().replace('up ', '').\
-		replace('day', '').replace('s', '').rstrip()
-		timeParts = lineParts[1].split(':')
-		if len(timeParts) == 1:
-			timeParts[0] = timeParts[0].replace('min', '').lstrip().rstrip()
-			rpi_uptime = lineParts[0]+'d '+timeParts[0]+'m'
-		else:
-			rpi_uptime = lineParts[0]+'d '+timeParts[0].lstrip()+'h'+timeParts[1].rstrip()+'m'
+#	else:
+#		lineParts[0] = lineParts[0].replace(timeStamp, '').lstrip().replace('up ', '').\
+#		replace('day', '').replace('s', '').rstrip()
+#		timeParts = lineParts[1].split(':')
+#		if len(timeParts) == 1:
+#			timeParts[0] = timeParts[0].replace('min', '').lstrip().rstrip()
+#			rpi_uptime = lineParts[0]+'d '+timeParts[0]+'m'
+#		else:
+#			rpi_uptime = lineParts[0]+'d '+timeParts[0].lstrip()+'h'+timeParts[1].rstrip()+'m'
 	print_line('rpi_uptime=[{}]'.format(rpi_uptime), debug=True)
 
 
