@@ -589,7 +589,7 @@ def getUptime():
 	global rpi_cpu_usage_1m
 	global rpi_cpu_usage_5m
 	cmdStringCPU = "/usr/bin/uptime | /usr/bin/cut -d':' -f5"
-	cmdStringtime = "/usr/bin/uptime | /usr/bin/cut -d' ' -f4-6"
+	cmdStringtime = "/usr/bin/uptime | /usr/bin/cut -d',' -f1-2"
 	out = subprocess.Popen(cmdStringCPU,
 		shell=True,
 		stdout=subprocess.PIPE,
@@ -607,10 +607,14 @@ def getUptime():
 		stdout=subprocess.PIPE,
 		stderr=subprocess.STDOUT)
 	stdout,_ = out.communicate()
-	lineParts = stdout.decode('utf-8').rstrip().lstrip().split()
-	if 'day' in lineParts[1]:
-		day = lineParts[0].lstrip().rstrip()
-		timeParts = lineParts[2].replace(',', '').lstrip().rstrip().split(':')
+	rpi_uptime_raw = stdout(decode('utf-8'))
+	lineParts = rpi_uptime_raw.split()
+	timeblock = lineParts[0]
+	rpi_uptime_raw = rpi_uptime_raw.replace(timeblock, '').replace('up', '').lstrip()
+	lineParts = rpi_uptime_raw.split(',')
+	if 'day' in lineParts[0]:
+		day = lineParts[0].replace('day', '').replace('s', '').lstrip().rstrip()
+		timeParts = lineParts[1].replace(',', '').lstrip().rstrip().split(':')
 		if len(timeParts) == 1:
 			timeParts[0] = timeParts[0].replace('min', '').lstrip().rstrip()
 			rpi_uptime = day+'d '+timeParts[0]+'m'
