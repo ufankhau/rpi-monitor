@@ -418,10 +418,10 @@ def getDeviceCPUInfo():
 #  ---------------
 #  getLinuxRelease
 #
-#  use command "/bin/cat /etc/os-release | /bin/egrep -i 'pretty_name' | /bin/awk -F'[""]' '{print $2}'" to extract the release of Linux running on the Raspberry Pi
+#  use command "/bin/cat /etc/os-release | /bin/egrep -i 'pretty_name' | /bin/awk -F'\"' '{print $2}'" to extract the release of Linux running on the Raspberry Pi
 def getLinuxRelease():
 	global rpi_os_release
-	cmdString = "/bin/cat /etc/os-release| /bin/egrep -i 'pretty_name'| /bin/awk -F'[""]' '{print $2}'"
+	cmdString = "/bin/cat /etc/os-release| /bin/egrep -i 'pretty_name'| /bin/awk -F'\"' '{print $2}'"
 	out = subprocess.Popen(cmdString,
 												 shell=True,
 												 stdout=subprocess.PIPE,
@@ -823,6 +823,7 @@ print_line('rpi_model=[{}]'.format(rpi_model), debug=True)
 #rpi_nbrCPUCores = getNbrCPUCores()
 #print_line('rpi_nbrCPUCores=[{}]'.format(rpi_nbrCPUCores), debug=True)
 rpi_cpu_model = getDeviceCPUInfo()
+print_line('rpi_cpu_mode=[{}]'.format(rpi_cpu_model), debug=True)
 rpi_nbrCPUs = rpi_cpu_model["Core(s)"]
 getLinuxRelease()
 getLinuxVersion()
