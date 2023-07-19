@@ -386,9 +386,9 @@ def getDeviceCPUInfo():
 		if 'Model name' in currLine:
 			cpu_model_name = currValue
 		if 'CPU max' in currLine:
-			cpu_clockSpeedMax = int(currValue)
+			cpu_clockSpeedMax = str(int(float(currValue)))
 		if 'CPU min' in currLine:
-			cpu_clockSpeedMin = int(currValue)
+			cpu_clockSpeedMin = str(int(float(currValue)))
 	
 	# build CPU model name ....
 	# Raspberry Pi Zero and Zero W CPU model names contain the vendor name, therefore
@@ -399,7 +399,7 @@ def getDeviceCPUInfo():
 		cpuInfo["Model"] = cpu_vendor + " " + cpu_model_name + " r" + cpu_model
 
 	# build core speed info ....
-	cpuInfo["Core Speed"] = str(cpu_clockSpeedMin) + " | " + str(cpu_clockSpeedMax)
+	cpuInfo["Core Speed"] = cpu_clockSpeedMin + " | " + cpu_clockSpeedMax
 	# get serial number
 	out = subprocess.Popen(cmdString2,
 		                     shell=True,
