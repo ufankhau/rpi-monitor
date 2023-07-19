@@ -1,12 +1,12 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 #
 #  ------------------------------------------------------------------------------
-#  Program to monitor the following parameters of a Raspberry Pi
-#  and send the data via MQTT to Home Assistant
+#  Program to monitor the following parameters of a Raspberry Pi and send the 
+#  the data via MQTT to Home Assistant
 #  - General data of the Raspberry Pi, like
-#	 - model (e.g. RPI 3B+, RPI 4B, RPI ZeroW)
-#    - running operating system (e.g. Debian, Raspberry OS, etc.)
-#    - kernel version
+#	   - model (e.g. RPI 3B+, RPI 4B, RPI ZeroW)
+#    - running operating system (release and version)
 #    - network interfaces with MAC and IP addresses
 #    - hostname, fqdn
 #    - number of CPUs
@@ -16,12 +16,13 @@
 #    - date of last update and upgrade of OS
 #    - uptime
 #    - Temperature CPU
-#    - Temperature GPU (only, if command vcgencmd is available on the Raspberry)
+#    - Temperature GPU (only, if command vcgencmd is available on the Raspberry Pi)
 #    - % of RAM used
 #    - % of used disk space
 #    - CPU load (1m and 5m)
-#    - system security status ("safe" if OS update less than 1 day old (default), and upgrade < 7 days, 
-#      otherwise "unsafe", thresholds can be set in "config.ini" file)
+#    - system security status ("safe" if OS update less than 1 day old (default), 
+#      and upgrade < 7 days, otherwise "unsafe", thresholds can be set in "config.ini" file,
+#      ranges are hardcoded)
 #
 #  --------------------------
 #  import necessary libraries
@@ -31,6 +32,7 @@ from datetime import datetime, timedelta
 from tzlocal import get_localzone
 import subprocess
 import sys
+import ssl
 import json
 import os.path
 import argparse
@@ -44,7 +46,7 @@ from unidecode import unidecode
 import paho.mqtt.client as mqtt
 import sdnotify
 
-script_version = "1.5.3"
+script_version = "1.6.1"
 script_name = 'rpi-monitor.py'
 script_info = '{} v{}'.format(script_name, script_version)
 project_name = 'rpi-monitor'
@@ -119,6 +121,7 @@ if opt_debug:
 if opt_stall:
 	print_line('Test: Stall (no-re-reporting) enabled', debug=True)
 
+
 #  -------------
 #  MQTT handlers
 #  -------------
@@ -134,7 +137,7 @@ def on_connect(client, userdata, flags, rc):
 		mqtt_client_connected = True
 		print_line('on_connect() mqtt_client_connected=[{}]'.format(mqtt_client_connected), debug=True)
 	else:
-		print_line('! Connection error with result code {} - {}'.format(str(r), \
+		print_line('! Connection error with result code {} - {}'.format(str(rc), \
 			mqtt.connack_string(rc)), error=True)
 		print_line('MQTT Connection error with result code {} - {}'.format(str(rc), \
 			mqtt.connack_string(rc)), error=True, sd_notify=True)
@@ -147,6 +150,7 @@ def on_connect(client, userdata, flags, rc):
 def on_publish(client, userdata, mid):
 	print_line('* Data successfully published.', debug=True)
 	pass
+
 
 #  -----------------------
 #  load configuration file
@@ -227,14 +231,13 @@ print_line('Configuration accepted', debug=True, sd_notify=True)
 #  Raspberry Pi variables monitored
 #  --------------------------------
 rpi_mac = ''
-rpi_nbrCPUs = ''
-rpi_cpu_tuple = []
+rpi_nbrCPUCores = 0
+rpi_cpu_model = OrderedDict()
 rpi_model = ''
-rpi_model_raw = ''
 rpi_hostname = ''
 rpi_fqdn = ''
-rpi_os = ''
-rpi_kernel_version = ''
+rpi_os_release = ''
+rpi_os_version = ''
 rpi_fs_used = ''
 rpi_fs_space = ''
 rpi_mqtt_script = script_info.replace('.py', '')
@@ -249,90 +252,205 @@ rpi_security = [
 rpi_security_status = 'off'
 
 
-#  --------------
-#  getDeviceModel
-#  --------------
-#  extract info from file /proc/device-tree/model and present it in compacted form
-#  extract info from file /proc/cpuinfo with command "/usr/bin/tail -n1 /proc/cpuinfo"
+
+
 def getDeviceModel():
-	global rpi_model
-	global rpi_model_raw
-	cmdString = "/usr/bin/tail -n1 /proc/cpuinfo"
+	"""
+	Return Raspberry Pi Device Model as a string
+
+	Use command "/usr/bin/tail -n1 /proc/cpuinfo | /bin/awk -F': ' '{print $2}'"
+	to get info on the device model. Return slightly compacted string.
+	"""
+	cmdString = "/usr/bin/tail -n1 /proc/cpuinfo | /bin/awk -F': ' '{print $2}'"
 	out = subprocess.Popen(cmdString,
-		shell=True,
-		stdout=subprocess.PIPE,
-		stderr=subprocess.STDOUT)
-	stdout,_ = out.communicate()
-	rpi_model_raw = stdout.decode('utf-8').rstrip().split(':')
-	print_line('rpi_model_raw=[{}]'.format(rpi_model_raw), debug=True)
-	#  reduce string length (just more compact, same info)
-	rpi_model = rpi_model_raw[1].lstrip().replace(' Model ', '').replace(' Plus ', '+').replace('Rev ', ' r').replace('\n', '')
-	print_line('rpi_model=[{}]'.format(rpi_model), debug=True)
+		                     shell=True,
+		                     stdout=subprocess.PIPE,
+		                     stderr=subprocess.STDOUT)
+	stdout, _ = out.communicate()
+	rpiModelRaw = stdout.decode('utf-8').strip()
+	return rpiModelRaw.replace(' Model ', '').replace(' Plus ', '+').replace('Rev ', ' r').replace('\n', '')
 
 
-#  ----------
-#  getNbrCPUs
-#  ----------
-#  use command "nproc" to get the number of processors / CPUs
-def getNbrCPUs():
-	global rpi_nbrCPUs
-	cmdString = '/usr/bin/nproc'
+
+
+# def getNbrCPUCores():
+# 	"""
+# 	Return number of CPU cores of the Raspberry Pi as an integer
+
+# 	Use command "/usr/bin/nproc" to get the number of CPU cores of the Raspberry Pi.
+# 	Return the value as integer.
+# 	"""
+# 	cmdString = '/usr/bin/nproc'
+# 	out = subprocess.Popen(cmdString,
+# 		                     shell=True,
+# 		                     stdout=subprocess.PIPE,
+# 		                     stderr=subprocess.STDOUT)
+# 	stdout, _ = out.communicate()
+# 	return int(stdout.decode('utf-8').strip())
+	
+
+
+
+def getCPUSpeedActual():
+	"""
+	Return current CPU clock speed as an integer in MHz
+
+	Use command "/bin/cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq" to get the 
+	current clock speed of the CPU. The value will likely be lower than the max value, if the
+	CPU is idling.
+	"""
+	cmdString = '/bin/cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq'
 	out = subprocess.Popen(cmdString,
-		shell=True,
-		stdout=subprocess.PIPE,
-		stderr=subprocess.STDOUT)
-	stdout,_ = out.communicate()
-	rpi_nbrCPUs = int(stdout.decode('utf-8').lstrip().rstrip())
-	print_line('rpi_getCPUs=[{}]'.format(rpi_nbrCPUs), debug=True)
+		                     shell=True,
+		                     stdout=subprocess.PIPE,
+		                     stderr=subprocess.STDOUT)
+	stdout, _ = out.communicate()
+	return int(stdout.decode('utf-8').strip())/1000
+
+
+
+
+def getCPUSpeedLimit(arg='max'):
+	"""
+	Return min/max CPU clock speed limit of the Raspberry Pi CPU as an integer in MHz
+
+	Argument: 
+		
+		arg:	default set to 'max'; if supplied, checked to be 'min', otherwise return
+        	max clock speed limit
+	
+	Use command "/bin/cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_{arg}_freq" to get
+	min or max CPU clock speed limit and return the value as integer in MHz
+	"""
+	if arg != 'min':
+		arg = 'max'
+	cmdString = "/bin/cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_" + arg + "_freq"
+	out = subprocess.Popen(cmdString,
+		                     shell=True,
+		                     stdout=subprocess.PIPE,
+		                     stderr=subprocess.STDOUT)
+	stdout, _ = out.communicate()
+	return int(stdout.decode('utf-8').strip())/1000
+
+
 
 
 #  -----------------
 #  getDeviceCpuModel
-#  -----------------
-#  use command "/usr/bin/lscpu | /bin/egrep -i 'model|bogo|vendor'" to extract data on the CPU
-#  use command "/bin/cat /proc/cpuinfo | /bin/egrep -i 'Serial'" to get the
-#              serial number of the Raspberry Pi
-def getDeviceCpuModel():
-	global rpi_cpu_tuple
-	global rpi_nbrCPUs
-	cmdString1 = "/usr/bin/lscpu | /bin/egrep -i 'model|bogo|vendor'"
-	cmdString2 = "/bin/cat /proc/cpuinfo | /bin/egrep -i 'Serial'"
+# 
+#  use command "/usr/bin/lscpu | /bin/egrep -i 'model|vendor|architecture'" to extract data
+#  on the CPU.
+#  use command "/bin/cat /proc/cpuinfo | /bin/egrep -i 'serial'" to get the
+#  serial number of the Raspberry Pi
+def getDeviceCPUInfo():
+	"""
+	Return static data of the CPU as a dictionary with the following content:
+
+		- architecture (key = "Architecture")
+		- number of cores (key = "Core(s)")
+		- model (vendor, name, release) (key = "Model")
+		- clock speed (min | max) (key = "Core Speed")
+		- serial number (key ="Serial")
+
+	Use the following commands to extract the respective information:
+
+		- /usr/bin/lscpu | /bin/egrep -i 'architecture|vendor|model|min|max'
+		- /bin/cat /proc/cpuinfo | /bin/egrep -i 'serial' | /bin/awk -F': ' '{print $2}'
+	"""
+	cpuInfo = OrderedDict()
+	cmdString1 = "/usr/bin/lscpu | /bin/egrep -i 'architecture|core\(s\)|vendor|model|min|max'"
+	cmdString2 = "/bin/cat /proc/cpuinfo | /bin/egrep -i 'serial' | /bin/awk -F': ' '{print $2}'"
 	out = subprocess.Popen(cmdString1,
-		shell=True,
-		stdout=subprocess.PIPE,
-		stderr=subprocess.STDOUT)
-	stdout,_ = out.communicate()
+		                     shell=True,
+		                     stdout=subprocess.PIPE,
+		                     stderr=subprocess.STDOUT)
+	stdout, _ = out.communicate()
 	lines = stdout.decode('utf-8').split("\n")
 	trimmedLines = []
 	for currLine in lines:
-		trimmedLine = currLine.lstrip().rstrip()
+		trimmedLine = currLine.strip()
 		trimmedLines.append(trimmedLine)
-	cpu_model = ''
-	cpu_cores = rpi_nbrCPUs
-	cpu_serial = ''
-	cpu_vendor = ''
-	cpu_model_name = ''
 	for currLine in trimmedLines:
 		lineParts = currLine.split(':')
-		currValue = '{?unk?}'
+		#currValue = '{?unk?}'
 		if len(lineParts) >= 2:
-			currValue = lineParts[1].lstrip().rstrip()
+			currValue = lineParts[1].strip()
+		if 'Architecture' in currLine:
+			cpuInfo["Architecture"] = currValue
+		if 'Core(s)' in currLine:
+			cpuInfo["Core(s)"] = currValue
 		if 'Vendor' in currLine:
-			cpu_vendor = currValue.upper()
+			cpu_vendor = currValue
 		if 'Model:' in currLine:
 			cpu_model = currValue
 		if 'Model name' in currLine:
 			cpu_model_name = currValue
-	cpu_model = cpu_vendor + " " + cpu_model_name + " r" + cpu_model
+		if 'CPU max' in currLine:
+			cpu_clockSpeedMax = str(int(currValue))
+		if 'CPU min' in currLine:
+			cpu_clockSpeedMin = str(int(currValue))
+	
+	# build CPU model name ....
+	# Raspberry Pi Zero and Zero W CPU model names contain the vendor name, therefore
+	# 'cpu_vendor' can be skipped when defining the variable 'cpu_model'
+	if cpu_model_name.find(cpu_vendor) >= 0:
+		cpuInfo["Model"] = cpu_model_name + " r" + cpu_model
+	else:
+		cpuInfo["Model"] = cpu_vendor + " " + cpu_model_name + " r" + cpu_model
+
+	# build core speed info ....
+	cpuInfo["Core Speed"] = cpu_clockSpeedMin + " | " + cpu_clockSpeedMax
+	# get serial number
 	out = subprocess.Popen(cmdString2,
-		shell=True,
-		stdout=subprocess.PIPE,
-		stderr=subprocess.STDOUT)
+		                     shell=True,
+		                     stdout=subprocess.PIPE,
+		                     stderr=subprocess.STDOUT)
 	stdout,_ = out.communicate()
-	lines = stdout.decode('utf-8').lstrip().rstrip().split(':')
-	cpu_serial = lines[1].lstrip().rstrip()
-	rpi_cpu_tuple = ( cpu_model, cpu_cores, cpu_serial )
-	print_line('rpi_cpu_tuple=[{}]'.format(rpi_cpu_tuple), debug=True)
+	cpuInfo["Serial"] = stdout.decode('utf-8').strip()
+
+	return cpuInfo
+	#rpi_cpu_tuple = ( cpu_architecture, cpu_model, rpi_nbrCPUs, cpu_serial )
+	#print_line('rpi_cpu_tuple=[{}]'.format(rpi_cpu_tuple), debug=True)
+
+
+
+
+#  ---------------
+#  getLinuxRelease
+#
+#  use command "/bin/cat /etc/os-release | /bin/egrep -i 'pretty_name' | /bin/awk -F'[""]' '{print $2}'" to extract the release of Linux running on the Raspberry Pi
+def getLinuxRelease():
+	global rpi_os_release
+	cmdString = "/bin/cat /etc/os-release| /bin/egrep -i 'pretty_name'| /bin/awk -F'[""]' '{print $2}'"
+	out = subprocess.Popen(cmdString,
+												 shell=True,
+												 stdout=subprocess.PIPE,
+												 stderr=subprocess.STDOUT)
+	stdout, _ = out.communicate()
+	rpi_os_release = stdout.decode('utf-8').strip()
+	print_line('rpi_os_release=[{}]'.format(rpi_os_release), debug=True)
+
+
+
+
+#  ---------------
+#  getLinuxVersion
+#
+#  use command "/bin/uname -r" to get the kernel version
+def getLinuxVersion():
+	"""
+
+	"""
+	global rpi_os_version
+	cmdString = "/bin/uname -r"
+	out = subprocess.Popen(cmdString,
+												 shell=True,
+												 stdout=subprocess.PIPE,
+												 stderr=subprocess.STDOUT)
+	stdout, _ = out.communicate()
+	rpi_os_version = stdout.decode('utf-8').rstrip()
+	print_line('rpi_os_version=[{}]'.format(rpi_os_version), debug=True)
+
 
 
 #  ---------------------
@@ -340,32 +458,32 @@ def getDeviceCpuModel():
 #  ---------------------
 #  use command "/bin/cat /etc/os-release" to get name of os system
 #  use command "/bin/cat /proc/version" to get kernel version
-def getOSandKernelVersion():
-	global rpi_os
-	global rpi_os_kernel
-	cmdString = "/bin/cat /etc/os-release"
-	out = subprocess.Popen(cmdString,
-		shell=True,
-		stdout=subprocess.PIPE,
-		stderr=subprocess.STDOUT)
-	stdout,_ = out.communicate()
-	lines = stdout.decode('utf-8').split("\n")
-	#trimmedLines = []
-	for currLine in lines:
-		trimmedLine = currLine.split("=")
-		if trimmedLine[0].lstrip() == "PRETTY_NAME":
-			rpi_os = trimmedLine[1].lstrip('"').rstrip('"')
+# def getOSandKernelVersion():
+# 	global rpi_os
+# 	global rpi_os_kernel
+# 	cmdString = "/bin/cat /etc/os-release"
+# 	out = subprocess.Popen(cmdString,
+# 		                    shell=True,
+# 		                    stdout=subprocess.PIPE,
+# 		                    stderr=subprocess.STDOUT)
+# 	stdout, _ = out.communicate()
+# 	lines = stdout.decode('utf-8').split("\n")
+# 	#trimmedLines = []
+# 	for currLine in lines:
+# 		trimmedLine = currLine.split("=")
+# 		if trimmedLine[0].lstrip() == "PRETTY_NAME":
+# 			rpi_os = trimmedLine[1].lstrip('"').rstrip('"')
 
-	cmdString = "/bin/cat /proc/version"
-	out = subprocess.Popen(cmdString,
-		shell=True,
-		stdout=subprocess.PIPE,
-		stderr=subprocess.STDOUT)
-	stdout,_ = out.communicate()
-	lines = stdout.decode('utf-8').split(" ")
-	rpi_os_kernel = 'Linux '+lines[2].lstrip().rstrip()
-	print_line('rpi_os=[{}]'.format(rpi_os), debug=True)
-	print_line('rpi_os_kernel=[{}]'.format(rpi_os_kernel), debug=True)
+# 	cmdString = "/bin/cat /proc/version"
+# 	out = subprocess.Popen(cmdString,
+# 		shell=True,
+# 		stdout=subprocess.PIPE,
+# 		stderr=subprocess.STDOUT)
+# 	stdout,_ = out.communicate()
+# 	lines = stdout.decode('utf-8').split(" ")
+# 	rpi_os_kernel = 'Linux '+lines[2].lstrip().rstrip()
+# 	print_line('rpi_os=[{}]'.format(rpi_os), debug=True)
+# 	print_line('rpi_os_kernel=[{}]'.format(rpi_os_kernel), debug=True)
 
 
 #  -----------------
@@ -441,16 +559,18 @@ def getFileSystemUsage():
 	print_line('rpi_filesystem_mounted=[{}]'.format(rpi_fs_mount), debug=True)
 
 
+
+
 #  -----------
 #  getVcGenCmd
-#  -----------
+# 
 #  find location of vcgencmd
 def getVcGenCmd():
-	cmd_loc1 = '/usr/bin/vcgencmd'
-	cmd_loc2 = '/opt/vc/bin/vcgencmd'
-	desiredCommand = cmd_loc1
+	cmdLoc1 = '/usr/bin/vcgencmd'
+	cmdLoc2 = '/opt/vc/bin/vcgencmd'
+	desiredCommand = cmdLoc1
 	if os.path.exists(desiredCommand) == False:
-		desiredCommand = cmd_loc2
+		desiredCommand = cmdLoc2
 	if os.path.exists(desiredCommand) == False:
 		desiredCommand = ''
 	if desiredCommand != '':
@@ -460,19 +580,21 @@ def getVcGenCmd():
 	return desiredCommand
 
 
+
+
 #  --------
 #  hostname
-#  --------
+#
 #  extract hostname and fqdn from "hostname -f" command
 def getHostname():
 	global rpi_hostname
 	global rpi_fqdn
 	cmdString = "/bin/hostname -f"
 	out = subprocess.Popen(cmdString,
-		shell = True,
-		stdout=subprocess.PIPE,
-		stderr=subprocess.STDOUT)
-	stdout,_ = out.communicate()
+		                     shell = True,
+		                     stdout=subprocess.PIPE,
+		                     stderr=subprocess.STDOUT)
+	stdout, _ = out.communicate()
 	fqdn_raw = stdout.decode('utf-8').rstrip()
 	print_line('fqdn_raw=[{}]'.format(fqdn_raw), debug=True)
 	rpi_hostname = fqdn_raw
@@ -579,7 +701,7 @@ def getSystemTemperature():
 
 #  ------
 #  uptime
-#  ------
+# 
 #  use command "/usr/bin/uptime" to get time, Raspberry is up and running, extract data and present
 #  it in the form "12d 5h:12m", respectively "5h:12m", if uptime is less than 24 hours
 #  get values for CPU usage (1 minute and 5 minute running average)
@@ -696,10 +818,15 @@ getHostname()
 if sensor_name == default_sensor_name:
 	sensor_name = 'rpi-{}'.format(rpi_hostname)
 #  get model so we can use it in MQTT
-getDeviceModel()
-getNbrCPUs()
-getDeviceCpuModel()
-getOSandKernelVersion()
+rpi_model = getDeviceModel()
+print_line('rpi_model=[{}]'.format(rpi_model), debug=True)
+#rpi_nbrCPUCores = getNbrCPUCores()
+#print_line('rpi_nbrCPUCores=[{}]'.format(rpi_nbrCPUCores), debug=True)
+rpi_cpu_model = getDeviceCPUInfo()
+rpi_nbrCPUs = rpi_cpu_model["Core(s)"]
+getLinuxRelease()
+getLinuxVersion()
+#getOSandKernelVersion()
 getFileSystemUsage()
 
 
@@ -768,7 +895,8 @@ if config['MQTT'].getboolean('tls', False):
 		ca_certs=config['MQTT'].get('tls_a_cert', None),
 		keyfile=config['MQTT'].get('tls_keyfile', None),
 		certfile=config['MQTT'].get('tls_certfile', None),
-		tls_version=ssl.PROTOCOL_SSLv23)
+		tls_version=ssl.PROTOCOL_SSLv23
+		)
 
 mqtt_username = os.environ.get("MQTT_USERNAME", config['MQTT'].get('username'))
 mqtt_password = os.environ.get("MQTT_PASSWORD", config['MQTT'].get('password', None))
@@ -810,32 +938,76 @@ print_line('mac lt=[{}],  rt=[{}], mac=[{}]'.format(mac_left, mac_right, mac_bas
 uniqID = "RPi-{}Mon{}".format(mac_left, mac_right)
 
 #  Raspberry Pi (rpi) monitor device with 6 sensors and 1 binary sensor
-LD_MONITOR = "monitor"    			#  sensor
-LD_CPU_TEMP = "temp_cpu_c"    		#  sensor
-LD_FS_USED = "disk_used"    		#  sensor
-LD_CPU_USAGE_1M = "cpu_load_1m"     #  sensor 
-LD_CPU_USAGE_5M = "cpu_load_5m"	    #  sensor
-LD_MEM_USED = "ram_used_prcnt"		#  sensor
+LD_MONITOR = "monitor"    		            #  sensor
+LD_CPU_TEMP = "temp_cpu_c"    		        #  sensor
+LD_FS_USED = "disk_used"    		          #  sensor
+LD_CPU_USAGE_1M = "cpu_load_1m"           #  sensor 
+LD_CPU_USAGE_5M = "cpu_load_5m"	          #  sensor
+LD_MEM_USED = "ram_used_prcnt"		        #  sensor
 LD_SECURITY_STATUS = "os_security_status"	#  binary_sensor
 LDS_PAYLOAD_NAME = "info"
+
+#  Verify CPU architecture to select appropriate logo for cpu_usage sensors
+if rpi_cpu_model["Architecture"].find('ARMv') > 0:
+	cpu_icon = "mdi:cpu-32-bit"
+else:
+	cpu_icon = "mdi:cpu-64-bit"
 
 #  Publish MQTT auto discovery ....
 #  table of key items to be published for sensors:
 detectorValues = OrderedDict([
-	(LD_MONITOR, dict(title="{} RPi Monitor".format(rpi_hostname), device_class="timestamp", \
-		no_title_prefix="yes", json_value="Timestamp", json_attr="yes", icon='mdi:raspberry-pi', \
-		device_ident='Raspberry Pi {}'.format(rpi_hostname.title()))),
-	(LD_CPU_TEMP, dict(title="{} CPU Temp".format(rpi_hostname), device_class="temperature", \
-		no_title_prefix="yes", unit="°C", json_value="Temp_CPU_c", icon='mdi:thermometer')),
-	(LD_CPU_USAGE_1M, dict(title="{} CPU Load (1 min)".format(rpi_hostname.title()), no_title_prefix="yes", \
-		json_value="CPU_Load_1_min", unit="%", icon='mdi:chip')),
-	(LD_CPU_USAGE_5M, dict(title="{} CPU Load (5 min)".format(rpi_hostname.title()), no_title_prefix="yes", \
-		json_value="CPU_Load_5_min", unit="%", icon='mdi:chip')),
-	(LD_MEM_USED, dict(title="{} Memory Usage".format(rpi_hostname), no_title_prefix="yes", \
-		json_value="RAM_used_prcnt", unit="%", icon='mdi:memory')),
-	(LD_FS_USED, dict(title="{} Disk Usage".format(rpi_hostname), no_title_prefix="yes", \
-		json_value="FS_used_prcnt", unit="%", icon='mdi:sd')),
-	])
+	(LD_MONITOR, dict(
+		title="{} RPi Monitor".format(rpi_hostname),
+		topic_category="sensor",
+		device_class="timestamp",
+		device_ident='Raspberry Pi {}'.format(rpi_hostname.title()),
+		no_title_prefix="yes",
+		icon='mdi:rapsberry-pi',
+		json_attr="yes",
+		json_value="Timestamp", 
+	)),		
+	(LD_CPU_TEMP, dict(
+		title="{} CPU Temp".format(rpi_hostname), 
+		topic_category="sensor",
+		device_class="temperature",
+		no_title_prefix="yes",
+		unit="°C",
+		icon='mdi:thermometer', 
+		json_value="Temp_CPU_c", 
+	)),
+	(LD_CPU_USAGE_1M, dict(
+		title="{} CPU Load (1 min)".format(rpi_hostname.title()),
+		topic_category="sensor",
+		no_title_prefix="yes",
+		unit="%",
+		icon=cpu_icon,
+		json_value="CPU_Load_1_min",  
+	)),
+	(LD_CPU_USAGE_5M, dict(
+		title="{} CPU Load (5 min)".format(rpi_hostname.title()),
+		topic_category="sensor",
+		no_title_prefix="yes",
+		unit="%",
+		icon=cpu_icon,
+		json_value="CPU_Load_5_min",  
+	)),
+	(LD_MEM_USED, dict(
+		title="{} Memory Usage".format(rpi_hostname),
+		topic_category="sensor",
+		no_title_prefix="yes",
+		unit="%",
+		icon='mdi:memory',
+		json_value="RAM_used_prcnt",  
+	)),
+	(LD_FS_USED, dict(
+		title="{} Disk Usage".format(rpi_hostname), 
+		topic_category="sensor",
+		no_title_prefix="yes",
+		unit="%",
+		icon='mdi:sd',
+		json_value="FS_used_prcnt",
+	)),
+])
 
 print_line('Announcing Raspberry Pi Monitoring device to MQTT broker for auto-discovery ...')
 
@@ -878,7 +1050,7 @@ for [sensor, params] in detectorValues.items():
 			'manufacturer' : 'Raspbery Pi (Trading) Ltd.',
 			'name' : params['device_ident'],
 			'model' : '{}'.format(rpi_model),
-			'sw_version' : "{} {}".format(rpi_os, rpi_os_kernel)
+			'sw_version' : "{} {}".format(rpi_os_release, rpi_os_version)
 		}
 	else:
 		payload['dev'] = {
@@ -888,8 +1060,7 @@ for [sensor, params] in detectorValues.items():
 	mqtt_client.publish(discovery_topic, json.dumps(payload), 1, retain=True)
 
 #  auto-discovery of binary_sensor
-discovery_topic = '{}/binary_sensor/{}/config'.format(discovery_prefix, \
-	sensor_name.lower())
+discovery_topic = '{}/binary_sensor/{}/config'.format(discovery_prefix, sensor_name.lower())
 payload = OrderedDict()
 payload['name'] = "{} Security Status".format(rpi_hostname.title())
 payload['uniq_id'] = "{}_{}".format(uniqID, LD_SECURITY_STATUS)
@@ -951,11 +1122,11 @@ reported_first_time = False
 #  MQTT transmit helper routines
 #  -----------------------------
 SCRIPT_TIMESTAMP = "Timestamp"
-RPI_MODEL = "Raspberry_Model"
+RPI_MODEL = "Raspberry Model"
 RPI_HOSTNAME = "Hostname"
 RPI_FQDN = "Fqdn"
-RPI_OS = "OS"
-RPI_OS_KERNEL = "OS_Kernel"
+RPI_OS_RELEASE = "OS Release"
+RPI_OS_VERSION = "OS Version"
 RPI_UPTIME = "Up_time"
 RPI_OS_LAST_UPDATE = "OS_Last_Update"
 RPI_OS_LAST_UPGRADE = "OS_Last_Upgrade"
@@ -966,16 +1137,19 @@ RPI_RAM_USED = "RAM_used_prcnt"
 RPI_CPU_TEMP = "Temp_CPU_c"
 RPI_CPU_USED_1M = "CPU_Load_1_min"
 RPI_CPU_USED_5M = "CPU_Load_5_min"
-RPI_GPU_TEMP = "Temp_GPU_c"
+RPI_GPU_TEMP = "Temp GPU [°C]"
 RPI_SCRIPT = "Reporter"
 RPI_NETWORK = "Network Interfaces"
 RPI_OS_UPDATE = rpi_security[0][0]
 RPI_OS_UPGRADE = rpi_security[1][0]
 RPI_SECURITY_STATUS = "Security_Status"
-# tupel cpu (mode name, #cores, serial#)
+# tupel cpu (architecture, mode name, #cores, serial#)
+RPI_CPU_ARCHITECTURE = "Architecture"
 RPI_CPU = "CPU"
 RPI_CPU_MODEL = "Model"
-RPI_CPU_CORES = "Cores"
+RPI_CPU_CORES = "Core(s)"
+RPI_CPU_ARCHITECTURE = "Architecture"
+RPI_CPU_SPEED = "Core_Speed_(min_|_max)"
 #RPI_CPU_BOGOMIPS = "BogoMIPS"
 RPI_CPU_SERIAL = "Serial"
 SCRIPT_REPORT_INTERVAL = "Reporter_Interval [min]"
@@ -990,8 +1164,8 @@ def send_status(timestamp, nothing):
 	rpiData[RPI_MODEL] = rpi_model
 	rpiData[RPI_HOSTNAME] = rpi_hostname
 	rpiData[RPI_FQDN] = rpi_fqdn
-	rpiData[RPI_OS] = rpi_os
-	rpiData[RPI_OS_KERNEL] = rpi_os_kernel
+	rpiData[RPI_OS_RELEASE] = rpi_os_release
+	rpiData[RPI_OS_VERSION] = rpi_os_version
 	rpiData[RPI_OS_LAST_UPDATE] = rpi_timesincelastUpdateDate+' ago - '+rpi_security[0][1]
 	rpiData[RPI_OS_LAST_UPGRADE] = rpi_timesincelastUpgradeDate+' ago - '+rpi_security[1][1]
 	rpiData[RPI_UPTIME] = rpi_uptime
@@ -1008,9 +1182,9 @@ def send_status(timestamp, nothing):
 	rpiData[RPI_SCRIPT] = rpi_mqtt_script
 	rpiData[SCRIPT_REPORT_INTERVAL] = interval_in_minutes
 
-	rpiCpu = getCPUDictionary()
-	if len(rpiCpu) > 0:
-		rpiData[RPI_CPU] = rpiCpu
+	#rpiCpu = getCPUDictionary()
+	#if len(rpiCpu) > 0:
+	rpiData[RPI_CPU] = rpi_cpu_model
 
 	if rpi_fs_mount == 'none':
 		rpiData[RPI_FS_MOUNT] = rpi_fs_mount
@@ -1044,15 +1218,16 @@ def send_status(timestamp, nothing):
 		_thread.start_new_thread(publishSecurityStatus, ('off', topic))
 
 
-def getCPUDictionary():
-	#  tuple (modelname, #cores, serial#)
-	cpuDict = OrderedDict()
-	#rpi_cpu_tuple = ( cpu_model, cpu_cores, cpu_serial )
-	if rpi_cpu_tuple != '':
-		cpuDict[RPI_CPU_MODEL] = rpi_cpu_tuple[0]
-		cpuDict[RPI_CPU_CORES] = rpi_cpu_tuple[1]
-		cpuDict[RPI_CPU_SERIAL] = rpi_cpu_tuple[2]
-	return cpuDict
+# def getCPUDictionary():
+# 	#  tuple (modelname, #cores, serial#)
+# 	cpuDict = OrderedDict()
+# 	#rpi_cpu_tuple = ( cpu_architecture, cpu_model, cpu_cores, cpu_serial )
+# 	if rpi_cpu_tuple != '':
+# 		cpuDict[RPI_CPU_ARCHITECTURE] = rpi_cpu_tuple[0]
+# 		cpuDict[RPI_CPU_MODEL] = rpi_cpu_tuple[1]
+# 		cpuDict[RPI_CPU_CORES] = rpi_cpu_tuple[2]
+# 		cpuDict[RPI_CPU_SERIAL] = rpi_cpu_tuple[3]
+# 	return cpuDict
 
 
 def getFSmountDictionary():
@@ -1120,7 +1295,7 @@ def handle_interrupt(channel):
 		reported_first_time = True
 	else:
 		print_line(sourceID + " >> Time to report! {} but SKIPPED (Test: stall)".format(\
-			current_tiemstamp.strftime('%H:%M:%S - %Y/%m/%d')), verbose=True)
+			current_timestamp.strftime('%H:%M:%S - %Y/%m/%d')), verbose=True)
 
 
 def afterMQTTConnect():
