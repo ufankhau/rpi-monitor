@@ -31,6 +31,7 @@ from datetime import datetime, timedelta
 from tzlocal import get_localzone
 import subprocess
 import sys
+import ssl
 import json
 import os.path
 import argparse
@@ -975,7 +976,7 @@ RPI_SECURITY_STATUS = "Security_Status"
 # tupel cpu (mode name, #cores, serial#)
 RPI_CPU = "CPU"
 RPI_CPU_MODEL = "Model"
-RPI_CPU_CORES = "Cores"
+RPI_CPU_CORES = "Core(s)"
 #RPI_CPU_BOGOMIPS = "BogoMIPS"
 RPI_CPU_SERIAL = "Serial"
 SCRIPT_REPORT_INTERVAL = "Reporter_Interval [min]"
