@@ -378,7 +378,7 @@ def getDeviceCPUInfo():
 		if 'Architecture' in currLine:
 			cpuInfo["Architecture"] = currValue
 		if 'Core(s)' in currLine:
-			cpuInfo["Core(s)"] = currValue
+			cpuInfo["Core(s)"] = int(currValue)
 		if 'Vendor' in currLine:
 			cpu_vendor = currValue
 		if 'Model:' in currLine:
@@ -399,12 +399,12 @@ def getDeviceCPUInfo():
 		cpuInfo["Model"] = cpu_vendor + " " + cpu_model_name + " r" + cpu_model
 
 	# build core speed info ....
-	cpuInfo["Core Speed"] = cpu_clockSpeedMin + " | " + cpu_clockSpeedMax
+	cpuInfo["Clock Speed (min | max)"] = cpu_clockSpeedMin + " | " + cpu_clockSpeedMax
 	# get serial number
 	out = subprocess.Popen(cmdString2,
-		                     shell=True,
-		                     stdout=subprocess.PIPE,
-		                     stderr=subprocess.STDOUT)
+												 shell=True,
+												 stdout=subprocess.PIPE,
+												 stderr=subprocess.STDOUT)
 	stdout,_ = out.communicate()
 	cpuInfo["Serial"] = stdout.decode('utf-8').strip()
 
