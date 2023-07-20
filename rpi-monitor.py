@@ -231,7 +231,7 @@ print_line('Configuration accepted', debug=True, sd_notify=True)
 #  Raspberry Pi variables monitored
 #  --------------------------------
 rpi_mac = ''
-rpi_nbrCPUCores = 0
+rpi_nbrCores = 0
 rpi_cpu_model = OrderedDict()
 rpi_model = ''
 rpi_hostname = ''
@@ -248,7 +248,7 @@ rpi_ram_usage = ''
 rpi_security = [
 	['OS Update Status', 'safe'],
 	['OS Upgrade Status', 'safe']
-	]
+]
 rpi_security_status = 'off'
 
 
@@ -256,9 +256,12 @@ rpi_security_status = 'off'
 
 def getDeviceModel():
 	"""
-	Return Raspberry Pi Device Model as a string
+	Return Raspberry Pi device model as a string
 
-	Use command "/usr/bin/tail -n1 /proc/cpuinfo | /bin/awk -F': ' '{print $2}'"
+	Use command 
+	
+		- /usr/bin/tail -n1 /proc/cpuinfo | /bin/awk -F': ' '{print $2}'
+	
 	to get info on the device model. Return slightly compacted string.
 	"""
 	cmdString = "/usr/bin/tail -n1 /proc/cpuinfo | /bin/awk -F': ' '{print $2}'"
@@ -273,33 +276,18 @@ def getDeviceModel():
 
 
 
-# def getNbrCPUCores():
-# 	"""
-# 	Return number of CPU cores of the Raspberry Pi as an integer
+def getCPUClockSpeedActual():
+	"""
+	Return current CPU clock speed as a float in MHz.
 
-# 	Use command "/usr/bin/nproc" to get the number of CPU cores of the Raspberry Pi.
-# 	Return the value as integer.
-# 	"""
-# 	cmdString = '/usr/bin/nproc'
-# 	out = subprocess.Popen(cmdString,
-# 		                     shell=True,
-# 		                     stdout=subprocess.PIPE,
-# 		                     stderr=subprocess.STDOUT)
-# 	stdout, _ = out.communicate()
-# 	return int(stdout.decode('utf-8').strip())
+	Use command
+
+		- /bin/cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
 	
-
-
-
-def getCPUSpeedActual():
+	to get the current clock speed of the CPU. The value will likely be lower than
+	the max value, if the CPU is idling.
 	"""
-	Return current CPU clock speed as an integer in MHz
-
-	Use command "/bin/cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq" to get the 
-	current clock speed of the CPU. The value will likely be lower than the max value, if the
-	CPU is idling.
-	"""
-	cmdString = '/bin/cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq'
+	cmdString = "/bin/cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq"
 	out = subprocess.Popen(cmdString,
 		                     shell=True,
 		                     stdout=subprocess.PIPE,
@@ -319,8 +307,11 @@ def getCPUSpeedLimit(arg='max'):
 		arg:	default set to 'max'; if supplied, checked to be 'min', otherwise return
         	max clock speed limit
 	
-	Use command "/bin/cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_{arg}_freq" to get
-	min or max CPU clock speed limit and return the value as integer in MHz
+	Use command 
+	
+		/bin/cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_{arg}_freq
+		 
+  to get min or max CPU clock speed limit and return the value as integer in MHz
 	"""
 	if arg != 'min':
 		arg = 'max'
@@ -337,18 +328,20 @@ def getCPUSpeedLimit(arg='max'):
 
 def getDeviceCPUInfo():
 	"""
-	Return static data of the CPU as a dictionary with the following content:
+	Return static data of the CPU in a dictionary with the following content:
 
-		- architecture (key = "Architecture")
-		- number of cores (key = "Core(s)")
-		- model (vendor, name, release) (key = "Model")
-		- clock speed (min | max) (key = "Core Speed (min|max) [MHz]")
-		- serial number (key ="Serial")
+		- architecture ["Architecture"]
+		- number of cores ["Core(s)"]
+		- model (vendor, name, release) ["Model"]
+		- clock speed (min | max) ["Core Speed [MHz] (min|max)"]
+		- serial number ["Serial"]
 
-	Use the following commands to extract the respective information:
+	Use the following commands
 
 		- /usr/bin/lscpu | /bin/egrep -i 'architecture|vendor|model|min|max'
 		- /bin/cat /proc/cpuinfo | /bin/egrep -i 'serial' | /bin/awk -F': ' '{print $2}'
+	
+	to get the respective information.
 	"""
 	cpuInfo = OrderedDict()
 	cmdString1 = "/usr/bin/lscpu | /bin/egrep -i 'architecture|core\(s\)|vendor|model|min|max'"
@@ -384,15 +377,13 @@ def getDeviceCPUInfo():
 			cpu_clockSpeedMin = str(int(float(currValue)))
 	
 	# build CPU model name ....
-	# Raspberry Pi Zero and Zero W CPU model names contain the vendor name, therefore
-	# 'cpu_vendor' can be skipped when defining the variable 'cpu_model'
-	if cpu_model_name.find(cpu_vendor) >= 0:
+	if cpu_model_name.find(cpu_vendor) > 0:
 		cpuInfo["Model"] = cpu_model_name + " r" + cpu_model
 	else:
 		cpuInfo["Model"] = cpu_vendor + " " + cpu_model_name + " r" + cpu_model
 
 	# build clock speed info ....
-	cpuInfo["Clock Speed (min|max) [MHz]"] = cpu_clockSpeedMin + " | " + cpu_clockSpeedMax
+	cpuInfo["Clock Speed [MHz] (min|max)"] = cpu_clockSpeedMin + " | " + cpu_clockSpeedMax
 	# get serial number
 	out = subprocess.Popen(cmdString2,
 												 shell=True,
@@ -406,15 +397,16 @@ def getDeviceCPUInfo():
 
 
 
-#  ---------------
-#  getLinuxRelease
-#
-#  use command "/bin/cat /etc/os-release | /bin/egrep -i 'pretty_name' | /bin/awk -F'\"' '{print $2}'" to extract the release of Linux running on the Raspberry Pi
-def getLinuxRelease():
+def getOSRelease():
 	"""
-	Return 
+	Return name of OS/Linux release as a string.
+
+	Use command 
+
+		/bin/cat /etc/os-release | /bin/egrep -i 'pretty_name' | /bin/awk -F'\"' '{print $2}'
+
+	to get the information.
 	"""
-	global rpi_os_release
 	cmdString = "/bin/cat /etc/os-release | /bin/egrep -i 'pretty_name' | /bin/awk -F'\"' '{print $2}'"
 	out = subprocess.Popen(cmdString,
 												 shell=True,
@@ -427,57 +419,25 @@ def getLinuxRelease():
 
 
 
-#  ---------------
-#  getLinuxVersion
-#
-#  use command "/bin/uname -r" to get the kernel version
-def getLinuxVersion():
+def getOSVersion():
 	"""
+	Return OS kernel version as a string.
 
+	Use command
+
+		/bin/uname -f
+
+	to get the required information.
 	"""
-	global rpi_os_version
 	cmdString = "/bin/uname -r"
 	out = subprocess.Popen(cmdString,
 												 shell=True,
 												 stdout=subprocess.PIPE,
 												 stderr=subprocess.STDOUT)
 	stdout, _ = out.communicate()
-	rpi_os_version = stdout.decode('utf-8').rstrip()
-	print_line('rpi_os_version=[{}]'.format(rpi_os_version), debug=True)
+	return stdout.decode('utf-8').rstrip()
 
 
-
-#  ---------------------
-#  getOSandKernelVersion
-#  ---------------------
-#  use command "/bin/cat /etc/os-release" to get name of os system
-#  use command "/bin/cat /proc/version" to get kernel version
-# def getOSandKernelVersion():
-# 	global rpi_os
-# 	global rpi_os_kernel
-# 	cmdString = "/bin/cat /etc/os-release"
-# 	out = subprocess.Popen(cmdString,
-# 		                    shell=True,
-# 		                    stdout=subprocess.PIPE,
-# 		                    stderr=subprocess.STDOUT)
-# 	stdout, _ = out.communicate()
-# 	lines = stdout.decode('utf-8').split("\n")
-# 	#trimmedLines = []
-# 	for currLine in lines:
-# 		trimmedLine = currLine.split("=")
-# 		if trimmedLine[0].lstrip() == "PRETTY_NAME":
-# 			rpi_os = trimmedLine[1].lstrip('"').rstrip('"')
-
-# 	cmdString = "/bin/cat /proc/version"
-# 	out = subprocess.Popen(cmdString,
-# 		shell=True,
-# 		stdout=subprocess.PIPE,
-# 		stderr=subprocess.STDOUT)
-# 	stdout,_ = out.communicate()
-# 	lines = stdout.decode('utf-8').split(" ")
-# 	rpi_os_kernel = 'Linux '+lines[2].lstrip().rstrip()
-# 	print_line('rpi_os=[{}]'.format(rpi_os), debug=True)
-# 	print_line('rpi_os_kernel=[{}]'.format(rpi_os_kernel), debug=True)
 
 
 #  -----------------
@@ -811,18 +771,17 @@ def getdeltatime(deltatime):
 getHostname()
 if sensor_name == default_sensor_name:
 	sensor_name = 'rpi-{}'.format(rpi_hostname)
-#  get model so we can use it in MQTT
+#  get static information on Rapsberry Pi model
 rpi_model = getDeviceModel()
 print_line('rpi_model=[{}]'.format(rpi_model), debug=True)
-#rpi_nbrCPUCores = getNbrCPUCores()
-#print_line('rpi_nbrCPUCores=[{}]'.format(rpi_nbrCPUCores), debug=True)
 rpi_cpu_model = getDeviceCPUInfo()
 print_line('rpi_cpu_mode=[{}]'.format(rpi_cpu_model), debug=True)
 rpi_nbrCores = rpi_cpu_model["Core(s)"]
-rpi_os_release = getLinuxRelease()
+print_line('rpi_nbrCores=[{}]'.format(rpi_nbrCores), debug=True)
+rpi_os_release = getOSRelease()
 print_line('rpi_os_release=[{}]'.format(rpi_os_release), debug=True)
-getLinuxVersion()
-#getOSandKernelVersion()
+rpi_os_version = getOSVersion()
+print_line('rpi_os_version=[{}]'.format(rpi_os_version), debug=True)
 getFileSystemUsage()
 
 
@@ -944,6 +903,7 @@ LD_SECURITY_STATUS = "os_security_status"	#  binary_sensor
 LDS_PAYLOAD_NAME = "info"
 
 #  Verify CPU architecture to select appropriate logo for cpu_usage sensors
+print_line('cpu_icon: architecture value: {}'.format(rpi_cpu_model["Architecture"]), debug=True)
 if rpi_cpu_model["Architecture"].find('armv') > 0:
 	cpu_icon = "mdi:cpu-32-bit"
 else:
