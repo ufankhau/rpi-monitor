@@ -335,13 +335,6 @@ def getCPUSpeedLimit(arg='max'):
 
 
 
-#  -----------------
-#  getDeviceCpuModel
-# 
-#  use command "/usr/bin/lscpu | /bin/egrep -i 'model|vendor|architecture'" to extract data
-#  on the CPU.
-#  use command "/bin/cat /proc/cpuinfo | /bin/egrep -i 'serial'" to get the
-#  serial number of the Raspberry Pi
 def getDeviceCPUInfo():
 	"""
 	Return static data of the CPU as a dictionary with the following content:
@@ -349,7 +342,7 @@ def getDeviceCPUInfo():
 		- architecture (key = "Architecture")
 		- number of cores (key = "Core(s)")
 		- model (vendor, name, release) (key = "Model")
-		- clock speed (min | max) (key = "Core Speed")
+		- clock speed (min | max) (key = "Core Speed (min|max) [MHz]")
 		- serial number (key ="Serial")
 
 	Use the following commands to extract the respective information:
@@ -398,8 +391,8 @@ def getDeviceCPUInfo():
 	else:
 		cpuInfo["Model"] = cpu_vendor + " " + cpu_model_name + " r" + cpu_model
 
-	# build core speed info ....
-	cpuInfo["Clock Speed (min | max)"] = cpu_clockSpeedMin + " | " + cpu_clockSpeedMax
+	# build clock speed info ....
+	cpuInfo["Clock Speed (min|max) [MHz]"] = cpu_clockSpeedMin + " | " + cpu_clockSpeedMax
 	# get serial number
 	out = subprocess.Popen(cmdString2,
 												 shell=True,
@@ -409,8 +402,6 @@ def getDeviceCPUInfo():
 	cpuInfo["Serial"] = stdout.decode('utf-8').strip()
 
 	return cpuInfo
-	#rpi_cpu_tuple = ( cpu_architecture, cpu_model, rpi_nbrCPUs, cpu_serial )
-	#print_line('rpi_cpu_tuple=[{}]'.format(rpi_cpu_tuple), debug=True)
 
 
 
@@ -420,14 +411,17 @@ def getDeviceCPUInfo():
 #
 #  use command "/bin/cat /etc/os-release | /bin/egrep -i 'pretty_name' | /bin/awk -F'\"' '{print $2}'" to extract the release of Linux running on the Raspberry Pi
 def getLinuxRelease():
+	"""
+	Return 
+	"""
 	global rpi_os_release
-	cmdString = "/bin/cat /etc/os-release| /bin/egrep -i 'pretty_name'| /bin/awk -F'\"' '{print $2}'"
+	cmdString = "/bin/cat /etc/os-release | /bin/egrep -i 'pretty_name' | /bin/awk -F'\"' '{print $2}'"
 	out = subprocess.Popen(cmdString,
 												 shell=True,
 												 stdout=subprocess.PIPE,
 												 stderr=subprocess.STDOUT)
 	stdout, _ = out.communicate()
-	rpi_os_release = stdout.decode('utf-8').strip()
+	return stdout.decode('utf-8').strip()
 	print_line('rpi_os_release=[{}]'.format(rpi_os_release), debug=True)
 
 
@@ -716,14 +710,14 @@ def getUptime():
 		stdout=subprocess.PIPE,
 		stderr=subprocess.STDOUT)
 	stdout,_ = out.communicate()
-	rpi_uptime_raw = stdout.decode('utf-8').rstrip().lstrip()
+	rpi_uptime_raw = stdout.decode('utf-8').strip()
 	print_line('rpi_uptime_raw=[{}]'.format(rpi_uptime_raw), debug=True)
 	basicParts = rpi_uptime_raw.split()
 	timeStamp = basicParts[0]
 	lineParts = rpi_uptime_raw.split(',')
 	rpi_cpu_usage_1m = '{:.1f}'.format(float(lineParts[3].replace('load average:', '')\
-		.replace(',', '').lstrip().rstrip()) / rpi_nbrCPUs * 100)
-	rpi_cpu_usage_5m = '{:.1f}'.format(float(lineParts[4].replace(',', '').lstrip().rstrip()) / rpi_nbrCPUs * 100)
+		.replace(',', '').lstrip().rstrip()) / rpi_nbrCores * 100)
+	rpi_cpu_usage_5m = '{:.1f}'.format(float(lineParts[4].replace(',', '').strip()) / rpi_nbrCores * 100)
 	print_line('rpi_cpu_usage_1m=[{}%]'.format(rpi_cpu_usage_1m), debug=True)
 	print_line('rpi_cpu_usage_5m=[{}%]'.format(rpi_cpu_usage_5m), debug=True)
 	if 'user' in lineParts[1]:
@@ -731,7 +725,7 @@ def getUptime():
 		timeParts = rpi_uptime_raw.split(':')
 		if len(timeParts) == 1:
 			# rpi_uptime_raw = timeParts[0].lstrip()+'m'
-			timeParts[0] = timeParts[0].replace('min', '').lstrip().rstrip()
+			timeParts[0] = timeParts[0].replace('min', '').strip()
 			rpi_uptime = timeParts[0]+'m'
 		else:
 			rpi_uptime = timeParts[0].lstrip()+'h'+timeParts[1].rstrip()+'m'
@@ -740,7 +734,7 @@ def getUptime():
 		replace('day', '').replace('s', '').rstrip()
 		timeParts = lineParts[1].split(':')
 		if len(timeParts) == 1:
-			timeParts[0] = timeParts[0].replace('min', '').lstrip().rstrip()
+			timeParts[0] = timeParts[0].replace('min', '').strip()
 			rpi_uptime = lineParts[0]+'d '+timeParts[0]+'m'
 		else:
 			rpi_uptime = lineParts[0]+'d '+timeParts[0].lstrip()+'h'+timeParts[1].rstrip()+'m'
@@ -824,8 +818,9 @@ print_line('rpi_model=[{}]'.format(rpi_model), debug=True)
 #print_line('rpi_nbrCPUCores=[{}]'.format(rpi_nbrCPUCores), debug=True)
 rpi_cpu_model = getDeviceCPUInfo()
 print_line('rpi_cpu_mode=[{}]'.format(rpi_cpu_model), debug=True)
-rpi_nbrCPUs = rpi_cpu_model["Core(s)"]
-getLinuxRelease()
+rpi_nbrCores = rpi_cpu_model["Core(s)"]
+rpi_os_release = getLinuxRelease()
+print_line('rpi_os_release=[{}]'.format(rpi_os_release), debug=True)
 getLinuxVersion()
 #getOSandKernelVersion()
 getFileSystemUsage()
@@ -949,7 +944,7 @@ LD_SECURITY_STATUS = "os_security_status"	#  binary_sensor
 LDS_PAYLOAD_NAME = "info"
 
 #  Verify CPU architecture to select appropriate logo for cpu_usage sensors
-if rpi_cpu_model["Architecture"].find('ARMv') > 0:
+if rpi_cpu_model["Architecture"].find('armv') > 0:
 	cpu_icon = "mdi:cpu-32-bit"
 else:
 	cpu_icon = "mdi:cpu-64-bit"
@@ -963,7 +958,7 @@ detectorValues = OrderedDict([
 		device_class="timestamp",
 		device_ident='Raspberry Pi {}'.format(rpi_hostname.title()),
 		no_title_prefix="yes",
-		icon='mdi:rapsberry-pi',
+		icon='mdi:raspberry-pi',
 		json_attr="yes",
 		json_value="Timestamp", 
 	)),		
@@ -1144,14 +1139,11 @@ RPI_NETWORK = "Network Interfaces"
 RPI_OS_UPDATE = rpi_security[0][0]
 RPI_OS_UPGRADE = rpi_security[1][0]
 RPI_SECURITY_STATUS = "Security_Status"
-# tupel cpu (architecture, mode name, #cores, serial#)
-RPI_CPU_ARCHITECTURE = "Architecture"
 RPI_CPU = "CPU"
 RPI_CPU_MODEL = "Model"
 RPI_CPU_CORES = "Core(s)"
 RPI_CPU_ARCHITECTURE = "Architecture"
 RPI_CPU_SPEED = "Core_Speed_(min_|_max)"
-#RPI_CPU_BOGOMIPS = "BogoMIPS"
 RPI_CPU_SERIAL = "Serial"
 SCRIPT_REPORT_INTERVAL = "Reporter_Interval [min]"
 
