@@ -904,7 +904,7 @@ LDS_PAYLOAD_NAME = "info"
 
 #  Verify CPU architecture to select appropriate logo for cpu_usage sensors
 print_line('cpu_icon: architecture value: {}'.format(rpi_cpu_model["Architecture"]), debug=True)
-if rpi_cpu_model["Architecture"].find('armv') > 0:
+if rpi_cpu_model["Architecture"].find("armv") > 0:
 	cpu_icon = "mdi:cpu-32-bit"
 else:
 	cpu_icon = "mdi:cpu-64-bit"
