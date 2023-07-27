@@ -95,6 +95,7 @@ def get_device_model():
 	"""
 	Return string with device model of Raspberry Pi
 	"""
+	global awk, tail
 	cmd_string = "{} -n1 /proc/cpuinfo | {} -F': ' '{print $2}'".format(tail, awk)
 	out = subprocess.Popen(cmd_string,
                           shell=True, 
