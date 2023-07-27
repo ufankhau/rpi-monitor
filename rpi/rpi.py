@@ -235,19 +235,20 @@ def get_filesystems_mounted():
     Return list of filesystem(s) mounted to the Raspberry Pi. Each item in the list represents
     a mounted drive in the form of "mounted device, mount point".
     """
-    fs_mounted = []
+    fs_mounted = [str]
     cmd_string = "{} | {} -n +2 | {} -v 'tmpfs|boot|root|overlay|udev'".format(df, tail, egrep)
     out = subprocess.Popen(cmd_string,
 			               shell=True,
 			               stdout=subprocess.PIPE,
 			               stderr=subprocess.STDOUT)
     stdout, _ = out.communicate()
-    lines = stdout.decode("utf-8").strip().split("\n")
-    print(len(lines))
-    if len(lines) > 0:
-        for line in lines:
+    lines = stdout.decode("utf-8").split("\n")
+    for line in lines:
+        line.strip()
+        if len(line) > 0:
             line_parts = line.split()
             fs_mounted.append("{}, {}".format(line_parts[0], line_parts[5]))
+	
     return fs_mounted
 
 
