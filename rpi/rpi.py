@@ -95,7 +95,6 @@ def get_device_model():
 	"""
 	Return string with device model of Raspberry Pi
 	"""
-	global awk, tail
 	cmd_string = tail+" -n1 /proc/cpuinfo | "+awk+" -F': ' '{print $2}'"
 	out = subprocess.Popen(cmd_string,
                           shell=True, 
@@ -113,7 +112,6 @@ def get_hostname():
 	"""
 	Return 'hostname' and 'fqdn' of the Raspberry PI in a tupple (hostname, fqdn)
 	"""
-	global hostname
 	cmd = get_command_location("hostname")
 	cmd_string = "{} -f".format(hostname)
 	out = subprocess.Popen(cmd_string,
@@ -124,11 +122,11 @@ def get_hostname():
 	fqdn = stdout.decode("utf-8").rstrip()
 	if "." in fqdn:
 		#  have good fqdn
-		hostname = fqdn.split(".")[0]
+		host_name = fqdn.split(".")[0]
 	else:
-		hostname = fqdn
+		host_name = fqdn
 
-	return (hostname, fqdn)
+	return (host_name, fqdn)
 
 
 def get_device_cpu_info():
@@ -207,7 +205,7 @@ def get_device_ram_installed():
 
     The function uses the helper routine next_power_of_two().
     """
-    cmd_string = "{} /proc/meminfo | {} -i 'memtotal' | {} '{print $2}'".format(cat, egrep, awk)
+    cmd_string = cat+" /proc/meminfo | "+egrep+" -i 'memtotal' | "+awk+" '{print $2}'"
     out = subprocess.Popen(cmd_string,
 			               shell=True,
 			               stdout=subprocess.PIPE,
@@ -223,7 +221,7 @@ def get_filesystem_size():
 
     The function uses the helper routine next_power_of_two().
     """
-    cmd_string = "{} -k | {} -n +2 | {} -i 'root' | {} '{print $2}'".format(df, tail, egrep, awk)
+    cmd_string = df+" -k | "+tail+" -n +2 | "+egrep+" -i 'root' | "+awk+" '{print $2}'"
     out = subprocess.Popen(cmd_string,
 			               shell=True,
 			               stdout=subprocess.PIPE,
@@ -268,7 +266,7 @@ def get_os_release():
     """
     Return name of OS/Linux release as a string.
     """
-    cmd_string = "{} /etc/os-release | {} -i 'pretty_name' | {} -F'\"' '{print $2}'".format(cat, egrep, awk)
+    cmd_string = cat+" /etc/os-release | "+egrep+" -i 'pretty_name' | "+awk+" -F'\"' '{print $2}'"
     out = subprocess.Popen(cmd_string,
 			               shell=True,
 			               stdout=subprocess.PIPE,
@@ -297,8 +295,7 @@ def get_network_interfaces():
     interface its IP and MAC address (if allocated), where the string returns the MAC address of the first physical	interface in lower characters.
     """
     mac_address = ""
-    cmd_string = "{} addr show | {} 'eth0:|wlan0:' | {} '{print $2}' | {} -d':' -f1".format(
-	    ip, egrep, awk, cut)
+    cmd_string = ip+" addr show | "+egrep+" 'eth0:|wlan0:' | "+awk+" '{print $2}' | "+cut+" -d':' -f1"
     out = subprocess.Popen(cmd_string,
 			               shell=True,
 			               stdout=subprocess.PIPE,
@@ -311,8 +308,7 @@ def get_network_interfaces():
     for idx in iface_names:
         interface = OrderedDict()
         # get IP4 address
-        cmd_IP = "{} -4 addr show {} | {} inet | {} '{print $2}' | {} -d'/' -f1".format(
-		ip, idx, egrep, awk, cut)
+        cmd_IP = ip+" -4 addr show "+idx+" | "+egrep+" inet | "+awk+" '{print $2}' | "+cut+" -d'/' -f1"
         out = subprocess.Popen(cmd_IP,
 			                   shell=True,
 				               stdout=subprocess.PIPE,
@@ -323,8 +319,7 @@ def get_network_interfaces():
             interface["IP"] = ip
 
         # get MAC address
-        cmd_MAC = "{} link show {} | {} ether | {} '{print $2}'".format(
-            ip, idx, egrep, awk)
+        cmd_MAC = ip+" link show "+idx+" | "+egrep+" ether | "+awk+" '{print $2}'"
         out = subprocess.Popen(cmd_MAC,
 			                   shell=True,
 				               stdout=subprocess.PIPE,
