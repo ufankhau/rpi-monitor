@@ -300,6 +300,7 @@ def get_network_interfaces():
     interface its IP and MAC address (if allocated), where the string returns the MAC address of the first physical	interface in lower characters.
     """
     mac_address = ""
+    print(ip)
     cmd_string = ip+" addr show | "+egrep+" 'eth0:|wlan0:' | "+awk+" '{print $2}' | "+cut+" -d':' -f1"
     out = subprocess.Popen(cmd_string,
 			               shell=True,
