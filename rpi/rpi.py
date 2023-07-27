@@ -242,7 +242,7 @@ def get_filesystems_mounted():
 			               stdout=subprocess.PIPE,
 			               stderr=subprocess.STDOUT)
     stdout, _ = out.communicate()
-    lines = stdout.decode("utf-8").split("\n")
+    lines = stdout.decode("utf-8").strip().split("\n")
     for line in lines:
         line_parts = line.split()
         fs_mounted.append("{}, {}".format(line_parts[0], line_parts[5]))
