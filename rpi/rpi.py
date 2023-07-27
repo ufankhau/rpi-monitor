@@ -112,8 +112,9 @@ def get_hostname():
 	"""
 	Return 'hostname' and 'fqdn' of the Raspberry PI in a tupple (hostname, fqdn)
 	"""
+	global hostname
 	cmd = get_command_location("hostname")
-	cmd_string = "{} -f".format(cmd)
+	cmd_string = "{} -f".format(hostname)
 	out = subprocess.Popen(cmd_string,
                            shell=True,
 						   stdout=subprocess.PIPE, 
