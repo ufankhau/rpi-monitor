@@ -84,7 +84,7 @@ hostname = get_command_location("hostname")
 lscpu = get_command_location("lscpu")
 df = get_command_location("df")
 uname = get_command_location("uname")
-ip = get_command_location("ip")
+ipaddr = get_command_location("ip")
 uptime = get_command_location("uptime")
 getconf = get_command_location("getconf")
 
@@ -300,8 +300,8 @@ def get_network_interfaces():
     interface its IP and MAC address (if allocated), where the string returns the MAC address of the first physical	interface in lower characters.
     """
     mac_address = ""
-    print(ip)
-    cmd_string = ip+" addr show | "+egrep+" 'eth0:|wlan0:' | "+awk+" '{print $2}' | "+cut+" -d':' -f1"
+    print(ipaddr)
+    cmd_string = ipaddr+" addr show | "+egrep+" 'eth0:|wlan0:' | "+awk+" '{print $2}' | "+cut+" -d':' -f1"
     out = subprocess.Popen(cmd_string,
 			               shell=True,
 			               stdout=subprocess.PIPE,
@@ -314,7 +314,7 @@ def get_network_interfaces():
     for idx in iface_names:
         interface = OrderedDict()
         # get IP4 address
-        cmd_IP = ip+" -4 addr show "+idx+" | "+egrep+" inet | "+awk+" '{print $2}' | "+cut+" -d'/' -f1"
+        cmd_IP = ipaddr+" -4 addr show "+idx+" | "+egrep+" inet | "+awk+" '{print $2}' | "+cut+" -d'/' -f1"
         out = subprocess.Popen(cmd_IP,
 			                   shell=True,
 				               stdout=subprocess.PIPE,
@@ -325,7 +325,7 @@ def get_network_interfaces():
             interface["IP"] = ip
 
         # get MAC address
-        cmd_MAC = ip+" link show "+idx+" | "+egrep+" ether | "+awk+" '{print $2}'"
+        cmd_MAC = ipaddr+" link show "+idx+" | "+egrep+" ether | "+awk+" '{print $2}'"
         out = subprocess.Popen(cmd_MAC,
 			                   shell=True,
 				               stdout=subprocess.PIPE,

@@ -14,7 +14,7 @@ hostname = get_command_location("hostname")
 lscpu = get_command_location("lscpu")
 df = get_command_location("df")
 uname = get_command_location("uname")
-ip = get_command_location("ip")
+ipaddr = get_command_location("ip")
 uptime = get_command_location("uptime")
 getconf = get_command_location("getconf")
 
