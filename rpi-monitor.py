@@ -316,7 +316,8 @@ for line in fs_mounted:
 		line_parts = line.split(',')
 		rpi_fs_mounted[line_parts[0]] = "-\> {}".format(line_parts[1])
 	else:
-		rpi_fs_mounted['none'] = ''
+		mnt_pt = None
+		rpi_fs_mounted['none'] = mnt_pt
 print_line('rpi_fs_mounted = [{}]'.format(rpi_fs_mounted), debug=True)
 rpi_network_interfaces, rpi_mac_address = rpi.get_network_interfaces()
 print_line('rpi_interfaces = [{}]'.format(rpi_network_interfaces), debug=True)
@@ -663,11 +664,11 @@ def sendStatus(timestamp, nothing):
 																	rpi.format_seconds(rpi_time_since_last_os_upgrade),													rpi_security[1][1])
 	rpiData[RPI_UPTIME] = rpi_uptime
 	rpiData[RPI_FS_SPACE] = rpi_fs_size
-	rpiData[RPI_FS_USED] = rpi_fs_used
+	rpiData[RPI_FS_USED] = '{:.1f}'.format(rpi_fs_used)
 	rpiData[RPI_RAM_INSTALLED] = rpi_ram_installed
-	rpiData[RPI_RAM_USED] = rpi_ram_used
-	rpiData[RPI_CPU_TEMP] = rpi_cpu_temp
-	rpiData[RPI_GPU_TEMP] = rpi_gpu_temp
+	rpiData[RPI_RAM_USED] = '{:.1f}'.format(rpi_ram_used)
+	rpiData[RPI_CPU_TEMP] = '{:.1f}'.format(rpi_cpu_temp)
+	rpiData[RPI_GPU_TEMP] = '{:.1f}'.format(rpi_gpu_temp)
 	rpiData[RPI_CPU_LOAD_1M] = rpi_cpu_load_1m
 	rpiData[RPI_CPU_LOAD_5M] = rpi_cpu_load_5m
 	rpiData[RPI_CPU_LOAD_15M] = rpi_cpu_load_15m
