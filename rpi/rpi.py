@@ -397,8 +397,7 @@ def get_uptime():
     """
     Return uptime of the Raspberry Pi in the format 'xd yhzm' as a string
     """
-    cmd_string = "{} | {} -F'up ' '{print $2}' | {} -F'. user' '{print $1}'".format(
-        uptime, awk, awk)
+    cmd_string = uptime+" | "+awk+" -F'up ' '{print $2}' | "+awk+" -F'. user' '{print $1}'"
     out = subprocess.Popen(cmd_string,
 			               shell=True,
 			               stdout=subprocess.PIPE,
