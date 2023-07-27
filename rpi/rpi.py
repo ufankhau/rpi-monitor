@@ -97,7 +97,7 @@ def get_device_model():
 	"""
 	global awk, tail
 	print(awk, tail)
-	cmd_string = "{} -n1 /proc/cpuinfo | {} -F': ' '\{print $2\}'".format(tail, awk)
+	cmd_string = "{} -n1 /proc/cpuinfo | {} -F': ' \'{print $2}\'".format(tail, awk)
 	out = subprocess.Popen(cmd_string,
                           shell=True, 
 						  stdout=subprocess.PIPE, 
