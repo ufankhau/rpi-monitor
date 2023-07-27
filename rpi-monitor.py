@@ -618,17 +618,17 @@ RPI_HOSTNAME = "Hostname"
 RPI_FQDN = "Fqdn"
 RPI_OS_RELEASE = "OS Release"
 RPI_OS_VERSION = "OS Version"
-RPI_UPTIME = "Up time"
+RPI_UPTIME = "Up Time"
 RPI_OS_LAST_UPDATE = "OS_Last_Update"
 RPI_OS_LAST_UPGRADE = "OS_Last_Upgrade"
 RPI_FS_SPACE = "FS Total [{}]".format(rpi_fs_size_unit)
-RPI_FS_USED = "FS used [%]"
-RPI_FS_MOUNT = "FS mounted"
-RPI_RAM_INSTALLED = "RAM installed [{}]".format(rpi_ram_installed_unit)
-RPI_RAM_USED = "RAM used [%]"
+RPI_FS_USED = "FS Used [%]"
+RPI_FS_MOUNT = "FS Mounted"
+RPI_RAM_INSTALLED = "RAM Installed [{}]".format(rpi_ram_installed_unit)
+RPI_RAM_USED = "RAM Used [%]"
 RPI_CPU_TEMP = "Temp CPU [°C]"
-RPI_CPU_LOAD_1M = "CPU Load 1min"
-RPI_CPU_LOAD_5M = "CPU Load 5min"
+RPI_CPU_LOAD_1M = "CPU Load _1min"
+RPI_CPU_LOAD_5M = "CPU Load _5min"
 RPI_CPU_LOAD_15M = "CPU Load 15min"
 RPI_GPU_TEMP = "Temp GPU [°C]"
 RPI_SCRIPT = "Reporter"
@@ -662,11 +662,10 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_OS_LAST_UPGRADE] = '{} ago - {}'.format(
 																	rpi.format_seconds(rpi_time_since_last_os_upgrade),													rpi_security[1][1])
 	rpiData[RPI_UPTIME] = rpi_uptime
-
 	rpiData[RPI_FS_SPACE] = rpi_fs_size
 	rpiData[RPI_FS_USED] = rpi_fs_used
+	rpiData[RPI_RAM_INSTALLED] = rpi_ram_installed
 	rpiData[RPI_RAM_USED] = rpi_ram_used
-
 	rpiData[RPI_CPU_TEMP] = rpi_cpu_temp
 	rpiData[RPI_GPU_TEMP] = rpi_gpu_temp
 	rpiData[RPI_CPU_LOAD_1M] = rpi_cpu_load_1m
