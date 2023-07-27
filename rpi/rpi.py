@@ -379,8 +379,7 @@ def get_device_temperatures():
     # get GPU temperature
     loc_vcgencmd = get_command_location("vcgencmd")
     if not loc_vcgencmd == "":
-        cmd_string = "{} measure_temp | {} -F'=' '{print $1}' | {} -d\"'\" -f1".format(
-            loc_vcgencmd, awk, cut)
+        cmd_string = loc_vcgencmd+" measure_temp | "+awk+" -F'=' '{print $1}' | "+cut+" -d\"'\" -f1"
         out = subprocess.Popen(cmd_string,
 			                   shell=True,
 				               stdout=subprocess.PIPE,
