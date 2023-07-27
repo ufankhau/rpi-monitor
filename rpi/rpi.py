@@ -242,7 +242,7 @@ def get_filesystems_mounted():
 			               stdout=subprocess.PIPE,
 			               stderr=subprocess.STDOUT)
     stdout, _ = out.communicate()
-    lines = stdout.decode("utf-8").split("\n")
+    lines = stdout.decode("utf-8").strip().split("\n")
     print(len(lines))
     if len(lines) > 0:
         for line in lines:
