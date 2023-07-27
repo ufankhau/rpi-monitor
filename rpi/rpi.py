@@ -143,7 +143,7 @@ def get_device_cpu_info():
 	"""
 	cpu_info = OrderedDict()
 	cmd_string1 = "{} | {} -i 'architecture|core\(s\)|vendor|model|min|max'".format(lscpu, egrep)
-	cmd_string2 = "{} /proc/cpuinfo | {} -i 'serial' | {} -F': ' '{print $2}'".format(cat, egrep, awk)
+	cmd_string2 = cat+" /proc/cpuinfo | "+egrep+" -i 'serial' | "+awk+" -F': ' '{print $2}'"
 	out = subprocess.Popen(cmd_string1, 
                            shell=True,
 						   stdout=subprocess.PIPE, 
