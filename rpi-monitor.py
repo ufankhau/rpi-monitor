@@ -310,8 +310,9 @@ rpi_fs_size, unit = rpi.get_filesystem_size()
 rpi_fs_size_unit = mem_units[unit]
 print_line('rpi_fs_size = [{}{}]'.format(rpi_fs_size, rpi_fs_size_unit), debug=True)
 fs_mounted = rpi.get_filesystems_mounted()
+print_line('fs_mounted = [{}]'.format(fs_mounted), debug=True)
 for line in fs_mounted:
-	if line != '':
+	if line != 'none':
 		line_parts = line.split(',')
 		rpi_fs_mounted[line_parts[0]] = "-\> {}".format(line_parts[1])
 	else:

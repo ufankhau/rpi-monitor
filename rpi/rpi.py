@@ -248,6 +248,8 @@ def get_filesystems_mounted():
         if len(line) > 0:
             line_parts = line.split()
             fs_mounted.append("{}, {}".format(line_parts[0], line_parts[5]))
+        else:
+            fs_mounted.append('none')
 	
     return fs_mounted
 
