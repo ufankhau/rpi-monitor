@@ -670,7 +670,7 @@ RPI_CPU = "CPU"
 # RPI_CPU_ARCHITECTURE = "Architecture"
 # RPI_CPU_SPEED = "Core Speed (min | max)"
 # RPI_CPU_SERIAL = "Serial"
-SCRIPT_REPORT_INTERVAL = "Reporter Interval [min]"
+SCRIPT_REPORT_INTERVAL = "Reporter_Interval_[min]"
 
 
 def sendStatus(timestamp, nothing):

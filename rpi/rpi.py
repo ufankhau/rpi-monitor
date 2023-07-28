@@ -345,8 +345,9 @@ def get_device_ram_used():
 
 def get_device_temperatures():
     """
-    Return tuple of 2 float values with actual CPU and GPU temperature. GPU temperature
-    is set to -1.0 in case the utilty program 'vcgencmd' is missing on the Raspberry Pi.
+    Return tuple of 2 float values, rounded to 1 decimal each, representing actual
+    CPU and GPU temperatures. GPU temperature is set to -1.0 in case the utilty program
+    'vcgencmd' is missing on the Raspberry Pi.
     """
     # get CPU temperature
     cmd_string = "{} /sys/class/thermal/thermal_zone0/temp".format(cat)
@@ -355,7 +356,7 @@ def get_device_temperatures():
 			               stdout=subprocess.PIPE,
 			               stderr=subprocess.STDOUT)
     stdout, _ = out.communicate()
-    cpu_temp = float(stdout.decode("utf-8").rstrip()) / 1000
+    cpu_temp = round(float(stdout.decode("utf-8").rstrip()) / 1000, 1)
 
     # get GPU temperature
     loc_vcgencmd = get_command_location("vcgencmd")
@@ -386,7 +387,7 @@ def get_uptime():
     return (
         stdout.decode("utf-8")
         .replace(" days,", "d")
-        .replace(";", "h")
+        .replace(":", "h")
         .replace(",", "m")
     )
 
