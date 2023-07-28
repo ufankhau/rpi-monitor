@@ -500,7 +500,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon=cpu_icon,
-		json_value="CPU_Load_1min",  
+		json_value="CPU_Load_1_min",  
 	)),
 	(LD_CPU_USAGE_5M, dict(
 		title="{} CPU Load (5 min)".format(rpi_hostname.title()),
@@ -508,7 +508,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon=cpu_icon,
-		json_value="CPU_Load_5min",  
+		json_value="CPU_Load_5_min",  
 	)),
 	(LD_MEM_USED, dict(
 		title="{} Memory Usage".format(rpi_hostname),
@@ -654,9 +654,9 @@ RPI_DRIVE_MOUNTED = "Drive_Mounted"
 RPI_RAM_INSTALLED = "RAM_Installed"
 RPI_RAM_USED = "RAM_Used"
 RPI_CPU_TEMP = "Temp_CPU"
-RPI_CPU_LOAD_1M = "CPU_Load_1min"
-RPI_CPU_LOAD_5M = "CPU_Load_5min"
-RPI_CPU_LOAD_15M = "CPU_Load_15min"
+RPI_CPU_LOAD_1M = "CPU_Load_1_min"
+RPI_CPU_LOAD_5M = "CPU_Load_5_min"
+RPI_CPU_LOAD_15M = "CPU_Load_15_min"
 RPI_GPU_TEMP = "Temp_GPU"
 RPI_SCRIPT = "Reporter"
 RPI_NETWORK = "Network_Interfaces"
