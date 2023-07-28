@@ -374,7 +374,7 @@ def get_device_temperatures():
 			               stdout=subprocess.PIPE,
 			               stderr=subprocess.STDOUT)
     stdout, _ = out.communicate()
-    cpu_temp = round(float(stdout.decode("utf-8").rstrip()) / 1000, 1)
+    cpu_temp = float(stdout.decode("utf-8").rstrip()) / 1000
 
     # get GPU temperature
     loc_vcgencmd = get_command_location("vcgencmd")
@@ -385,7 +385,7 @@ def get_device_temperatures():
 				               stdout=subprocess.PIPE,
 				               stderr=subprocess.STDOUT)
         stdout, _ = out.communicate()
-        gpu_temp = round(float(stdout.decode("utf-8").strip()), 1)
+        gpu_temp = float(stdout.decode("utf-8").strip())
     else:
         gpu_temp = -1.0
 

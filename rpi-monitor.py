@@ -490,7 +490,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon='mdi:memory',
-		json_value="RAM_Used_[%]",  
+		json_value="RAM_Used",  
 	)),
 	(LD_FS_USED, dict(
 		title="{} Disk Usage".format(rpi_hostname), 
@@ -498,7 +498,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon='mdi:sd',
-		json_value="FS_Used_[%]",
+		json_value="FS_Used",
 	)),
 ])
 
@@ -623,10 +623,10 @@ RPI_UPTIME = "Up Time"
 RPI_OS_LAST_UPDATE = "OS_Last_Update"
 RPI_OS_LAST_UPGRADE = "OS_Last_Upgrade"
 RPI_FS_SPACE = "FS Total"
-RPI_FS_USED = "FS_Used_[%]"
+RPI_FS_USED = "FS_Used"
 RPI_FS_MOUNT = "FS Mounted"
 RPI_RAM_INSTALLED = "RAM Installed"
-RPI_RAM_USED = "RAM_Used_[%]"
+RPI_RAM_USED = "RAM_Used"
 RPI_CPU_TEMP = "Temp_CPU"
 RPI_CPU_LOAD_1M = "CPU Load 1min"
 RPI_CPU_LOAD_5M = "CPU Load 5min"
