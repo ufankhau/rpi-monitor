@@ -664,11 +664,11 @@ def sendStatus(timestamp, nothing):
 																	rpi.format_seconds(rpi_time_since_last_os_upgrade),													rpi_security[1][1])
 	rpiData[RPI_UPTIME] = rpi_uptime
 	rpiData[RPI_FS_SPACE] = rpi_fs_size
-	rpiData[RPI_FS_USED] = '{:.1f}'.format(rpi_fs_used)
+	rpiData[RPI_FS_USED] = '{:.1f}%'.format(rpi_fs_used)
 	rpiData[RPI_RAM_INSTALLED] = rpi_ram_installed
-	rpiData[RPI_RAM_USED] = '{:.1f}'.format(rpi_ram_used)
-	rpiData[RPI_CPU_TEMP] = '{:.1f}'.format(rpi_cpu_temp)
-	rpiData[RPI_GPU_TEMP] = '{:.1f}'.format(rpi_gpu_temp)
+	rpiData[RPI_RAM_USED] = '{:.1f}%'.format(rpi_ram_used)
+	rpiData[RPI_CPU_TEMP] = '{:.1f}°C'.format(rpi_cpu_temp)
+	rpiData[RPI_GPU_TEMP] = '{:.1f}°C'.format(rpi_gpu_temp)
 	rpiData[RPI_CPU_LOAD_1M] = rpi_cpu_load_1m
 	rpiData[RPI_CPU_LOAD_5M] = rpi_cpu_load_5m
 	rpiData[RPI_CPU_LOAD_15M] = rpi_cpu_load_15m
