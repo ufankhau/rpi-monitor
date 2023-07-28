@@ -501,7 +501,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon=cpu_icon,
-		json_value="CPU_Load_1min",  
+		json_value="CPU Load 1min",  
 	)),
 	(LD_CPU_USAGE_5M, dict(
 		title="{} CPU Load (5 min)".format(rpi_hostname.title()),
@@ -509,7 +509,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon=cpu_icon,
-		json_value="CPU_Load_5min",  
+		json_value="CPU Load 5min",  
 	)),
 	(LD_MEM_USED, dict(
 		title="{} Memory Usage".format(rpi_hostname),
@@ -517,7 +517,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon='mdi:memory',
-		json_value="RAM_Used",  
+		json_value="RAM Used",  
 	)),
 	(LD_FS_USED, dict(
 		title="{} Disk Usage".format(rpi_hostname), 
@@ -525,7 +525,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon='mdi:sd',
-		json_value="FS_Used",
+		json_value="FS Used",
 	)),
 ])
 
@@ -650,15 +650,15 @@ RPI_UPTIME = "Up Time"
 RPI_OS_LAST_UPDATE = "OS_Last_Update"
 RPI_OS_LAST_UPGRADE = "OS_Last_Upgrade"
 RPI_FS_SPACE = "FS Total"
-RPI_FS_USED = "FS_Used"
+RPI_FS_USED = "FS Used"
 RPI_FS_MOUNT = "FS Mounted"
 RPI_RAM_INSTALLED = "RAM Installed"
-RPI_RAM_USED = "RAM_Used"
-RPI_CPU_TEMP = "Temp_CPU"
-RPI_CPU_LOAD_1M = "CPU_Load_1min"
-RPI_CPU_LOAD_5M = "CPU_Load_5min"
-RPI_CPU_LOAD_15M = "CPU_Load_15min"
-RPI_GPU_TEMP = "Temp GPU [C]"
+RPI_RAM_USED = "RAM Used"
+RPI_CPU_TEMP = "Temp CPU"
+RPI_CPU_LOAD_1M = "CPU Load 1min"
+RPI_CPU_LOAD_5M = "CPU Load 5min"
+RPI_CPU_LOAD_15M = "CPU Load 15min"
+RPI_GPU_TEMP = "Temp GPU"
 RPI_SCRIPT = "Reporter"
 RPI_NETWORK = "Network Interfaces"
 RPI_OS_UPDATE = rpi_security[0][0]
