@@ -466,7 +466,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="°C",
 		icon='mdi:thermometer', 
-		json_value="Temp_CPU", 
+		json_value="Temp CPU [°C]", 
 	)),
 	(LD_CPU_USAGE_1M, dict(
 		title="{} CPU Load (1 min)".format(rpi_hostname.title()),
@@ -490,7 +490,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon='mdi:memory',
-		json_value="RAM_used_prcnt",  
+		json_value="RAM Used [%]",  
 	)),
 	(LD_FS_USED, dict(
 		title="{} Disk Usage".format(rpi_hostname), 
@@ -498,7 +498,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon='mdi:sd',
-		json_value="FS_used_prcnt",
+		json_value="FS Used [%]",
 	)),
 ])
 
