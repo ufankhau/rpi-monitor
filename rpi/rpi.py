@@ -195,7 +195,7 @@ def get_device_ram_installed():
     return next_power_of_two(int(stdout.decode("utf-8").strip()))
 
 
-def get_filesystem_size():
+def get_device_drive_size():
     """
     Return size of the filesystem in form of a tuple of two integers. The first value
     is the size, the second value an index for the units to be applied (0 = 'kB', 1 = 'MB', 2 = 'GB', 3 = 'TB')
@@ -211,7 +211,7 @@ def get_filesystem_size():
     return next_power_of_two(int(stdout.decode("utf-8").strip()))
 
 
-def get_filesystems_mounted():
+def get_drives_mounted():
     """
     Return list of filesystem(s) mounted to the Raspberry Pi. Each item in the list represents
     a mounted drive in the form of "mounted device, mount point".
@@ -424,7 +424,7 @@ def get_cpu_clock_speed():
     return int(stdout.decode("utf-8").strip()) / 1000
 
 
-def get_filesystem_used():
+def get_device_drive_used():
 	"""
 	Return percentage of filesystem size used as integer.
     """

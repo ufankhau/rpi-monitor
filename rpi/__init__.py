@@ -21,8 +21,8 @@ from .rpi import get_device_model
 from .rpi import get_hostname
 from .rpi import get_device_cpu_info
 from .rpi import get_device_ram_installed
-from .rpi import get_filesystem_size
-from .rpi import get_filesystems_mounted
+from .rpi import get_device_drive_size
+from .rpi import get_drives_mounted
 from .rpi import get_os_bit_length
 from .rpi import get_os_release
 from .rpi import get_os_version
@@ -33,6 +33,6 @@ from .rpi import get_device_temperatures
 from .rpi import get_uptime
 from .rpi import get_cpu_load
 from .rpi import get_cpu_clock_speed
-from .rpi import get_filesystem_used
+from .rpi import get_device_drive_used
 from .rpi import get_time_since_last_os_update
 from .rpi import get_time_since_last_os_upgrade

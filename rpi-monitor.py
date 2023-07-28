@@ -278,9 +278,9 @@ mem_units = {
 #  ... with static content
 rpi_cpu_model = {}
 rpi_fqdn = ''
-rpi_fs_mounted = OrderedDict()
-rpi_fs_size = 0
-rpi_fs_size_unit = ''
+rpi_drive_mounted = ''
+rpi_drive_size = 0
+rpi_drive_size_unit = ''
 rpi_hostname = ''
 rpi_mac_address = ''
 rpi_model = ''
@@ -298,7 +298,7 @@ rpi_cpu_load_1m = 0.0
 rpi_cpu_load_5m = 0.0
 rpi_cpu_load_15m = 0.0
 rpi_cpu_temp = 0.0
-rpi_fs_used = 0
+rpi_drive_used = 0
 rpi_gpu_temp = 0.0
 rpi_ram_used = 0
 rpi_security = [
@@ -333,19 +333,18 @@ print_line('rpi_os_version = [{}]'.format(rpi_os_version), debug=True)
 rpi_ram_installed, unit = rpi.get_device_ram_installed()
 rpi_ram_installed_unit = mem_units[unit]
 print_line('rpi_mem_installed = [{}{}]'.format(rpi_ram_installed, rpi_ram_installed_unit), debug=True)
-rpi_fs_size, unit = rpi.get_filesystem_size()
-rpi_fs_size_unit = mem_units[unit]
-print_line('rpi_fs_size = [{}{}]'.format(rpi_fs_size, rpi_fs_size_unit), debug=True)
-fs_mounted = rpi.get_filesystems_mounted()
-print_line('fs_mounted = [{}]'.format(fs_mounted), debug=True)
-for line in fs_mounted:
+rpi_drive_size, unit = rpi.get_device_drive_size()
+rpi_drive_size_unit = mem_units[unit]
+print_line('rpi_device_drive_size = [{}{}]'.format(rpi_drive_size, rpi_drive_size_unit), debug=True)
+drive_mounted = rpi.get_drives_mounted()
+print_line('fs_mounted = [{}]'.format(drive_mounted), debug=True)
+for line in drive_mounted:
 	if line != 'none':
 		line_parts = line.split(',')
-		rpi_fs_mounted[line_parts[0]] = "-\> {}".format(line_parts[1])
+		rpi_drive_mounted[line_parts[0]] = '-\> {}'.format(line_parts[1])
 	else:
-		mnt_pt = None
-		rpi_fs_mounted['none'] = mnt_pt
-print_line('rpi_fs_mounted = [{}]'.format(rpi_fs_mounted), debug=True)
+		rpi_drive_mounted = 'none'
+print_line('rpi_drive_mounted = [{}]'.format(rpi_drive_mounted), debug=True)
 rpi_network_interfaces, rpi_mac_address = rpi.get_network_interfaces()
 print_line('rpi_interfaces = [{}]'.format(rpi_network_interfaces), debug=True)
 print_line('rpi_mac_address = [{}]'.format(rpi_mac_address), debug=True)
@@ -649,9 +648,9 @@ RPI_OS_VERSION = "OS_Version"
 RPI_UPTIME = "Up_Time"
 RPI_OS_LAST_UPDATE = "OS_Last_Update"
 RPI_OS_LAST_UPGRADE = "OS_Last_Upgrade"
-RPI_FS_SPACE = "FS_Total"
-RPI_FS_USED = "FS_Used"
-RPI_FS_MOUNT = "FS_Mounted"
+RPI_DRIVE_INSTALLED = "Drive_Installed"
+RPI_DRIVE_USED = "Drive_Used"
+RPI_DRIVE_MOUNTED = "Drive_Mounted"
 RPI_RAM_INSTALLED = "RAM_Installed"
 RPI_RAM_USED = "RAM_Used"
 RPI_CPU_TEMP = "Temp_CPU"
@@ -687,8 +686,8 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_OS_LAST_UPDATE] = '{} ago - {}'.format(format_seconds(rpi_time_since_last_os_update), rpi_security[0][1])
 	rpiData[RPI_OS_LAST_UPGRADE] = '{} ago - {}'.format(format_seconds(rpi_time_since_last_os_upgrade), rpi_security[1][1])
 	rpiData[RPI_UPTIME] = rpi_uptime
-	rpiData[RPI_FS_SPACE] = '{} {}'.format(rpi_fs_size, rpi_fs_size_unit)
-	rpiData[RPI_FS_USED] = rpi_fs_used
+	rpiData[RPI_DRIVE_INSTALLED] = '{} {}'.format(rpi_drive_size, rpi_fs_size_unit)
+	rpiData[RPI_DRIVE_USED] = rpi_drive_used
 	rpiData[RPI_RAM_INSTALLED] = '{} {}'.format(rpi_ram_installed, rpi_ram_installed_unit)
 	rpiData[RPI_RAM_USED] = rpi_ram_used
 	rpiData[RPI_CPU_TEMP] = rpi_cpu_temp
@@ -701,7 +700,7 @@ def sendStatus(timestamp, nothing):
 	rpiData[SCRIPT_REPORT_INTERVAL] = interval_in_minutes
 
 	rpiData[RPI_CPU] = rpi_cpu_model
-	rpiData[RPI_FS_MOUNT] = rpi_fs_mounted
+	rpiData[RPI_DRIVE_MOUNTED] = rpi_drive_mounted
 	# if rpi_fs_mounted == 'none':
 	# 	rpiData[RPI_FS_MOUNT] = rpi_fs_mounted
 	# else:
@@ -791,7 +790,7 @@ def publishSecurityStatus(status, topic):
 def update_dynamic_values():
 	global rpi_uptime, rpi_cpu_temp, rpi_gpu_temp
 	global rpi_time_since_last_os_update,rpi_time_since_last_os_upgrade
-	global rpi_ram_used, rpi_fs_used
+	global rpi_ram_used, rpi_drive_used
 	global rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m
 	rpi_uptime = rpi.get_uptime()
 	print_line('rpi_uptime = [{}]'.format(rpi_uptime), debug=True)
@@ -804,7 +803,7 @@ def update_dynamic_values():
 	print_line('rpi_time_since_last_os_upgrade formatted = [{}]'.format(format_seconds(rpi_time_since_last_os_upgrade)), debug=True)
 	rpi_ram_used = rpi.get_device_ram_used()
 	print_line('rpi_ram_used = [{}%]'.format(rpi_ram_used), debug=True)
-	rpi_fs_used = rpi.get_filesystem_used()
+	rpi_drive_used = rpi.get_device_drive_used()
 	print_line('rpi_fs_used = [{}%]'.format(rpi_fs_used), debug=True)
 	rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m = rpi.get_cpu_load()
 	print_line('rpi_cpu_loads 1m|5m|15m = [{}|{}|{}]'.format(rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m), debug=True)
