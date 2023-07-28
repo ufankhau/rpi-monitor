@@ -402,7 +402,7 @@ def get_cpu_load():
 			               stdout=subprocess.PIPE,
 			               stderr=subprocess.STDOUT)
     stdout, _ = out.communicate()
-    loadavg = stdout.decode("utf-8").split()[0:2]
+    loadavg = stdout.decode("utf-8").split()[0:3]
     return (
         round(float(loadavg[0]) * 100, 1),
         round(float(loadavg[1]) * 100, 1),
