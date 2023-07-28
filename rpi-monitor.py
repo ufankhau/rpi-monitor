@@ -466,7 +466,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="°C",
 		icon='mdi:thermometer', 
-		json_value="Temp CPU", 
+		json_value="Temp_CPU", 
 	)),
 	(LD_CPU_USAGE_1M, dict(
 		title="{} CPU Load (1 min)".format(rpi_hostname.title()),
@@ -627,7 +627,7 @@ RPI_FS_USED = "FS Used [%]"
 RPI_FS_MOUNT = "FS Mounted"
 RPI_RAM_INSTALLED = "RAM Installed"
 RPI_RAM_USED = "RAM Used [%]"
-RPI_CPU_TEMP = "Temp CPU"
+RPI_CPU_TEMP = "Temp_CPU"
 RPI_CPU_LOAD_1M = "CPU Load 1min"
 RPI_CPU_LOAD_5M = "CPU Load 5min"
 RPI_CPU_LOAD_15M = "CPU Load 15min"
@@ -657,11 +657,8 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_FQDN] = rpi_fqdn
 	rpiData[RPI_OS_RELEASE] = rpi_os_release
 	rpiData[RPI_OS_VERSION] = rpi_os_version
-	rpiData[RPI_OS_LAST_UPDATE] = '{} ago - {}'.format(
-																 rpi.format_seconds(rpi_time_since_last_os_update),
-																 rpi_security[0][1])
-	rpiData[RPI_OS_LAST_UPGRADE] = '{} ago - {}'.format(
-																	rpi.format_seconds(rpi_time_since_last_os_upgrade),													rpi_security[1][1])
+	rpiData[RPI_OS_LAST_UPDATE] = '{} ago - {}'.format(rpi.format_seconds(rpi_time_since_last_os_update), rpi_security[0][1])
+	rpiData[RPI_OS_LAST_UPGRADE] = '{} ago - {}'.format(rpi.format_seconds(rpi_time_since_last_os_upgrade), rpi_security[1][1])
 	rpiData[RPI_UPTIME] = rpi_uptime
 	rpiData[RPI_FS_SPACE] = '{} {}'.format(rpi_fs_size, rpi_fs_size_unit)
 	rpiData[RPI_FS_USED] = rpi_fs_used
