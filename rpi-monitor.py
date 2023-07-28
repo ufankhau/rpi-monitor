@@ -501,7 +501,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon=cpu_icon,
-		json_value="CPU Load 1min",  
+		json_value="CPU_Load_1min",  
 	)),
 	(LD_CPU_USAGE_5M, dict(
 		title="{} CPU Load (5 min)".format(rpi_hostname.title()),
@@ -509,7 +509,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon=cpu_icon,
-		json_value="CPU Load 5min",  
+		json_value="CPU_Load_5min",  
 	)),
 	(LD_MEM_USED, dict(
 		title="{} Memory Usage".format(rpi_hostname),
@@ -517,7 +517,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon='mdi:memory',
-		json_value="RAM Used",  
+		json_value="RAM_Used",  
 	)),
 	(LD_FS_USED, dict(
 		title="{} Disk Usage".format(rpi_hostname), 
@@ -525,7 +525,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon='mdi:sd',
-		json_value="FS Used",
+		json_value="FS_Used",
 	)),
 ])
 
@@ -641,29 +641,29 @@ reported_first_time = False
 #  MQTT transmit helper routines
 #  -----------------------------
 SCRIPT_TIMESTAMP = "Timestamp"
-RPI_MODEL = "Raspberry Model"
+RPI_MODEL = "Raspberry_Model"
 RPI_HOSTNAME = "Hostname"
 RPI_FQDN = "Fqdn"
-RPI_OS_RELEASE = "OS Release"
-RPI_OS_VERSION = "OS Version"
-RPI_UPTIME = "Up Time"
+RPI_OS_RELEASE = "OS_Release"
+RPI_OS_VERSION = "OS_Version"
+RPI_UPTIME = "Up_Time"
 RPI_OS_LAST_UPDATE = "OS_Last_Update"
 RPI_OS_LAST_UPGRADE = "OS_Last_Upgrade"
-RPI_FS_SPACE = "FS Total"
-RPI_FS_USED = "FS Used"
-RPI_FS_MOUNT = "FS Mounted"
-RPI_RAM_INSTALLED = "RAM Installed"
-RPI_RAM_USED = "RAM Used"
-RPI_CPU_TEMP = "Temp CPU"
-RPI_CPU_LOAD_1M = "CPU Load 1min"
-RPI_CPU_LOAD_5M = "CPU Load 5min"
-RPI_CPU_LOAD_15M = "CPU Load 15min"
-RPI_GPU_TEMP = "Temp GPU"
+RPI_FS_SPACE = "FS_Total"
+RPI_FS_USED = "FS_Used"
+RPI_FS_MOUNT = "FS_Mounted"
+RPI_RAM_INSTALLED = "RAM_Installed"
+RPI_RAM_USED = "RAM_Used"
+RPI_CPU_TEMP = "Temp_CPU"
+RPI_CPU_LOAD_1M = "CPU_Load_1min"
+RPI_CPU_LOAD_5M = "CPU_Load_5min"
+RPI_CPU_LOAD_15M = "CPU_Load_15min"
+RPI_GPU_TEMP = "Temp_GPU"
 RPI_SCRIPT = "Reporter"
-RPI_NETWORK = "Network Interfaces"
+RPI_NETWORK = "Network_Interfaces"
 RPI_OS_UPDATE = rpi_security[0][0]
 RPI_OS_UPGRADE = rpi_security[1][0]
-RPI_SECURITY_STATUS = "Security Status"
+RPI_SECURITY_STATUS = "Security_Status"
 RPI_CPU = "CPU"
 # RPI_CPU_MODEL = "Model"
 # RPI_CPU_CORES = "Core(s)"
