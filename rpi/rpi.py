@@ -120,7 +120,7 @@ def get_device_cpu_info():
 		- clock speed (min | max) ["Core Speed [MHz] (min|max)"]
 		- serial number ["Serial"]
 	"""
-	cpu_info = OrderedDict()
+	cpu_info = {}
 	cmd_string1 = "{} | {} -i 'architecture|core\(s\)|vendor|model|min|max'".format(lscpu, egrep)
 	cmd_string2 = cat+" /proc/cpuinfo | "+egrep+" -i 'serial' | "+awk+" -F': ' '{print $2}'"
 	out = subprocess.Popen(cmd_string1, 
