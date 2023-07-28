@@ -56,18 +56,18 @@ def get_command_location(arg: str):
 
 
 #  Get Locations of Executables on the Filesystem of the Raspberry Pi
-# cat = get_command_location("cat")
-# awk = get_command_location("awk")
-# egrep = get_command_location("egrep")
-# cut = get_command_location("cut")
-# tail = get_command_location("tail")
-# hostname = get_command_location("hostname")
-# lscpu = get_command_location("lscpu")
-# df = get_command_location("df")
-# uname = get_command_location("uname")
-# ipaddr = get_command_location("ip")
-# uptime = get_command_location("uptime")
-# getconf = get_command_location("getconf")
+cat = get_command_location("cat")
+awk = get_command_location("awk")
+egrep = get_command_location("egrep")
+cut = get_command_location("cut")
+tail = get_command_location("tail")
+hostname = get_command_location("hostname")
+lscpu = get_command_location("lscpu")
+df = get_command_location("df")
+uname = get_command_location("uname")
+ipaddr = get_command_location("ip")
+uptime = get_command_location("uptime")
+getconf = get_command_location("getconf")
 
 
 #  *******************************************************************
