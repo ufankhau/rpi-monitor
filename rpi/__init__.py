@@ -1,7 +1,6 @@
 # import the necessary packages
-from .rpi import format_seconds, next_power_of_two
+from .rpi import next_power_of_two
 from .rpi import get_command_location
-from .rpi import format_seconds
 
 
 #  Get Locations of Executables on the Filesystem of the Raspberry Pi

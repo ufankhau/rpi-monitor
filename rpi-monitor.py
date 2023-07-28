@@ -29,6 +29,7 @@
 #  --------------------------
 import _thread
 from datetime import datetime, timedelta
+from pickle import TRUE
 from tzlocal import get_localzone
 #import subprocess
 import sys
@@ -86,6 +87,32 @@ def print_line(text, error=False, warning=False, info=False, verbose=False, debu
 	timestamp_sd = strftime('%b %d %H:%M:%S', localtime())
 	if sd_notify:
 		sd_notifier.notify('STATUS={} - {}.'.format(timestamp_sd, unidecode(text)))
+
+
+#  Delta Time
+def format_seconds(num: int):
+	"""
+	Format integer received as seconds into string of day(s) hour(s) and minute(s).
+
+	Examples:
+
+		93845	--> 1d 2h04m \n
+		434220 --> 	5d 37m
+	"""
+	days = num // 86400
+	hours = (num - days * 86400) // 3600
+	minutes = (num - days * 86400 - hours * 3600) // 60
+
+	if days != 0 and hours != 0:
+		deltatime = "{}d {}h{:02d}m".format(days, hours, minutes)
+	elif days != 0 and hours == 0:
+		deltatime = "{}d {}m".format(days, minutes)
+	elif days == 0 and hours == 0:
+		deltatime = "{}m".format(minutes)
+	else:
+		deltatime = "{}h{:02d}m".format(hours, minutes)
+	return deltatime
+
 
 #  check, that python 3 is available
 if False:
@@ -271,16 +298,16 @@ rpi_cpu_load_1m = 0.0
 rpi_cpu_load_5m = 0.0
 rpi_cpu_load_15m = 0.0
 rpi_cpu_temp = 0.0
-rpi_fs_used = ''
+rpi_fs_used = 0
 rpi_gpu_temp = 0.0
-rpi_ram_used = ''
+rpi_ram_used = 0
 rpi_security = [
 	['OS Update Status', 'safe'],
 	['OS Upgrade Status', 'safe']
 ]
 rpi_security_status = 'off'
-rpi_time_since_last_os_update = 0
-rpi_time_since_last_os_upgrade = 0
+rpi_time_since_last_os_update = 0       # in seconds
+rpi_time_since_last_os_upgrade = 0      # in seconds
 rpi_uptime = ''
 
 
@@ -657,8 +684,8 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_FQDN] = rpi_fqdn
 	rpiData[RPI_OS_RELEASE] = rpi_os_release
 	rpiData[RPI_OS_VERSION] = rpi_os_version
-	rpiData[RPI_OS_LAST_UPDATE] = '{} ago - {}'.format(rpi.format_seconds(rpi_time_since_last_os_update), rpi_security[0][1])
-	rpiData[RPI_OS_LAST_UPGRADE] = '{} ago - {}'.format(rpi.format_seconds(rpi_time_since_last_os_upgrade), rpi_security[1][1])
+	rpiData[RPI_OS_LAST_UPDATE] = '{} ago - {}'.format(format_seconds(rpi_time_since_last_os_update), rpi_security[0][1])
+	rpiData[RPI_OS_LAST_UPGRADE] = '{} ago - {}'.format(format_seconds(rpi_time_since_last_os_upgrade), rpi_security[1][1])
 	rpiData[RPI_UPTIME] = rpi_uptime
 	rpiData[RPI_FS_SPACE] = '{} {}'.format(rpi_fs_size, rpi_fs_size_unit)
 	rpiData[RPI_FS_USED] = rpi_fs_used
@@ -765,12 +792,22 @@ def update_dynamic_values():
 	global rpi_uptime, rpi_cpu_temp, rpi_gpu_temp
 	global rpi_time_since_last_os_update,rpi_time_since_last_os_upgrade
 	global rpi_ram_used, rpi_fs_used
+	global rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m
 	rpi_uptime = rpi.get_uptime()
+	print_line('rpi_uptime = [{}]'.format(rpi_uptime), debug=True)
 	rpi_cpu_temp, rpi_gpu_temp = rpi.get_device_temperatures()
+	print_line('rpi_cpu_temp = [{}]'.format(rpi_cpu_temp), debug=TRUE)
+	print_line('rpi_gpu_temp = [{}]'.format(rpi_gpu_temp), debug=TRUE)
 	rpi_time_since_last_os_update = rpi.get_time_since_last_os_update()
+	print_line('rpi_time_since_last_os_update formatted = [{}]'.format(format_seconds(rpi_time_since_last_os_update)), debug=True)
 	rpi_time_since_last_os_upgrade = rpi.get_time_since_last_os_upgrade()
+	print_line('rpi_time_since_last_os_upgrade formatted = [{}]'.format(format_seconds(rpi_time_since_last_os_upgrade)), debug=True)
 	rpi_ram_used = rpi.get_device_ram_used()
-	rpi_fs_used = rpi.get_device_ram_used()
+	print_line('rpi_ram_used = [{}%]'.format(rpi_ram_used), debug=True)
+	rpi_fs_used = rpi.get_filesystem_used()
+	print_line('rpi_fs_used = [{}%]'.format(rpi_fs_used), debug=True)
+	rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m = rpi.get_cpu_load()
+	print_line('rpi_cpu_loads 1m|5m|15m = [{}|{}|{}]'.format(rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m), debug=True)
 
 #  ---------------------------------------------------------------
 

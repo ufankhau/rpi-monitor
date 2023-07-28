@@ -6,6 +6,12 @@ import subprocess
 from collections import OrderedDict
 from time import time
 
+apt_available = True
+try:
+    import apt
+except ImportError:
+	apt_available = False
+
 
 #  ***************
 #  Helper Routines
@@ -41,37 +47,12 @@ def get_command_location(arg: str):
 	"""
 	cmd_string = "/usr/bin/which " + arg
 	out = subprocess.Popen(cmd_string, 
-												 shell=True, 
-												 stdout=subprocess.PIPE, 
-												 stderr=subprocess.STDOUT)
+						   shell=True, 
+						   stdout=subprocess.PIPE, 
+						   stderr=subprocess.STDOUT)
 	stdout, _ = out.communicate()
 	loc = stdout.decode("utf-8").strip()
 	return "" if loc == "" or "not found" in loc else loc
-
-
-def format_seconds(num: int):
-	"""
-	Format integer received as seconds into string of day(s) hour(s) and minute(s).
-
-	Examples:
-
-		93845	--> 	1d 2h04m
-
-		434220 --> 	5d 37m
-	"""
-	days = num // 86400
-	hours = (num - days * 86400) // 3600
-	minutes = (num - days * 86400 - hours * 3600) // 60
-
-	if days != 0 and hours != 0:
-		deltatime = "{}d {}h{:02d}m".format(days, hours, minutes)
-	elif days != 0 and hours == 0:
-		deltatime = "{}d {}m".format(days, minutes)
-	elif days == 0 and hours == 0:
-		deltatime = "{}m".format(minutes)
-	else:
-		deltatime = "{}h{:02d}m".format(hours, minutes)
-	return deltatime
 
 
 #  Get Locations of Executables on the Filesystem of the Raspberry Pi
@@ -433,8 +414,8 @@ def get_cpu_clock_speed():
     """
     Return current CPU clock speed as a float in MHz.
     """
-    cmdString = "{} /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq".format(cat)
-    out = subprocess.Popen(cmdString,
+    cmd_string = "{} /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq".format(cat)
+    out = subprocess.Popen(cmd_string,
 			               shell=True,
 			               stdout=subprocess.PIPE,
 			               stderr=subprocess.STDOUT)
@@ -444,7 +425,26 @@ def get_cpu_clock_speed():
 
 def get_filesystem_used():
 	"""
+	Return percentage of filesystem size used as integer.
     """
+	cmd_string = df+" | "+egrep+" root | "+awk+" '{print $5}' | "+cut+" -d'%' -f1"
+	out = subprocess.Popen(cmd_string,
+			               shell=True,
+			               stdout=subprocess.PIPE,
+			               stderr=subprocess.STDOUT)
+	stdout, _ = out.communicate()
+	return int(stdout.decode('utf-8'))
+
+
+def get_number_of_available_updates():
+	"""
+    """
+	if apt_available:
+		cache = apt.Cache()
+		cache.open(None)
+		cache.upgrade()
+		changes = cache.get_changes()
+		return len(changes)
 
 
 def get_time_since_last_os_update():
