@@ -466,7 +466,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="°C",
 		icon='mdi:thermometer', 
-		json_value="Temp CPU [°C]", 
+		json_value="Temp CPU", 
 	)),
 	(LD_CPU_USAGE_1M, dict(
 		title="{} CPU Load (1 min)".format(rpi_hostname.title()),
@@ -627,7 +627,7 @@ RPI_FS_USED = "FS Used [%]"
 RPI_FS_MOUNT = "FS Mounted"
 RPI_RAM_INSTALLED = "RAM Installed"
 RPI_RAM_USED = "RAM Used [%]"
-RPI_CPU_TEMP = "Temp CPU [C]"
+RPI_CPU_TEMP = "Temp CPU"
 RPI_CPU_LOAD_1M = "CPU Load 1min"
 RPI_CPU_LOAD_5M = "CPU Load 5min"
 RPI_CPU_LOAD_15M = "CPU Load 15min"
