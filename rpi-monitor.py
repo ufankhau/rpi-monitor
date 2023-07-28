@@ -466,7 +466,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="°C",
 		icon='mdi:thermometer', 
-		json_value="Temp CPU", 
+		json_value="Temp_CPU", 
 	)),
 	(LD_CPU_USAGE_1M, dict(
 		title="{} CPU Load (1 min)".format(rpi_hostname.title()),
@@ -627,7 +627,7 @@ RPI_FS_USED = "FS Used"
 RPI_FS_MOUNT = "FS Mounted"
 RPI_RAM_INSTALLED = "RAM Installed"
 RPI_RAM_USED = "RAM Used"
-RPI_CPU_TEMP = "Temp CPU"
+RPI_CPU_TEMP = "Temp_CPU"
 RPI_CPU_LOAD_1M = "CPU Load _1min"
 RPI_CPU_LOAD_5M = "CPU Load _5min"
 RPI_CPU_LOAD_15M = "CPU Load 15min"
@@ -667,7 +667,7 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_FS_USED] = '{:.1f}%'.format(rpi_fs_used)
 	rpiData[RPI_RAM_INSTALLED] = '{:.0d}{}'.format(rpi_ram_installed, rpi_ram_installed_unit)
 	rpiData[RPI_RAM_USED] = '{:.1f}%'.format(rpi_ram_used)
-	rpiData[RPI_CPU_TEMP] = '{:.1f}°C'.format(rpi_cpu_temp)
+	rpiData[RPI_CPU_TEMP] = rpi_cpu_temp
 	rpiData[RPI_GPU_TEMP] = '{:.1f}°C'.format(rpi_gpu_temp)
 	rpiData[RPI_CPU_LOAD_1M] = rpi_cpu_load_1m
 	rpiData[RPI_CPU_LOAD_5M] = rpi_cpu_load_5m
