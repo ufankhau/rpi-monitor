@@ -276,7 +276,7 @@ mem_units = {
 #  Raspberry Pi Variables Monitored
 #  
 #  ... with static content
-rpi_cpu_model = OrderedDict()
+rpi_cpu_model = {}
 rpi_fqdn = ''
 rpi_fs_mounted = OrderedDict()
 rpi_fs_size = 0
@@ -321,7 +321,7 @@ print_line('rpi_fqdn = [{}]'.format(rpi_fqdn), debug=True)
 rpi_model = rpi.get_device_model()
 print_line('rpi_model = [{}]'.format(rpi_model), debug=True)
 rpi_cpu_model = rpi.get_device_cpu_info()
-print_line('rpi_cpu_mode = [{}]'.format(rpi_cpu_model), debug=True)
+print_line('rpi_cpu_model = [{}]'.format(rpi_cpu_model), debug=True)
 rpi_number_of_cpu_cores = rpi_cpu_model["Core(s)"]
 print_line('rpi_nbrCores = [{}]'.format(rpi_number_of_cpu_cores), debug=True)
 rpi_os_bit_length = rpi.get_os_bit_length()
@@ -501,7 +501,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon=cpu_icon,
-		json_value="CPU_Load_1_min",  
+		json_value="CPU_Load_1min",  
 	)),
 	(LD_CPU_USAGE_5M, dict(
 		title="{} CPU Load (5 min)".format(rpi_hostname.title()),
@@ -509,7 +509,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon=cpu_icon,
-		json_value="CPU_Load_5_min",  
+		json_value="CPU_Load_5min",  
 	)),
 	(LD_MEM_USED, dict(
 		title="{} Memory Usage".format(rpi_hostname),
@@ -655,9 +655,9 @@ RPI_FS_MOUNT = "FS Mounted"
 RPI_RAM_INSTALLED = "RAM Installed"
 RPI_RAM_USED = "RAM_Used"
 RPI_CPU_TEMP = "Temp_CPU"
-RPI_CPU_LOAD_1M = "CPU Load 1min"
-RPI_CPU_LOAD_5M = "CPU Load 5min"
-RPI_CPU_LOAD_15M = "CPU Load 15min"
+RPI_CPU_LOAD_1M = "CPU_Load_1min"
+RPI_CPU_LOAD_5M = "CPU_Load_5min"
+RPI_CPU_LOAD_15M = "CPU_Load_15min"
 RPI_GPU_TEMP = "Temp GPU [C]"
 RPI_SCRIPT = "Reporter"
 RPI_NETWORK = "Network Interfaces"
