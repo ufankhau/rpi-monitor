@@ -442,6 +442,11 @@ def get_cpu_clock_speed():
     return int(stdout.decode("utf-8").strip()) / 1000
 
 
+def get_filesystem_used():
+	"""
+    """
+
+
 def get_time_since_last_os_update():
     """
     Return seconds passed since last run of 'sudo apt-get update' command on Raspberry Pi.

@@ -34,5 +34,6 @@ from .rpi import get_device_temperatures
 from .rpi import get_uptime
 from .rpi import get_cpu_load
 from .rpi import get_cpu_clock_speed
+from .rpi import get_filesystem_used
 from .rpi import get_time_since_last_os_update
 from .rpi import get_time_since_last_os_upgrade

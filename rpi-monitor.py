@@ -466,7 +466,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="°C",
 		icon='mdi:thermometer', 
-		json_value="Temp_CPU_c", 
+		json_value="Temp CPU", 
 	)),
 	(LD_CPU_USAGE_1M, dict(
 		title="{} CPU Load (1 min)".format(rpi_hostname.title()),
@@ -622,16 +622,16 @@ RPI_OS_VERSION = "OS Version"
 RPI_UPTIME = "Up Time"
 RPI_OS_LAST_UPDATE = "OS_Last_Update"
 RPI_OS_LAST_UPGRADE = "OS_Last_Upgrade"
-RPI_FS_SPACE = "FS Total [{}]".format(rpi_fs_size_unit)
-RPI_FS_USED = "FS Used [%]"
+RPI_FS_SPACE = "FS Total"
+RPI_FS_USED = "FS Used"
 RPI_FS_MOUNT = "FS Mounted"
-RPI_RAM_INSTALLED = "RAM Installed [{}]".format(rpi_ram_installed_unit)
-RPI_RAM_USED = "RAM Used [%]"
-RPI_CPU_TEMP = "Temp CPU [°C]"
+RPI_RAM_INSTALLED = "RAM Installed"
+RPI_RAM_USED = "RAM Used"
+RPI_CPU_TEMP = "Temp CPU"
 RPI_CPU_LOAD_1M = "CPU Load _1min"
 RPI_CPU_LOAD_5M = "CPU Load _5min"
 RPI_CPU_LOAD_15M = "CPU Load 15min"
-RPI_GPU_TEMP = "Temp GPU [°C]"
+RPI_GPU_TEMP = "Temp GPU"
 RPI_SCRIPT = "Reporter"
 RPI_NETWORK = "Network Interfaces"
 RPI_OS_UPDATE = rpi_security[0][0]
@@ -663,9 +663,9 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_OS_LAST_UPGRADE] = '{} ago - {}'.format(
 																	rpi.format_seconds(rpi_time_since_last_os_upgrade),													rpi_security[1][1])
 	rpiData[RPI_UPTIME] = rpi_uptime
-	rpiData[RPI_FS_SPACE] = rpi_fs_size
+	rpiData[RPI_FS_SPACE] = '{:.0d}{}'.format(rpi_fs_size, rpi_fs_size_unit)
 	rpiData[RPI_FS_USED] = '{:.1f}%'.format(rpi_fs_used)
-	rpiData[RPI_RAM_INSTALLED] = rpi_ram_installed
+	rpiData[RPI_RAM_INSTALLED] = '{:.0d}{}'.format(rpi_ram_installed, rpi_ram_installed_unit)
 	rpiData[RPI_RAM_USED] = '{:.1f}%'.format(rpi_ram_used)
 	rpiData[RPI_CPU_TEMP] = '{:.1f}°C'.format(rpi_cpu_temp)
 	rpiData[RPI_GPU_TEMP] = '{:.1f}°C'.format(rpi_gpu_temp)
@@ -773,7 +773,7 @@ def update_dynamic_values():
 	rpi_time_since_last_os_update = rpi.get_time_since_last_os_update()
 	rpi_time_since_last_os_upgrade = rpi.get_time_since_last_os_upgrade()
 	rpi_ram_used = rpi.get_device_ram_used()
-	rpi_fs_used = rpi.get_device_ram_used()
+	rpi_fs_used = rpi.get_filesystem_used()
 
 #  ---------------------------------------------------------------
 
