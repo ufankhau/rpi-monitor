@@ -664,7 +664,7 @@ def sendStatus(timestamp, nothing):
 																	rpi.format_seconds(rpi_time_since_last_os_upgrade),													rpi_security[1][1])
 	rpiData[RPI_UPTIME] = rpi_uptime
 	rpiData[RPI_FS_SPACE] = '{}{}'.format(rpi_fs_size, rpi_fs_size_unit)
-	rpiData[RPI_FS_USED] = '{:.1f}%'.format(rpi_fs_used)
+	rpiData[RPI_FS_USED] = rpi_fs_used
 	rpiData[RPI_RAM_INSTALLED] = '{}{}'.format(rpi_ram_installed, rpi_ram_installed_unit)
 	rpiData[RPI_RAM_USED] = '{:.1f}%'.format(rpi_ram_used)
 	rpiData[RPI_CPU_TEMP] = rpi_cpu_temp
@@ -773,7 +773,7 @@ def update_dynamic_values():
 	rpi_time_since_last_os_update = rpi.get_time_since_last_os_update()
 	rpi_time_since_last_os_upgrade = rpi.get_time_since_last_os_upgrade()
 	rpi_ram_used = rpi.get_device_ram_used()
-	rpi_fs_used = rpi.get_filesystem_used()
+	rpi_fs_used = rpi.get_device_ram_used()
 
 #  ---------------------------------------------------------------
 
