@@ -686,7 +686,7 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_OS_LAST_UPDATE] = '{} ago - {}'.format(format_seconds(rpi_time_since_last_os_update), rpi_security[0][1])
 	rpiData[RPI_OS_LAST_UPGRADE] = '{} ago - {}'.format(format_seconds(rpi_time_since_last_os_upgrade), rpi_security[1][1])
 	rpiData[RPI_UPTIME] = rpi_uptime
-	rpiData[RPI_DRIVE_INSTALLED] = '{} {}'.format(rpi_drive_size, rpi_fs_size_unit)
+	rpiData[RPI_DRIVE_INSTALLED] = '{} {}'.format(rpi_drive_size, rpi_drive_size_unit)
 	rpiData[RPI_DRIVE_USED] = rpi_drive_used
 	rpiData[RPI_RAM_INSTALLED] = '{} {}'.format(rpi_ram_installed, rpi_ram_installed_unit)
 	rpiData[RPI_RAM_USED] = rpi_ram_used
@@ -804,7 +804,7 @@ def update_dynamic_values():
 	rpi_ram_used = rpi.get_device_ram_used()
 	print_line('rpi_ram_used = [{}%]'.format(rpi_ram_used), debug=True)
 	rpi_drive_used = rpi.get_device_drive_used()
-	print_line('rpi_fs_used = [{}%]'.format(rpi_fs_used), debug=True)
+	print_line('rpi_fs_used = [{}%]'.format(rpi_drive_used), debug=True)
 	rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m = rpi.get_cpu_load()
 	print_line('rpi_cpu_loads 1m|5m|15m = [{}|{}|{}]'.format(rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m), debug=True)
 
