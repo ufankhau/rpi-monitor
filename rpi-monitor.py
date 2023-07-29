@@ -689,7 +689,7 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_MEMORY_USED] = rpi_memory_used
 	rpiData[RPI_CPU_TEMP] = rpi_cpu_temp
 	rpiData[RPI_GPU_TEMP] = rpi_gpu_temp
-	rpiData[RPI_CPU_CLOCK_SPEED] = '{} HHz'.format(rpi_cpu_clock_speed)
+	#rpiData[RPI_CPU_CLOCK_SPEED] = '{} MHz'.format(rpi_cpu_clock_speed)
 	rpiData[RPI_CPU_LOAD_1M] = rpi_cpu_load_1m
 	rpiData[RPI_CPU_LOAD_5M] = rpi_cpu_load_5m
 	rpiData[RPI_SCRIPT] = rpi_mqtt_script
