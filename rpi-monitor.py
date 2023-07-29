@@ -7,18 +7,21 @@
 #  - General data of the Raspberry Pi, like
 #	   - model (e.g. RPI 3B+, RPI 4B, RPI ZeroW)
 #    - running operating system (release and version)
-#    - network interfaces with MAC and IP addresses
+#    - network interface(s) with MAC and IP addresses
 #    - hostname, fqdn
-#    - number of CPUs
+#    - number of CPU core(s)
+#    - clock speed of CPU (min|max)
 #    - architecture
 #    - mounted filesystem(s)
+#		 - memory installed
+#    - drive size installed
 #  - Operating data of the Raspberry Pi, like
 #    - date of last update and upgrade of OS
 #    - uptime
 #    - Temperature CPU
 #    - Temperature GPU (only, if command vcgencmd is available on the Raspberry Pi)
-#    - % of RAM used
-#    - % of used disk space
+#    - % of memory used
+#    - % of used drive space
 #    - CPU load (1m and 5m)
 #    - system security status ("safe" if OS update less than 1 day old (default), 
 #      and upgrade < 7 days, otherwise "unsafe", thresholds can be set in "config.ini" file,
@@ -290,8 +293,8 @@ rpi_number_of_cpu_cores = 0
 rpi_os_bit_length = 0
 rpi_os_release = ''
 rpi_os_version = ''
-rpi_ram_installed = 0
-rpi_ram_installed_unit = ''
+rpi_memory_installed = 0
+rpi_memory_installed_unit = ''
 
 #  ... with dynamic content
 rpi_cpu_load_1m = 0.0
@@ -330,9 +333,9 @@ rpi_os_release = "{} - {}-bit".format(rpi.get_os_release(), rpi_os_bit_length)
 print_line('rpi_os_release = [{}]'.format(rpi_os_release), debug=True)
 rpi_os_version = rpi.get_os_version()
 print_line('rpi_os_version = [{}]'.format(rpi_os_version), debug=True)
-rpi_ram_installed, unit = rpi.get_device_ram_installed()
-rpi_ram_installed_unit = mem_units[unit]
-print_line('rpi_mem_installed = [{}{}]'.format(rpi_ram_installed, rpi_ram_installed_unit), debug=True)
+rpi_memory_installed, unit = rpi.get_device_memory_installed()
+rpi_memory_installed_unit = mem_units[unit]
+print_line('rpi_mem_installed = [{}{}]'.format(rpi_memory_installed, rpi_memory_installed_unit), debug=True)
 rpi_drive_size, unit = rpi.get_device_drive_size()
 rpi_drive_size_unit = mem_units[unit]
 print_line('rpi_device_drive_size = [{}{}]'.format(rpi_drive_size, rpi_drive_size_unit), debug=True)
@@ -516,7 +519,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon='mdi:memory',
-		json_value="RAM_Used",  
+		json_value="Memory_Used",  
 	)),
 	(LD_FS_USED, dict(
 		title="{} Disk Usage".format(rpi_hostname), 
@@ -648,8 +651,8 @@ RPI_OS_LAST_UPGRADE = "OS_Last_Upgrade"
 RPI_DRIVE_INSTALLED = "Drive_Size_Installed"
 RPI_DRIVE_USED = "Drive_Size_Used"
 RPI_DRIVE_MOUNTED = "Drive(s)_Mounted"
-RPI_RAM_INSTALLED = "RAM_Installed"
-RPI_RAM_USED = "RAM_Used"
+RPI_MEMORY_INSTALLED = "Memory_Installed"
+RPI_MEMORY_USED = "Memory_Used"
 RPI_CPU_TEMP = "Temp_CPU"
 RPI_CPU_LOAD_1M = "CPU_Load_1min"
 RPI_CPU_LOAD_5M = "CPU_Load_5min"
@@ -679,8 +682,8 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_UPTIME] = rpi_uptime
 	rpiData[RPI_DRIVE_INSTALLED] = '{} {}'.format(rpi_drive_size, rpi_drive_size_unit)
 	rpiData[RPI_DRIVE_USED] = rpi_drive_used
-	rpiData[RPI_RAM_INSTALLED] = '{} {}'.format(rpi_ram_installed, rpi_ram_installed_unit)
-	rpiData[RPI_RAM_USED] = rpi_ram_used
+	rpiData[RPI_MEMORY_INSTALLED] = '{} {}'.format(rpi_memory_installed, rpi_memory_installed_unit)
+	rpiData[RPI_MEMORY_USED] = rpi_memory_used
 	rpiData[RPI_CPU_TEMP] = rpi_cpu_temp
 	rpiData[RPI_GPU_TEMP] = rpi_gpu_temp
 	rpiData[RPI_CPU_LOAD_1M] = rpi_cpu_load_1m
@@ -732,7 +735,7 @@ def publishSecurityStatus(status, topic):
 def update_dynamic_values():
 	global rpi_uptime, rpi_cpu_temp, rpi_gpu_temp
 	global rpi_time_since_last_os_update,rpi_time_since_last_os_upgrade
-	global rpi_ram_used, rpi_drive_used
+	global rpi_memory_used, rpi_drive_used
 	global rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m
 	rpi_uptime = rpi.get_uptime()
 	print_line('rpi_uptime = [{}]'.format(rpi_uptime), debug=True)
@@ -743,7 +746,7 @@ def update_dynamic_values():
 	print_line('rpi_time_since_last_os_update formatted = [{}]'.format(format_seconds(rpi_time_since_last_os_update)), debug=True)
 	rpi_time_since_last_os_upgrade = rpi.get_time_since_last_os_upgrade()
 	print_line('rpi_time_since_last_os_upgrade formatted = [{}]'.format(format_seconds(rpi_time_since_last_os_upgrade)), debug=True)
-	rpi_ram_used = rpi.get_device_ram_used()
+	rpi_memory_used = rpi.get_device_memory_used()
 	print_line('rpi_ram_used = [{}%]'.format(rpi_ram_used), debug=True)
 	rpi_drive_used = rpi.get_device_drive_used()
 	print_line('rpi_fs_used = [{}%]'.format(rpi_drive_used), debug=True)

@@ -173,16 +173,16 @@ def get_device_cpu_info():
 	return cpu_info
 
 
-def get_device_ram_installed():
+def get_device_memory_installed():
     """
-    Return installed RAM on the Raspberry Pi in form of a tuple of two integers.
-    The first value is the RAM size. The second value is an index for the units to be applied
+    Return installed memory on the Raspberry Pi in form of a tuple of two integers.
+    The first value is the memory size. The second value is an index for the units to be applied
     (0 = 'kB', 1 = 'MB', 2 = 'GB', 3 = 'TB').
 
     Example:
 
-    (64, 2) = RAM size of 64 GB \n
-    (512, 1) = RAM size of 512 kB
+    (64, 2) = memory size of 64 GB \n
+    (512, 1) = memory size of 512 kB
 
     The function uses the helper routine next_power_of_two().
     """
@@ -324,9 +324,9 @@ def get_network_interfaces():
 
 #  ********************************************************************
 #  Set of Functions to Retrieve Dynamic Information from a Raspberry Pi
-def get_device_ram_used():
+def get_device_memory_used():
     """
-    Return integer with amount of RAM used on a Raspberry Pi in range [0...100]
+    Return integer with amount of memory used on a Raspberry Pi in range [0...100]
     """
     cmd_string = "{} /proc/meminfo | {} -i 'mem[tf]'".format(cat, egrep)
     out = subprocess.Popen(cmd_string,
