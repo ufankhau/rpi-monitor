@@ -437,15 +437,17 @@ def get_device_drive_used():
 	return int(stdout.decode('utf-8'))
 
 
-def get_number_of_available_updates():
+def get_os_number_of_updates():
 	"""
+	Return number of changes ready to be applied to the operating system together
+	with list of changes.
     """
 	if apt_available:
 		cache = apt.Cache()
 		cache.open(None)
 		cache.upgrade()
 		changes = cache.get_changes()
-		return len(changes)
+		return (len(changes), changes)
 
 
 def get_time_since_last_os_update():

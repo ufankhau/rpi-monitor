@@ -1,4 +1,5 @@
 # import the necessary packages
+# helper functions
 from .rpi import next_power_of_two
 from .rpi import get_command_location
 
@@ -17,6 +18,7 @@ from .rpi import get_command_location
 # uptime = get_command_location("uptime")
 # getconf = get_command_location("getconf")
 
+# functions to get static data
 from .rpi import get_device_model
 from .rpi import get_hostname
 from .rpi import get_device_cpu_info
@@ -28,11 +30,13 @@ from .rpi import get_os_release
 from .rpi import get_os_version
 from .rpi import get_network_interfaces
 
-from .rpi import get_device_memory_used
-from .rpi import get_device_temperatures
-from .rpi import get_uptime
+# functions to get dynamic data
 from .rpi import get_cpu_load
 from .rpi import get_cpu_clock_speed
 from .rpi import get_device_drive_used
+from .rpi import get_device_memory_used
+from .rpi import get_device_temperatures
+from .rpi import get_os_number_of_updates
 from .rpi import get_time_since_last_os_update
 from .rpi import get_time_since_last_os_upgrade
+from .rpi import get_uptime

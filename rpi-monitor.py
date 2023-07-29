@@ -298,13 +298,15 @@ rpi_memory_installed = 0
 rpi_memory_installed_unit = ''
 
 #  ... with dynamic content
-rpi_cpu_clock_speed = 0
+#rpi_cpu_clock_speed = 0
 rpi_cpu_load_1m = 0.0
 rpi_cpu_load_5m = 0.0
 rpi_cpu_load_15m = 0.0
 rpi_cpu_temp = 0.0
 rpi_drive_used = 0
 rpi_gpu_temp = 0.0
+rpi_os_nbr_of_updates = 0
+rpi_os_update_content = []
 rpi_ram_used = 0
 rpi_security = [
 	['OS Update Status', 'safe'],
@@ -354,12 +356,15 @@ rpi_network_interfaces, rpi_mac_address = rpi.get_network_interfaces()
 print_line('rpi_interfaces = [{}]'.format(rpi_network_interfaces), debug=True)
 print_line('rpi_mac_address = [{}]'.format(rpi_mac_address), debug=True)
 
+# handling of update(s) and its content
+rpi_os_nbr_of_updates, rpi_os_update_content = rpi.get_os_number_of_updates()
+print_line('rpi_os_nbr_of_updates = [{}]'.format(rpi_os_nbr_of_updates), debug=True)
+print_line('rpi_os_update_content = [{}]'.format(rpi_os_update_content), debug=True)
+
 
 #  -----------------------------------------------------
 #  timer and timer funcs for ALIVE MQTT notices handling
-#  -----------------------------------------------------
-
-
+#
 def publishAliveStatus():
 	print_line('- SEND: yes, still alive - ', debug=True)
 	mqtt_client.publish(lwt_topic, payload=lwt_online_val, retain=False)
@@ -655,7 +660,7 @@ RPI_DRIVE_USED = "Drive_Size_Used"
 RPI_DRIVE_MOUNTED = "Drive(s)_Mounted"
 RPI_MEMORY_INSTALLED = "Memory_Installed"
 RPI_MEMORY_USED = "Memory_Used"
-RPI_CPU_CLOCK_SPEED = "CPU_Clock_Speed"
+#RPI_CPU_CLOCK_SPEED = "CPU_Clock_Speed"
 RPI_CPU_TEMP = "Temp_CPU"
 RPI_CPU_LOAD_1M = "CPU_Load_1min"
 RPI_CPU_LOAD_5M = "CPU_Load_5min"
@@ -756,8 +761,8 @@ def update_dynamic_values():
 	print_line('rpi_fs_used = [{}%]'.format(rpi_drive_used), debug=True)
 	rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m = rpi.get_cpu_load()
 	print_line('rpi_cpu_loads 1m|5m|15m = [{}|{}|{}]'.format(rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m), debug=True)
-	rpi_cpu_clock_speed = rpi.get_cpu_clock_speed()
-	print_line('rpi_cpu_clock_speed = [{}] MHz'.format(rpi_cpu_clock_speed), debug=True)
+	# rpi_cpu_clock_speed = rpi.get_cpu_clock_speed()
+	# print_line('rpi_cpu_clock_speed = [{}] MHz'.format(rpi_cpu_clock_speed), debug=True)
 
 #  ---------------------------------------------------------------
 
