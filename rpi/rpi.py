@@ -413,7 +413,7 @@ def get_cpu_load():
 
 def get_cpu_clock_speed():
     """
-    Return current CPU clock speed as a float in MHz.
+    Return current CPU clock speed in MHz.
     """
     cmd_string = "{} /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq".format(cat)
     out = subprocess.Popen(cmd_string,
@@ -421,7 +421,7 @@ def get_cpu_clock_speed():
 			               stdout=subprocess.PIPE,
 			               stderr=subprocess.STDOUT)
     stdout, _ = out.communicate()
-    return int(stdout.decode("utf-8").strip()) / 1000
+    return round(int(stdout.decode("utf-8").strip()) / 1000)
 
 
 def get_device_drive_used():

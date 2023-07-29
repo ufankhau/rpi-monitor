@@ -26,10 +26,11 @@
 #    - system security status ("safe" if OS update less than 1 day old (default), 
 #      and upgrade < 7 days, otherwise "unsafe", thresholds can be set in "config.ini" file,
 #      ranges are hardcoded)
-#
+
+
 #  --------------------------
 #  import necessary libraries
-#  --------------------------
+# 
 import _thread
 from datetime import datetime, timedelta
 from pickle import TRUE
@@ -297,6 +298,7 @@ rpi_memory_installed = 0
 rpi_memory_installed_unit = ''
 
 #  ... with dynamic content
+rpi_cpu_clock_speed = 0
 rpi_cpu_load_1m = 0.0
 rpi_cpu_load_5m = 0.0
 rpi_cpu_load_15m = 0.0
@@ -653,6 +655,7 @@ RPI_DRIVE_USED = "Drive_Size_Used"
 RPI_DRIVE_MOUNTED = "Drive(s)_Mounted"
 RPI_MEMORY_INSTALLED = "Memory_Installed"
 RPI_MEMORY_USED = "Memory_Used"
+RPI_CPU_CLOCK_SPEED = "CPU_Clock_Speed"
 RPI_CPU_TEMP = "Temp_CPU"
 RPI_CPU_LOAD_1M = "CPU_Load_1min"
 RPI_CPU_LOAD_5M = "CPU_Load_5min"
@@ -686,6 +689,7 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_MEMORY_USED] = rpi_memory_used
 	rpiData[RPI_CPU_TEMP] = rpi_cpu_temp
 	rpiData[RPI_GPU_TEMP] = rpi_gpu_temp
+	rpiData[RPI_CPU_CLOCK_SPEED] = '{} HHz'.format(rpi_cpu_clock_speed)
 	rpiData[RPI_CPU_LOAD_1M] = rpi_cpu_load_1m
 	rpiData[RPI_CPU_LOAD_5M] = rpi_cpu_load_5m
 	rpiData[RPI_SCRIPT] = rpi_mqtt_script
@@ -736,7 +740,7 @@ def update_dynamic_values():
 	global rpi_uptime, rpi_cpu_temp, rpi_gpu_temp
 	global rpi_time_since_last_os_update,rpi_time_since_last_os_upgrade
 	global rpi_memory_used, rpi_drive_used
-	global rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m
+	global rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m, rpi_cpu_clock_speed
 	rpi_uptime = rpi.get_uptime()
 	print_line('rpi_uptime = [{}]'.format(rpi_uptime), debug=True)
 	rpi_cpu_temp, rpi_gpu_temp = rpi.get_device_temperatures()
@@ -752,6 +756,8 @@ def update_dynamic_values():
 	print_line('rpi_fs_used = [{}%]'.format(rpi_drive_used), debug=True)
 	rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m = rpi.get_cpu_load()
 	print_line('rpi_cpu_loads 1m|5m|15m = [{}|{}|{}]'.format(rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m), debug=True)
+	rpi_cpu_clock_speed = rpi.get_cpu_clock_speed()
+	print_line('rpi_cpu_clock_speed = [{}] MHz'.format(rpi_cpu_clock_speed), debug=True)
 
 #  ---------------------------------------------------------------
 
