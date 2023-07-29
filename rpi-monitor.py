@@ -92,7 +92,7 @@ def print_line(text, error=False, warning=False, info=False, verbose=False, debu
 #  Delta Time
 def format_seconds(num: int):
 	"""
-	Format integer received as seconds into string of day(s) hour(s) and minute(s).
+	Format integer representing seconds into string of day(s) hour(s) and minute(s).
 
 	Examples:
 
@@ -524,7 +524,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon='mdi:sd',
-		json_value="FS_Used",
+		json_value="Drive_Size_Used",
 	)),
 ])
 
@@ -596,10 +596,7 @@ mqtt_client.publish(discovery_topic, json.dumps(payload), 1, retain=True)
 
 #  -----------------------------------------
 #  timer and timer funcs for period handling
-#  -----------------------------------------
-
-
-
+# 
 def periodTimeoutHandler():
 	print_line('- PERIOD TIMER INTERRUPT -', debug=True)
 	handle_interrupt(TIMER_INTERRUPT)     #  '0' means we have a timer interrupt!
@@ -638,18 +635,18 @@ reported_first_time = False
 
 #  -----------------------------
 #  MQTT transmit helper routines
-#  -----------------------------
+#
 SCRIPT_TIMESTAMP = "Timestamp"
 RPI_MODEL = "Raspberry_Model"
 RPI_HOSTNAME = "Hostname"
-RPI_FQDN = "Fqdn"
+RPI_FQDN = "FQDN"
 RPI_OS_RELEASE = "OS_Release"
 RPI_OS_VERSION = "OS_Version"
 RPI_UPTIME = "Up_Time"
 RPI_OS_LAST_UPDATE = "OS_Last_Update"
 RPI_OS_LAST_UPGRADE = "OS_Last_Upgrade"
-RPI_DRIVE_INSTALLED = "Drive_Installed"
-RPI_DRIVE_USED = "Drive_Used"
+RPI_DRIVE_INSTALLED = "Drive_Size_Installed"
+RPI_DRIVE_USED = "Drive_Size_Used"
 RPI_DRIVE_MOUNTED = "Drive_Mounted"
 RPI_RAM_INSTALLED = "RAM_Installed"
 RPI_RAM_USED = "RAM_Used"
@@ -664,18 +661,13 @@ RPI_OS_UPDATE = rpi_security[0][0]
 RPI_OS_UPGRADE = rpi_security[1][0]
 RPI_SECURITY_STATUS = "Security_Status"
 RPI_CPU = "CPU"
-# RPI_CPU_MODEL = "Model"
-# RPI_CPU_CORES = "Core(s)"
-# RPI_CPU_ARCHITECTURE = "Architecture"
-# RPI_CPU_SPEED = "Core Speed (min | max)"
-# RPI_CPU_SERIAL = "Serial"
 SCRIPT_REPORT_INTERVAL = "Reporter_Interval_[min]"
 
 
 def sendStatus(timestamp, nothing):
-	# prepare and send update of sensor data
+	"""
+    """
 	global rpi_security_status
-	#global rpi_fs_mount
 	rpiData = OrderedDict()
 	rpiData[SCRIPT_TIMESTAMP] = timestamp.astimezone().replace(microsecond=0).isoformat()
 	rpiData[RPI_MODEL] = rpi_model
@@ -695,17 +687,10 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_CPU_LOAD_1M] = rpi_cpu_load_1m
 	rpiData[RPI_CPU_LOAD_5M] = rpi_cpu_load_5m
 	rpiData[RPI_CPU_LOAD_15M] = rpi_cpu_load_15m
-
 	rpiData[RPI_SCRIPT] = rpi_mqtt_script
 	rpiData[SCRIPT_REPORT_INTERVAL] = interval_in_minutes
-
 	rpiData[RPI_CPU] = rpi_cpu_model
 	rpiData[RPI_DRIVE_MOUNTED] = rpi_drive_mounted
-	# if rpi_fs_mounted == 'none':
-	# 	rpiData[RPI_FS_MOUNT] = rpi_fs_mounted
-	# else:
-	# 	rpiData[RPI_FS_MOUNT] = getFSmountDictionary()
-
 	rpiData[RPI_NETWORK] = rpi_network_interfaces
 	
 	rpiTopDict = OrderedDict()
@@ -732,47 +717,6 @@ def sendStatus(timestamp, nothing):
 		topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
 		_thread.start_new_thread(publishSecurityStatus, ('off', topic))
 
-
-# def getCPUDictionary():
-# 	#  tuple (modelname, #cores, serial#)
-# 	cpuDict = OrderedDict()
-# 	#rpi_cpu_tuple = ( cpu_architecture, cpu_model, cpu_cores, cpu_serial )
-# 	if rpi_cpu_tuple != '':
-# 		cpuDict[RPI_CPU_ARCHITECTURE] = rpi_cpu_tuple[0]
-# 		cpuDict[RPI_CPU_MODEL] = rpi_cpu_tuple[1]
-# 		cpuDict[RPI_CPU_CORES] = rpi_cpu_tuple[2]
-# 		cpuDict[RPI_CPU_SERIAL] = rpi_cpu_tuple[3]
-# 	return cpuDict
-
-
-# def getFSmountDictionary():
-# 	fsmountDict = OrderedDict()
-# 	for i in range(len(rpi_fs_mount)):
-# 		lineParts = rpi_fs_mount[i].split(',')
-# 		fsmountDict[lineParts[0]] = '-> '+lineParts[1]
-# 	print_line('fsmountDict:{}'.format(fsmountDict), debug=True)
-# 	return fsmountDict
-
-
-# def getNetworkDictionary():
-# 	networkDict = OrderedDict()
-# 	priorIFKey = ''
-# 	tmpData = OrderedDict()
-# 	for currTuple in rpi_interfaces:
-# 		currIFKey = currTuple[0]
-# 		if priorIFKey == '':
-# 			priorIFKey = currIFKey
-# 		if currIFKey != priorIFKey:
-# 			if priorIFKey != '':
-# 				networkDict[priorIFKey] = tmpData
-# 				tmpData = OrderedDict()
-# 				priorIFKey = currIFKey
-# 		subKey = currTuple[1]
-# 		subValue = currTuple[2]
-# 		tmpData[subKey] = subValue
-# 	networkDict[priorIFKey] = tmpData
-# 	print_line('networkDict:{}'.format(networkDict), debug=True)
-# 	return networkDict
 
 
 def publishMonitorData(latestData, topic):
