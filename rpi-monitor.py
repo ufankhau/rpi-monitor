@@ -500,7 +500,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon=cpu_icon,
-		json_value="CPU_Load_1-min",  
+		json_value="CPU_Load_1min",  
 	)),
 	(LD_CPU_USAGE_5M, dict(
 		title="{} CPU Load (5 min)".format(rpi_hostname.title()),
@@ -508,7 +508,7 @@ detectorValues = OrderedDict([
 		no_title_prefix="yes",
 		unit="%",
 		icon=cpu_icon,
-		json_value="CPU_Load_5-min",  
+		json_value="CPU_Load_5min",  
 	)),
 	(LD_MEM_USED, dict(
 		title="{} Memory Usage".format(rpi_hostname),
@@ -647,16 +647,15 @@ RPI_OS_LAST_UPDATE = "OS_Last_Update"
 RPI_OS_LAST_UPGRADE = "OS_Last_Upgrade"
 RPI_DRIVE_INSTALLED = "Drive_Size_Installed"
 RPI_DRIVE_USED = "Drive_Size_Used"
-RPI_DRIVE_MOUNTED = "Drive_Mounted"
+RPI_DRIVE_MOUNTED = "Drive(s)_Mounted"
 RPI_RAM_INSTALLED = "RAM_Installed"
 RPI_RAM_USED = "RAM_Used"
 RPI_CPU_TEMP = "Temp_CPU"
-RPI_CPU_LOAD_1M = "CPU_Load_1-min"
-RPI_CPU_LOAD_5M = "CPU_Load_5-min"
-RPI_CPU_LOAD_15M = "CPU_Load_15-min"
+RPI_CPU_LOAD_1M = "CPU_Load_1min"
+RPI_CPU_LOAD_5M = "CPU_Load_5min"
 RPI_GPU_TEMP = "Temp_GPU"
 RPI_SCRIPT = "Reporter"
-RPI_NETWORK = "Network_Interfaces"
+RPI_NETWORK = "Network_Interface(s)"
 RPI_OS_UPDATE = rpi_security[0][0]
 RPI_OS_UPGRADE = rpi_security[1][0]
 RPI_SECURITY_STATUS = "Security_Status"
@@ -686,7 +685,6 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_GPU_TEMP] = rpi_gpu_temp
 	rpiData[RPI_CPU_LOAD_1M] = rpi_cpu_load_1m
 	rpiData[RPI_CPU_LOAD_5M] = rpi_cpu_load_5m
-	rpiData[RPI_CPU_LOAD_15M] = rpi_cpu_load_15m
 	rpiData[RPI_SCRIPT] = rpi_mqtt_script
 	rpiData[SCRIPT_REPORT_INTERVAL] = interval_in_minutes
 	rpiData[RPI_CPU] = rpi_cpu_model
