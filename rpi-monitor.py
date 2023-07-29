@@ -35,7 +35,6 @@ import _thread
 from datetime import datetime, timedelta
 from pickle import TRUE
 from tzlocal import get_localzone
-#import subprocess
 import sys
 import ssl
 import json
@@ -52,9 +51,6 @@ from configparser import ConfigParser
 from unidecode import unidecode 
 import paho.mqtt.client as mqtt
 import sdnotify
-
-# import rpi module located in subdirectory /rpi
-#sys.path.append('rpi')
 import rpi
 
 script_version = "1.7.1"
@@ -333,7 +329,7 @@ rpi_number_of_cpu_cores = rpi_cpu_model["Core(s)"]
 print_line('rpi_nbrCores = [{}]'.format(rpi_number_of_cpu_cores), debug=True)
 rpi_os_bit_length = rpi.get_os_bit_length()
 print_line('rpi_os_bit_length = [{}]'.format(rpi_os_bit_length), debug=True)
-rpi_os_release = "{} - {}-bit".format(rpi.get_os_release(), rpi_os_bit_length)
+rpi_os_release = "{} | {}-bit".format(rpi.get_os_release(), rpi_os_bit_length)
 print_line('rpi_os_release = [{}]'.format(rpi_os_release), debug=True)
 rpi_os_version = rpi.get_os_version()
 print_line('rpi_os_version = [{}]'.format(rpi_os_version), debug=True)
@@ -756,9 +752,9 @@ def update_dynamic_values():
 	rpi_time_since_last_os_upgrade = rpi.get_time_since_last_os_upgrade()
 	print_line('rpi_time_since_last_os_upgrade formatted = [{}]'.format(format_seconds(rpi_time_since_last_os_upgrade)), debug=True)
 	rpi_memory_used = rpi.get_device_memory_used()
-	print_line('rpi_ram_used = [{}%]'.format(rpi_ram_used), debug=True)
+	print_line('rpi_memory_used = [{}%]'.format(rpi_memory_used), debug=True)
 	rpi_drive_used = rpi.get_device_drive_used()
-	print_line('rpi_fs_used = [{}%]'.format(rpi_drive_used), debug=True)
+	print_line('rpi_drive_used = [{}%]'.format(rpi_drive_used), debug=True)
 	rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m = rpi.get_cpu_load()
 	print_line('rpi_cpu_loads 1m|5m|15m = [{}|{}|{}]'.format(rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m), debug=True)
 	# rpi_cpu_clock_speed = rpi.get_cpu_clock_speed()
