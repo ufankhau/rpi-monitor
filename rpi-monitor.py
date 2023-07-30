@@ -639,6 +639,7 @@ for [command, _] in commands.items():
 	})
 
 print_line('Announcing Raspberry Pi Monitoring device to MQTT broker for auto-discovery ...')
+print_line('- detectorValues=[{}]'.format(detectorValues), debug=True)
 
 sensor_base_topic = '{}/sensor/{}'.format(base_topic, sensor_name.lower())
 values_topic_rel = '{}/{}'.format('~', LD_MONITOR)
@@ -650,8 +651,8 @@ command_topic_rel = '~/set'
 
 #  auto-discovery of sensors
 for [sensor, params] in detectorValues.items():
-	discovery_topic = '{}/sensor/{}/{}/config'.format(discovery_prefix, sensor_name.lower(), \
-		sensor)
+	discovery_topic = '{}/{}/{}/{}/config'.format(
+		discovery_prefix, params['topic_category'], sensor_name.lower(), sensor)
 	payload = OrderedDict()
 	if 'no_title_prefix' in params:
 		payload['name'] = "{}".format(params['title'].title())
