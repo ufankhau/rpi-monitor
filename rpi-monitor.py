@@ -619,7 +619,7 @@ detectorValues = OrderedDict([
 ])
 
 for [command, _] in commands.items():
-	#print_line('- REGISTER command: [{}]'.format(command), debug=True)
+	print_line('- REGISTER command: [{}]'.format(command), debug=True)
 	iconName = 'mdi:gesture-tap'
 	if 'reboot' in command:
 		iconName = 'mdi:restart'
@@ -629,7 +629,7 @@ for [command, _] in commands.items():
 		iconName = 'mdi:cog-counterclockwise'
 	detectorValues.update({
 		command: dict(
-			title='RPi {} {} Command'.format(command, rpi_hostname),
+			title='{} {} Command'.format(rpi_hostname, command),
 			topic_category='button',
 			no_title_prefix='yes',
 			icon=iconName,
