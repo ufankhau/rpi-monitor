@@ -618,13 +618,35 @@ detectorValues = OrderedDict([
 	)),
 ])
 
+for [command, _] in commands.items():
+	#print_line('- REGISTER command: [{}]'.format(command), debug=True)
+	iconName = 'mdi:gesture-tap'
+	if 'reboot' in command:
+		iconName = 'mdi:restart'
+	elif 'shutdown' in command:
+		iconName = 'mdi:power-sleep'
+	elif 'service' in command:
+		iconName = 'mdi:cog-counterclockwise'
+	detectorValues.update({
+		command: dict(
+			title='RPi {} {} Command'.format(command, rpi_hostname),
+			topic_category='button',
+			no_title_prefix='yes',
+			icon=iconName,
+			command = command,
+			command_topic = '{}/{}'.format(command_base_topic, command)
+		)
+	})
+
 print_line('Announcing Raspberry Pi Monitoring device to MQTT broker for auto-discovery ...')
 
-base_topic = '{}/sensor/{}'.format(base_topic, sensor_name.lower())
+sensor_base_topic = '{}/sensor/{}'.format(base_topic, sensor_name.lower())
 values_topic_rel = '{}/{}'.format('~', LD_MONITOR)
-values_topic = '{}/{}'.format(base_topic, LD_MONITOR)
+values_topic = '{}/{}'.format(sensor_base_topic, LD_MONITOR)
 activity_topic_rel = '{}/status'.format('~')
-activity_topic = '{}/status'.format(base_topic)
+activity_topic = '{}/status'.format(sensor_base_topic)
+
+command_topic_rel = '~/set'
 
 #  auto-discovery of sensors
 for [sensor, params] in detectorValues.items():
@@ -644,12 +666,21 @@ for [sensor, params] in detectorValues.items():
 		payload['stat_t'] = values_topic_rel
 		payload['val_tpl'] = "{{{{ value_json.{}.{} }}}}".format(LDS_PAYLOAD_NAME, \
 			params['json_value'])
-	payload['~'] = base_topic
+	if 'command' in params:
+		payload['~'] = command_base_topic
+		payload['cmd_t'] = '~/{}'.format(params['command'])
+		payload['json_attr_t'] = '~/{}/attributes'.format(params['command'])
+	else:
+		payload['~'] = sensor_base_topic
+	payload['avty_t'] = activity_topic_rel
 	payload['pl_avail'] = lwt_online_val
 	payload['pl_not_avail'] = lwt_offline_val
+	if 'trigger_type' in params:
+		payload['type'] = params['trigger_type']
+	if 'trigger_subtype' in params:
+		payload['subtype'] = params['trigger_subtype']
 	if 'icon' in params:
 		payload['ic'] = params['icon']
-	payload['avty_t'] = activity_topic_rel
 	if 'json_attr' in params:
 		payload['json_attr_t'] = values_topic_rel
 		payload['json_attr_tpl'] = '{{{{ value_json.{} | tojson }}}}'.format(LDS_PAYLOAD_NAME)
