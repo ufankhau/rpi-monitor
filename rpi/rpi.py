@@ -387,6 +387,7 @@ def get_uptime():
     return (
         stdout.decode("utf-8")
         .replace(" days,", "d")
+        .replace(" min", "")
         .replace(":", "h")
         .replace(",", "m")
     )

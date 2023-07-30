@@ -715,7 +715,7 @@ discovery_topic = '{}/binary_sensor/{}/config'.format(discovery_prefix, sensor_n
 payload = OrderedDict()
 payload['name'] = "{} Security Status".format(rpi_hostname.title())
 payload['uniq_id'] = "{}_{}".format(uniqID, LD_SECURITY_STATUS)
-payload['dev_cla'] = "safety"
+payload['dev_cla'] = "update"
 payload['payload_on'] = "on"
 payload['payload_off'] = "off"
 payload['state_topic'] = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
@@ -923,6 +923,9 @@ try:
 		sleep(10000)
 
 finally:
+	publishShuttingDownStatus()
 	#  cleanup timers
 	stopPeriodTimer()
 	stopAliveTimer()
+	mqtt_client.disconnect()
+	print_line('* MQTT Disconnect()', verbose=True, debug=True)
