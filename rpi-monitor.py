@@ -441,7 +441,14 @@ print_line('rpi_os_update_content = [{}]'.format(rpi_os_update_content), debug=T
 #
 def publishAliveStatus():
 	print_line('- SEND: yes, still alive - ', debug=True)
-	mqtt_client.publish(lwt_topic, payload=lwt_online_val, retain=False)
+	mqtt_client.publish(lwt_sensor_topic, payload=lwt_online_val, retain=False)
+	mqtt_client.publish(lwt_command_topic, payload=lwt_online_val, retain=False)
+
+
+def publishShuttingDownStatus():
+    print_line('- SEND: shutting down -', debug=True)
+    mqtt_client.publish(lwt_sensor_topic, payload=lwt_offline_val, retain=False)
+    mqtt_client.publish(lwt_command_topic, payload=lwt_offline_val, retain=False)
 
 
 def aliveTimeoutHandler():
@@ -482,7 +489,8 @@ aliveTimerRunningStatus = False
 #  MQTT Setup and Startup
 #
 #  MQTT connection
-lwt_topic = '{}/sensor/{}/status'.format(base_topic, sensor_name.lower())
+lwt_sensor_topic = '{}/sensor/{}/status'.format(base_topic, sensor_name.lower())
+lwt_command_topic = '{}/command/{}/status'.format(base_topic, sensor_name.lower())
 lwt_online_val = 'online'
 lwt_offline_val = 'offline'
 
@@ -498,7 +506,8 @@ mqtt_client.on_publish = on_publish
 mqtt_client.on_subscribe = on_subscribe
 mqtt_client.on_message = on_message
 
-mqtt_client.will_set(lwt_topic, payload=lwt_offline_val, retain=True)
+mqtt_client.will_set(lwt_sensor_topic, payload=lwt_offline_val, retain=True)
+mqtt_client.will_set(lwt_command_topic, payload=lwt_offline_val, retain=True)
 
 if config['MQTT'].getboolean('tls', False):
 	mqtt_client.tls_set(
@@ -521,7 +530,8 @@ except:
 		file "config.ini"', error=True, sd_notify=True)
 	sys.exit(1)
 else:
-	mqtt_client.publish(lwt_topic, payload=lwt_online_val, retain=False)
+	mqtt_client.publish(lwt_sensor_topic, payload=lwt_online_val, retain=False)
+	mqtt_client.publish(lwt_command_topic, payload=lwt_online_val, retain=False)
 	mqtt_client.loop_start()
 
 	while mqtt_client_connected == False:     #  wait in loop
