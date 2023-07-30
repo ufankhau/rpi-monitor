@@ -632,17 +632,19 @@ for [command, _] in commands.items():
 	print_line('- REGISTER command: [{}]'.format(command), debug=True)
 	iconName = 'mdi:gesture-tap'
 	if 'reboot' in command:
-		iconName = 'mdi:restart'
+		icon_name = 'mdi:restart'
 	elif 'shutdown' in command:
-		iconName = 'mdi:power-sleep'
+		icon_name = 'mdi:power'
 	elif 'service' in command:
-		iconName = 'mdi:cog-counterclockwise'
+		icon_name = 'mdi:cog-counterclockwise'
+	elif 'upgrade' in command:
+		icon_name = 'mdi:update'
 	detectorValues.update({
 		command: dict(
-			title='{} {} Command'.format(rpi_hostname, command),
+			title='{}'.format(command),
 			topic_category='button',
 			no_title_prefix='yes',
-			icon=iconName,
+			icon=icon_name,
 			command = command,
 			command_topic = '{}/{}'.format(command_base_topic, command)
 		)
