@@ -5,10 +5,18 @@
 # Some settings can be configured by environment variables.
 # If an env variable is set, it takes precedence over settings in this file
 
+
+[Commands]
+
+#shutdown = /usr/bin/sudo /sbin/shutdown -h now 'shutdown rqst via MQTT'
+#reboot = /usr/bin/sudo /sbin/shutdown -r now 'reboot rqst via MQTT'
+#restart_service = /usr/bin/sudo systemctl restart isp-rpi-reporter.service
+
+
 [Daemon]
 
-# Enable or Disable an endless execution loop (Default: true)
-#enabled = true
+# Enable or Disable an endless execution loop (Default: True)
+#enabled = True
 
 # This script reports RPi values at a fixed interval in minutes [2-30], [Default: 5]
 #interval_in_minutes = 5
@@ -16,9 +24,10 @@
 # default domain to use when hostname -f doesn't return a proper fqdn
 #fallback_domain = home
 
-# the operating system of the Raspberry PI requires regular system updates and upgrades. By default
-# the system is considered "Unsafe", if update is older than 3 day and upgrade older than 7 days. 
-# System accepts values in the range [1...7] for update days and [1...14] for upgrade days
+# the operating system of the Raspberry PI requires regular system updates and upgrades.
+# By default the system is considered "Unsafe", if update is older than 3 day and upgrade
+# older than 7 days. System accepts values in the range [1...7] for update days and [1...14]
+# for upgrade days
 #OS_update_days = 3
 #OS_upgrade_days = 7
 
@@ -49,7 +58,6 @@
 
 # The MQTT name for this Raspberry Pi as a sensor
 #sensor_name = rpi-{hostname}
-
 
 # The MQTT broker authentification credentials (Default: no authentication)
 # Will also read from MQTT_USERNAME and MQTT_PASSWORD environment variables

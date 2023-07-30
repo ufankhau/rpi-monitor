@@ -33,7 +33,6 @@
 # 
 import _thread
 from datetime import datetime, timedelta
-from pickle import TRUE
 from tzlocal import get_localzone
 import sys
 import ssl
@@ -42,6 +41,7 @@ import os
 import os.path
 import argparse
 import threading
+import subprocess
 #from time import time, sleep, localtime, strftime
 from time import sleep, localtime, strftime
 from collections import OrderedDict
@@ -154,39 +154,105 @@ if opt_stall:
 	print_line('Test: Stall (no-re-reporting) enabled', debug=True)
 
 
-#  -------------
-#  MQTT Handlers
+#  -----------------------------------------------------------------
+#  MQTT - Callback Functions that are Called in Response to an Event
 # 
 mqtt_client_connected = False
 print_line('* init mqtt_client_connected=[{}]'.format(mqtt_client_connected), debug=True)
 mqtt_client_should_attempt_reconnect = True
 
 def on_connect(client, userdata, flags, rc):
+	"""
+	Callback function triggered by MQTT client in a connection event
+	"""
 	global mqtt_client_connected
+	print_line('on_connect() - client, userdata, flags, rc', debug=True)
+	print_line('Data received (client, userdata, flags, rc): ({}, {}, {}, {})'.format(client, userdata, flags, rc), debug=True)
 	if rc == 0:
 		print_line('* MQTT connection established', console=True, sd_notify=True)
 		print_line('')  #  blank line
 		mqtt_client_connected = True
-		print_line('on_connect() mqtt_client_connected=[{}]'.format(mqtt_client_connected), debug=True)
+		print_line('on_connect() mqtt_client_connected = [{}]'.format(mqtt_client_connected), debug=True)
+
+		# commands subscription
+		if len(commands) > 0:
+			mqtt_client.subscribe('{}/+'.format(command_base_topic))
+			print_line('MQTT subscription to {}/+ enabled'.format(command_base_topic), 
+	      console=True, sd_notify=True)
+		else:
+			print_line('MQTT subscription to {}/+ disabled'.format(command_base_topic), 
+	      console=True, sd_notify=True)
+
 	else:
 		print_line('! Connection error with result code {} - {}'.format(str(rc), \
 			mqtt.connack_string(rc)), error=True)
 		print_line('MQTT Connection error with result code {} - {}'.format(str(rc), \
 			mqtt.connack_string(rc)), error=True, sd_notify=True)
 		mqtt_client_connected = False  #  technically NOT useful but readying possible new shape ...
-		print_line('on_connected() mqtt_client_connected=[{}]'.format(mqtt_client_connected), \
+		print_line('on_connected() mqtt_client_connected = [{}]'.format(mqtt_client_connected), \
 			debug=True, error=True)
 		# kill main thread
 		os._exit(1)
 
-def on_publish(client, userdata, mid):
-	print_line('* Data successfully published.', debug=True)
+
+def on_disconnect(client, userdata, mid):
+	"""
+	Callback function triggered by MQTT client in a disconnection event
+	"""
+	global mqtt_client_connected
+	mqtt_client_connected = False
+	print_line('* MQTT connection lost', console=True, sd_notify=True)
+	print_line('on_disconnect() mqtt_client_connected = [{}]'.format(
+		mqtt_client_connected), debug=True)
 	pass
+
+
+def on_publish(client, userdata, mid):
+	"""
+	Callback function triggered by MQTT broker in a publish event
+	"""
+	print_line('* Data successfully published.', debug=True)
+	print_line('(client | userdata | mid): {} | {} | {}'.format(client, userdata, mid), debug=True)
+	pass
+
+
+def on_subscribe(client, userdata, mid, granted_qos):
+    """
+		"""
+    print_line('on_subscribe() - {} - {}'.format(str(mid),str(granted_qos)), debug=True, sd_notify=True)
+
+
+def on_message(client, userdata, message):
+	"""
+	"""
+	sh_cmd_loc = rpi.get_command_location('sh')
+	if sh_cmd_loc != '':
+		payload = message.payload.decode('utf-8')
+		command = message.topic.split('/')[-1]
+		print_line('on_message() topic = [{}] payload = [{}] command = [{}]'.format(
+			message.topic, message.payload, command), console=True, sd_notify=True, debug=True)
+		
+		if command != 'status':
+			if command in commands:
+				print_line('- Command "{}" Received - Run {} {} -'.format(
+					command, commands[command], payload), console=True, debug=True)
+				pHandle = subprocess.Popen([sh_cmd_loc, "-c", commands[command].format(payload)])
+				_, errors = pHandle.communicate()
+				if errors:
+						print_line('- Command exec says: errors=[{}]'.format(errors),
+		 					console=True, debug=True)
+			else:
+				print_line('* Invalid Command received.', error=True)
+
+	else:
+		print_line('* Failed to locate shell Command!', error=True)
+		os._exit(1)
 
 
 #  -----------------------
 #  Load Configuration File
 # 
+commands = OrderedDict([])
 config = ConfigParser(delimiters=('=', ), inline_comment_prefixes=('#'))
 config.optionxform = str
 try:
@@ -196,27 +262,26 @@ except IOError:
 	print_line('No configuration file "config.ini"', error=True, sd_notify=True)
 	sys.exit(1)
 
+
+#  Read [Commands] Section of config.ini, if exists
+if config.has_section('Commands'):
+	commandSet = dict(config['Commands'].items())
+	if len(commandSet) > 0:
+		commands.update(commandSet)
+
+
+#  Read [Daemon] Section of config.ini
 daemon_enabled = config['Daemon'].getboolean('enabled', True)
 
-default_base_topic = 'home/nodes'
-base_topic = config['MQTT'].get('base_topic', default_base_topic).lower()
-
-default_sensor_name = 'rpi'
-sensor_name = config['MQTT'].get('sensor_name', default_sensor_name).lower()
-
-#  by default Home Assistant listens to /homeassistant
-default_discovery_prefix = 'homeassistant'
-discovery_prefix = config['MQTT'].get('discovery_prefix', default_discovery_prefix).lower()
+#  default domain when hostname -f doesn't return it
+default_domain = 'home'
+fallback_domain = config['Daemon'].get('fallback_domain', default_domain).lower()
 
 #  reporting interval of Raspberry values in minutes [1 - 20]
 min_interval_in_minutes = 1
 max_interval_in_minutes = 20
 default_interval_in_minutes = 5
 interval_in_minutes = config['Daemon'].getint('interval_in_minutes', default_interval_in_minutes)
-
-#  default domain when hostname -f doesn't return it
-default_domain = ''
-fallback_domain = config['Daemon'].get('fallback_domain', default_domain).lower()
 
 #  the apt update command should be run daily. Hence the default is set to 3
 min_update_days = 1
@@ -232,7 +297,20 @@ default_upgrade_days = 7
 OS_upgrade_days = config['Daemon'].getint('OS_upgrade_days', default_upgrade_days)
 max_time_since_upgrade = OS_upgrade_days*24*60*60
 
-#  check configuration
+
+#  Read [MQTT] Section of config.ini
+default_base_topic = 'home/nodes'
+base_topic = config['MQTT'].get('base_topic', default_base_topic).lower()
+
+default_sensor_name = 'rpi'
+sensor_name = config['MQTT'].get('sensor_name', default_sensor_name).lower()
+
+#  by default Home Assistant listens to /homeassistant
+default_discovery_prefix = 'homeassistant'
+discovery_prefix = config['MQTT'].get('discovery_prefix', default_discovery_prefix).lower()
+
+
+#  Check Configuration
 if (OS_update_days < min_update_days) or (OS_update_days > max_update_days):
 	print_line('ERROR: invalid "OS_update_days" found in configuration file: '+\
 		'"config.ini"! Must be within range [{}-{}]. Fix and try again .... aborting'\
@@ -249,7 +327,7 @@ if (interval_in_minutes < min_interval_in_minutes) or (interval_in_minutes > max
 		min_interval_in_minutes, max_interval_in_minutes), error=True, sd_notify=True)
 	sys.exit(1)
 
-#  ensure requried values whtin sections of our config file are present
+#  ensure config.ini file has a [MQTT] section
 if not config['MQTT']:
 	print_line('ERROR: No MQTT settings found in configuration file "config.ini"! \
 		Fix and try again ... aborting', error=True, sd_notify=True)
@@ -408,10 +486,17 @@ lwt_topic = '{}/sensor/{}/status'.format(base_topic, sensor_name.lower())
 lwt_online_val = 'online'
 lwt_offline_val = 'offline'
 
+# MQTT subscription
+command_base_topic = '{}/command/{}'.format(base_topic, sensor_name.lower())
+
 print_line('Connecting to MQTT broker ...', verbose=True)
 mqtt_client = mqtt.Client()
+#  connect callback functions
 mqtt_client.on_connect = on_connect
+mqtt_client.on_disconnect = on_disconnect
 mqtt_client.on_publish = on_publish
+mqtt_client.on_subscribe = on_subscribe
+mqtt_client.on_message = on_message
 
 mqtt_client.will_set(lwt_topic, payload=lwt_offline_val, retain=True)
 
@@ -454,7 +539,6 @@ sd_notifier.notify('READY=1')
 
 #  what RPi device are we on?
 #  get hostnames so we can setup MQTT
-#getNetworkIFsUsingIP()         #  this will fill-in rpi_mac
 
 mac_basic = rpi_mac_address.lower().replace(":", "")
 mac_left = mac_basic[:6]
@@ -741,12 +825,12 @@ def update_dynamic_values():
 	global rpi_uptime, rpi_cpu_temp, rpi_gpu_temp
 	global rpi_time_since_last_os_update,rpi_time_since_last_os_upgrade
 	global rpi_memory_used, rpi_drive_used
-	global rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m, rpi_cpu_clock_speed
+	global rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m
 	rpi_uptime = rpi.get_uptime()
 	print_line('rpi_uptime = [{}]'.format(rpi_uptime), debug=True)
 	rpi_cpu_temp, rpi_gpu_temp = rpi.get_device_temperatures()
-	print_line('rpi_cpu_temp = [{}]'.format(rpi_cpu_temp), debug=TRUE)
-	print_line('rpi_gpu_temp = [{}]'.format(rpi_gpu_temp), debug=TRUE)
+	print_line('rpi_cpu_temp = [{}]'.format(rpi_cpu_temp), debug=True)
+	print_line('rpi_gpu_temp = [{}]'.format(rpi_gpu_temp), debug=True)
 	rpi_time_since_last_os_update = rpi.get_time_since_last_os_update()
 	print_line('rpi_time_since_last_os_update formatted = [{}]'.format(format_seconds(rpi_time_since_last_os_update)), debug=True)
 	rpi_time_since_last_os_upgrade = rpi.get_time_since_last_os_upgrade()
