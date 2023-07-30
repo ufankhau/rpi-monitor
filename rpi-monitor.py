@@ -637,7 +637,7 @@ for [command, _] in commands.items():
 		icon_name = 'mdi:power'
 	elif 'service' in command:
 		icon_name = 'mdi:cog-counterclockwise'
-	elif 'upgrade' in command:
+	elif 'update' in command:
 		icon_name = 'mdi:update'
 	detectorValues.update({
 		command: dict(
@@ -715,9 +715,10 @@ for [sensor, params] in detectorValues.items():
 #  auto-discovery of binary_sensor
 discovery_topic = '{}/binary_sensor/{}/config'.format(discovery_prefix, sensor_name.lower())
 payload = OrderedDict()
-payload['name'] = "{} Security Status".format(rpi_hostname.title())
+payload['name'] = "{} Operating System".format(rpi_hostname.title())
 payload['uniq_id'] = "{}_{}".format(uniqID, LD_SECURITY_STATUS)
 payload['dev_cla'] = "update"
+payload['ic'] = 'mdi:package-up'
 payload['payload_on'] = "on"
 payload['payload_off'] = "off"
 payload['state_topic'] = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
