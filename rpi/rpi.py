@@ -458,8 +458,8 @@ def get_timestamp_of_last_os_update_run():
     #  'sudo apt-get update' writes to the following directory (so date changes on update)
     apt_listdir_filespec = "/var/lib/apt/lists/partial"
     date_of_last_update_run_in_seconds = os.path.getmtime(apt_listdir_filespec)
-    #date_now_in_seconds = time()
-    return int(date_of_last_update_run_in_seconds)
+    date_now_in_seconds = time()
+    return int(date_now_in_seconds - date_of_last_update_run_in_seconds)
 
 
 def get_timestamp_of_last_os_upgrade_in_seconds():

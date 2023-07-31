@@ -877,7 +877,7 @@ def update_dynamic_values():
 	rpi_cpu_temp, rpi_gpu_temp = rpi.get_device_temperatures()
 	print_line('rpi_cpu_temp = [{}]'.format(rpi_cpu_temp), debug=True)
 	print_line('rpi_gpu_temp = [{}]'.format(rpi_gpu_temp), debug=True)
-	rpi_time_since_last_os_update = rpi.get_time_since_last_os_update()
+	rpi_time_since_last_os_update = rpi.get_timestamp_of_last_os_update_run()
 	print_line('rpi_time_since_last_os_update formatted = [{}]'.format(format_seconds(rpi_time_since_last_os_update)), debug=True)
 	rpi_timestamp_of_last_os_upgrade = strftime('%Y-%m-%d %H:%M:%S', localtime(rpi.get_timestamp_of_last_os_upgrade_in_seconds()))
 	print_line('rpi_timestamp_of_last_os_upgrade = [{}]'.format(
