@@ -17,7 +17,7 @@ timestamp()
 echo "$(timestamp)" >> $logfn
 echo "$(timestamp) *** upgrade ${osName} on ${name^}" >> $logfn
 echo "$(timestamp) ***" >> $logfn
-/usr/bin/apt-get upgrade -y 2>$1 >> $logfn
+/usr/bin/apt-get upgrade -y >> $logfn
 if [[ $? = 0 ]]; then
     echo "$(timestamp) ***" >> $logfn
     echo "$(timestamp) *** upgrade successfully completed!" >> $logfn
