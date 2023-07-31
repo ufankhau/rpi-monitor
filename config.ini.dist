@@ -8,8 +8,8 @@
 
 [Commands]
 
-#shutdown = /usr/bin/sudo /sbin/shutdown -h now 'shutdown rqst via MQTT'
-#reboot = /usr/bin/sudo /sbin/shutdown -r now 'reboot rqst via MQTT'
+#shutdown = /usr/bin/sudo /usr/sbin/shutdown -h now 'shutdown rqst via MQTT'
+#reboot = /usr/bin/sudo /usr/sbin/shutdown -r now 'reboot rqst via MQTT'
 #restart_service = /usr/bin/sudo systemctl restart isp-rpi-reporter.service
 #update = /usr/bin/sudo /usr/bin/bash /opt/rpi-monitor/rpi-update.sh 'os upgrade rqst via MQTT'
 
