@@ -451,24 +451,24 @@ def get_os_number_of_updates():
 		return (len(changes), changes)
 
 
-def get_time_since_last_os_update():
+def get_timestamp_of_last_os_update_run():
     """
-    Return seconds passed since last run of 'sudo apt-get update' command on Raspberry Pi.
+    Return date and time of last run of 'sudo apt-get update' command on Raspberry Pi.
     """
     #  'sudo apt-get update' writes to the following directory (so date changes on update)
     apt_listdir_filespec = "/var/lib/apt/lists/partial"
-    date_last_update_run_in_seconds = os.path.getmtime(apt_listdir_filespec)
-    date_now_in_seconds = time()
-    return int(date_now_in_seconds - date_last_update_run_in_seconds)
+    date_of_last_update_run_in_seconds = os.path.getmtime(apt_listdir_filespec)
+    #date_now_in_seconds = time()
+    return int(date_of_last_update_run_in_seconds)
 
 
-def get_time_since_last_os_upgrade():
+def get_timestamp_of_last_os_upgrade_in_seconds():
     """
-    Return seconds passed since last upgrade applied to the operating system of the
-    Raspberry Pi.
+    Return date and time of last upgrade of the operating system running on the
+    Raspberry Pi in seconds since Epoch.
     """
     #  'sudo apt-get upgrade' updates the following file when actions are taken
     apt_lockdir_filespec = "/var/lib/dpkg/lock"
-    date_last_upgrade_applied_in_seconds = os.path.getmtime(apt_lockdir_filespec)
-    date_now_in_seconds = time()
-    return int(date_now_in_seconds - date_last_upgrade_applied_in_seconds)
+    timestamp_of_last_os_upgrade_in_seconds = os.path.getmtime(apt_lockdir_filespec)
+    #date_now_in_seconds = time()
+    return int(timestamp_of_last_os_upgrade_in_seconds)

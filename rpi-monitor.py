@@ -388,7 +388,7 @@ rpi_security = [
 ]
 rpi_security_status = 'off'
 rpi_time_since_last_os_update = 0       # in seconds
-rpi_time_since_last_os_upgrade = 0      # in seconds
+rpi_timestamp_of_last_os_upgrade = ''
 rpi_uptime = ''
 
 
@@ -811,7 +811,7 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_OS_RELEASE] = rpi_os_release
 	rpiData[RPI_OS_VERSION] = rpi_os_version
 	rpiData[RPI_OS_LAST_UPDATE] = '{} ago - {}'.format(format_seconds(rpi_time_since_last_os_update), rpi_security[0][1])
-	rpiData[RPI_OS_LAST_UPGRADE] = '{} ago - {}'.format(format_seconds(rpi_time_since_last_os_upgrade), rpi_security[1][1])
+	rpiData[RPI_OS_LAST_UPGRADE] = rpi_timestamp_of_last_os_upgrade
 	rpiData[RPI_UPTIME] = rpi_uptime
 	rpiData[RPI_DRIVE_INSTALLED] = '{} {}'.format(rpi_drive_size, rpi_drive_size_unit)
 	rpiData[RPI_DRIVE_USED] = rpi_drive_used
@@ -868,7 +868,8 @@ def publishSecurityStatus(status, topic):
 
 def update_dynamic_values():
 	global rpi_uptime, rpi_cpu_temp, rpi_gpu_temp
-	global rpi_time_since_last_os_update,rpi_time_since_last_os_upgrade
+	global rpi_time_since_last_os_update
+	global rpi_timestamp_of_last_os_upgrade
 	global rpi_memory_used, rpi_drive_used
 	global rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m
 	rpi_uptime = rpi.get_uptime()
@@ -878,8 +879,9 @@ def update_dynamic_values():
 	print_line('rpi_gpu_temp = [{}]'.format(rpi_gpu_temp), debug=True)
 	rpi_time_since_last_os_update = rpi.get_time_since_last_os_update()
 	print_line('rpi_time_since_last_os_update formatted = [{}]'.format(format_seconds(rpi_time_since_last_os_update)), debug=True)
-	rpi_time_since_last_os_upgrade = rpi.get_time_since_last_os_upgrade()
-	print_line('rpi_time_since_last_os_upgrade formatted = [{}]'.format(format_seconds(rpi_time_since_last_os_upgrade)), debug=True)
+	rpi_timestamp_of_last_os_upgrade = strftime('%Y-%m-%d %H:%M:%S', localtime(rpi.get_timestamp_of_last_os_upgrade_in_seconds()))
+	print_line('rpi_timestamp_of_last_os_upgrade = [{}]'.format(
+		rpi_timestamp_of_last_os_upgrade), debug=True)
 	rpi_memory_used = rpi.get_device_memory_used()
 	print_line('rpi_memory_used = [{}%]'.format(rpi_memory_used), debug=True)
 	rpi_drive_used = rpi.get_device_drive_used()
