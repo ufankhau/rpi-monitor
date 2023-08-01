@@ -16,14 +16,14 @@
 
 [Daemon]
 
-# Enable or Disable an endless execution loop (Default: True)
+# Enable or Disable an endless execution loop (default: True)
 #enabled = True
-
-# This script reports RPi values at a fixed interval in minutes [2-30], [Default: 5]
-#interval_in_minutes = 5
 
 # default domain to use when hostname -f doesn't return a proper fqdn
 #fallback_domain = home
+
+# This script reports RPi values at a fixed interval in minutes [1-20], [default: 3]
+#reporting_interval_in_minutes = 3
 
 # the operating system of the Raspberry PI requires regular system updates and upgrades.
 # By default the system is considered "Unsafe", if update is older than 3 day and upgrade

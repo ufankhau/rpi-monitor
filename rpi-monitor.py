@@ -90,28 +90,28 @@ def print_line(text, error=False, warning=False, info=False, verbose=False, debu
 
 
 #  Delta Time
-def format_seconds(num: int):
-	"""
-	Format integer representing seconds into string of day(s) hour(s) and minute(s).
+# def format_seconds(num: int):
+	# """
+	# Format integer representing seconds into string of day(s) hour(s) and minute(s).
 
-	Examples:
+	# Examples:
 
-		93845	--> 1d 2h04m \n
-		434220 --> 	5d 37m
-	"""
-	days = num // 86400
-	hours = (num - days * 86400) // 3600
-	minutes = (num - days * 86400 - hours * 3600) // 60
+	# 	93845	--> 1d 2h04m \n
+	# 	434220 --> 	5d 37m
+	# """
+	# days = num // 86400
+	# hours = (num - days * 86400) // 3600
+	# minutes = (num - days * 86400 - hours * 3600) // 60
 
-	if days != 0 and hours != 0:
-		deltatime = "{}d {}h{:02d}m".format(days, hours, minutes)
-	elif days != 0 and hours == 0:
-		deltatime = "{}d {}m".format(days, minutes)
-	elif days == 0 and hours == 0:
-		deltatime = "{}m".format(minutes)
-	else:
-		deltatime = "{}h{:02d}m".format(hours, minutes)
-	return deltatime
+	# if days != 0 and hours != 0:
+	# 	deltatime = "{}d {}h{:02d}m".format(days, hours, minutes)
+	# elif days != 0 and hours == 0:
+	# 	deltatime = "{}d {}m".format(days, minutes)
+	# elif days == 0 and hours == 0:
+	# 	deltatime = "{}m".format(minutes)
+	# else:
+	# 	deltatime = "{}h{:02d}m".format(hours, minutes)
+	# return deltatime
 
 
 #  check, that python 3 is available
@@ -217,9 +217,9 @@ def on_publish(client, userdata, mid):
 
 
 def on_subscribe(client, userdata, mid, granted_qos):
-    """
-		"""
-    print_line('on_subscribe() - {} - {}'.format(str(mid),str(granted_qos)), debug=True, sd_notify=True)
+	"""
+	"""
+	print_line('on_subscribe() - {} - {}'.format(str(mid),str(granted_qos)), debug=True, sd_notify=True)
 
 
 def on_message(client, userdata, message):
@@ -265,9 +265,9 @@ except IOError:
 
 #  Read [Commands] Section of config.ini, if exists
 if config.has_section('Commands'):
-	commandSet = dict(config['Commands'].items())
-	if len(commandSet) > 0:
-		commands.update(commandSet)
+	command_set = dict(config['Commands'].items())
+	if len(command_set) > 0:
+		commands.update(command_set)
 
 
 #  Read [Daemon] Section of config.ini
@@ -277,25 +277,28 @@ daemon_enabled = config['Daemon'].getboolean('enabled', True)
 default_domain = 'home'
 fallback_domain = config['Daemon'].get('fallback_domain', default_domain).lower()
 
-#  reporting interval of Raspberry values in minutes [1 - 20]
-min_interval_in_minutes = 1
-max_interval_in_minutes = 20
-default_interval_in_minutes = 5
-interval_in_minutes = config['Daemon'].getint('interval_in_minutes', default_interval_in_minutes)
+#  reporting interval of Raspberry values in minutes [1 - 20], [default: 3]
+min_reporting_interval_in_minutes = 1
+max_reporting_interval_in_minutes = 20
+default_reporting_interval_in_minutes = 3
+reporting_interval_in_minutes = config['Daemon'].getint(
+	'reporting_interval_in_minutes', default_reporting_interval_in_minutes)
 
-#  the apt update command should be run daily. Hence the default is set to 3
-min_update_days = 1
-max_update_days = 7
-default_update_days = 3
-OS_update_days = config['Daemon'].getint('OS_update_days', default_update_days)
-max_time_since_update = OS_update_days*24*60*60
+#  period in hours between checking for pending updates for the OS running on 
+#  the Raspberry Pi, [default: 6]
+min_update_check_in_hours = 1
+max_update_check_in_hours = 24
+default_update_check_in_hours = 6
+OS_update_check_in_hours = config['Daemon'].getint(
+	'OS_update_check_in_days', default_update_check_in_hours)
+max_time_since_last_update = OS_update_check_in_hours*60*60
 
 #  maximum time since last upgrade of OS to consider heahlth of Raspberry OS as "Safe"
-min_upgrade_days = 1
-max_upgrade_days = 14
-default_upgrade_days = 7
-OS_upgrade_days = config['Daemon'].getint('OS_upgrade_days', default_upgrade_days)
-max_time_since_upgrade = OS_upgrade_days*24*60*60
+# min_upgrade_days = 1
+# max_upgrade_days = 14
+# default_upgrade_days = 7
+# OS_upgrade_days = config['Daemon'].getint('OS_upgrade_days', default_upgrade_days)
+# max_time_since_upgrade = OS_upgrade_days*24*60*60
 
 
 #  Read [MQTT] Section of config.ini
@@ -311,20 +314,20 @@ discovery_prefix = config['MQTT'].get('discovery_prefix', default_discovery_pref
 
 
 #  Check Configuration
-if (OS_update_days < min_update_days) or (OS_update_days > max_update_days):
-	print_line('ERROR: invalid "OS_update_days" found in configuration file: '+\
+if (OS_update_check_in_hours < min_update_check_in_hours) or (OS_update_check_in_hours > max_update_check_in_hours):
+	print_line('ERROR: invalid "OS_update_check_in_hours" found in configuration file: '+\
 		'"config.ini"! Must be within range [{}-{}]. Fix and try again .... aborting'\
-		.format(min_update_days, max_update_days), error=True, sd_notify=True)
+		.format(min_update_check_in_hours, max_update_check_in_hours), error=True, sd_notify=True)
 	sys.exit(1)
-if (OS_upgrade_days < min_upgrade_days) or (OS_upgrade_days > max_upgrade_days):
-	print_line('ERROR: invalid "OS_upgrade_days" found in configuration file: '+\
-		'"config.ini"! Must be within range [{}-{}]. Fix and try again .... aborting'\
-		.format(min_upgrade_days, max_upgrade_days), error=True, sd_notify=True)
-	sys.exit(1)
-if (interval_in_minutes < min_interval_in_minutes) or (interval_in_minutes > max_interval_in_minutes):
-	print_line('ERROR: invalid "interval_in_minutes" found in configuration file: '+\
+# if (OS_upgrade_days < min_upgrade_days) or (OS_upgrade_days > max_upgrade_days):
+# 	print_line('ERROR: invalid "OS_upgrade_days" found in configuration file: '+\
+# 		'"config.ini"! Must be within range [{}-{}]. Fix and try again .... aborting'\
+# 		.format(min_upgrade_days, max_upgrade_days), error=True, sd_notify=True)
+# 	sys.exit(1)
+if (reporting_interval_in_minutes < min_reporting_interval_in_minutes) or (reporting_interval_in_minutes > max_reporting_interval_in_minutes):
+	print_line('ERROR: invalid "reporting_interval_in_minutes" found in configuration file: '+\
 		'"config.ini"! Must be [{}-{}] Fix and try again .... aborting'.format(\
-		min_interval_in_minutes, max_interval_in_minutes), error=True, sd_notify=True)
+		min_reporting_interval_in_minutes, max_reporting_interval_in_minutes), error=True, sd_notify=True)
 	sys.exit(1)
 
 #  ensure config.ini file has a [MQTT] section
@@ -431,58 +434,64 @@ print_line('rpi_interfaces = [{}]'.format(rpi_network_interfaces), debug=True)
 print_line('rpi_mac_address = [{}]'.format(rpi_mac_address), debug=True)
 
 # handling of update(s) and its content
-rpi_os_nbr_of_updates, rpi_os_update_content = rpi.get_os_number_of_updates()
-print_line('rpi_os_nbr_of_updates = [{}]'.format(rpi_os_nbr_of_updates), debug=True)
-print_line('rpi_os_update_content = [{}]'.format(rpi_os_update_content), debug=True)
+rpi_os_nbr_of_pending_updates, rpi_os_pending_update_content = rpi.get_os_number_of_updates()
+print_line('rpi_os_nbr_of_updates = [{}]'.format(rpi_os_nbr_of_pending_updates), debug=True)
+print_line('rpi_os_update_content = [{}]'.format(rpi_os_pending_update_content), debug=True)
+
+rpi_timestamp_of_last_os_upgrade = strftime('%Y-%m-%d %H:%M:%S', localtime(rpi.get_timestamp_of_last_os_upgrade_in_seconds()))
+print_line('rpi_timestamp_of_last_os_upgrade = [{}]'.format(
+	rpi_timestamp_of_last_os_upgrade), debug=True)
 
 
 #  -----------------------------------------------------
 #  timer and timer funcs for ALIVE MQTT notices handling
 #
-def publishAliveStatus():
+def publish_alive_status():
 	print_line('- SEND: yes, still alive - ', debug=True)
 	mqtt_client.publish(lwt_sensor_topic, payload=lwt_online_val, retain=False)
 	mqtt_client.publish(lwt_command_topic, payload=lwt_online_val, retain=False)
 
 
-def publishShuttingDownStatus():
+def publish_shutting_down_status():
     print_line('- SEND: shutting down -', debug=True)
     mqtt_client.publish(lwt_sensor_topic, payload=lwt_offline_val, retain=False)
     mqtt_client.publish(lwt_command_topic, payload=lwt_offline_val, retain=False)
 
 
-def aliveTimeoutHandler():
+def mqtt_alive_handler():
 	print_line('- MQTT TIMER INTERRUPT -', debug=True)
-	_thread.start_new_thread(publishAliveStatus, ())
-	startAliveTimer()
+	_thread.start_new_thread(publish_alive_status, ())
+	start_alive_timer()
 
 
-def startAliveTimer():
-	global aliveTimeout
-	global aliveTimerRunningStatus
-	stopAliveTimer()
-	aliveTimer = threading.Timer(ALIVE_TIMEOUT_IN_SECONDS, aliveTimeoutHandler)
-	aliveTimer.start()
-	aliveTimerRunningStatus = True
+def start_alive_timer():
+	global mqtt_alive_timer
+	#global aliveTimerRunningStatus
+	#stopAliveTimer()
+	mqtt_alive_timer.cancel()
+	print_line('- stopped MQTT timer', debug=True)
+	mqtt_alive_timer = threading.Timer(ALIVE_TIMEOUT_IN_SECONDS, mqtt_alive_handler)
+	mqtt_alive_timer.start()
+	#aliveTimerRunningStatus = True
 	print_line('- started MQTT timer - every {} seconds'.format(ALIVE_TIMEOUT_IN_SECONDS), debug=True)
 
 
-def stopAliveTimer():
-	global aliveTimer
-	global aliveTimerRunningStatus
-	aliveTimer.cancel()
-	aliveTimerRunningStatus = False
-	print_line('- stopped MQTT timer', debug=True)
+# def stopAliveTimer():
+# 	global mqtt_alive_timer
+# 	global aliveTimerRunningStatus
+# 	mqtt_alive_timer.cancel()
+# 	aliveTimerRunningStatus = False
+# 	print_line('- stopped MQTT timer', debug=True)
 
 
-def isAliveTimerRunning():
-	global aliveTimerRunningStatus
-	return aliveTimerRunningStatus
+# def isAliveTimerRunning():
+# 	global aliveTimerRunningStatus
+# 	return aliveTimerRunningStatus
 
-#  our ALIVE TIMER
-aliveTimer = threading.Timer(ALIVE_TIMEOUT_IN_SECONDS, aliveTimeoutHandler)
+#  our MQTT ALIVE TIMER
+mqtt_alive_timer = threading.Timer(ALIVE_TIMEOUT_IN_SECONDS, mqtt_alive_handler)
 #  our BOOL tracking state of ALIVE TIMER
-aliveTimerRunningStatus = False
+#aliveTimerRunningStatus = False
 
 
 #  ----------------------
@@ -538,7 +547,7 @@ else:
 		print_line('* Wait on mqtt_client_connected=[{}]'.format(mqtt_client_connected), debug=True)
 		sleep(1.0)      #  some slack to establish the connection
 
-	startAliveTimer()
+	start_alive_timer()
 
 sd_notifier.notify('READY=1')
 
@@ -576,7 +585,7 @@ else:
 #  table of key items to be published for sensors:
 detectorValues = OrderedDict([
 	(LD_MONITOR, dict(
-		title="{} RPi Monitor".format(rpi_hostname),
+		title="{} Monitor".format(rpi_hostname),
 		topic_category="sensor",
 		device_class="timestamp",
 		device_ident='Raspberry Pi {}'.format(rpi_hostname.title()),
@@ -630,7 +639,7 @@ detectorValues = OrderedDict([
 
 for [command, _] in commands.items():
 	print_line('- REGISTER command: [{}]'.format(command), debug=True)
-	iconName = 'mdi:gesture-tap'
+	icon_name = 'mdi:gesture-tap'
 	if 'reboot' in command:
 		icon_name = 'mdi:restart'
 	elif 'shutdown' in command:
@@ -642,6 +651,7 @@ for [command, _] in commands.items():
 	detectorValues.update({
 		command: dict(
 			title='{}'.format(command),
+			object_id='{} {} command'.format(rpi_hostname, command),
 			topic_category='button',
 			no_title_prefix='yes',
 			icon=icon_name,
@@ -659,7 +669,7 @@ values_topic = '{}/{}'.format(sensor_base_topic, LD_MONITOR)
 activity_topic_rel = '{}/status'.format('~')
 activity_topic = '{}/status'.format(sensor_base_topic)
 
-command_topic_rel = '~/set'
+#command_topic_rel = '~/set'
 
 #  auto-discovery of sensors
 for [sensor, params] in detectorValues.items():
@@ -679,6 +689,8 @@ for [sensor, params] in detectorValues.items():
 		payload['stat_t'] = values_topic_rel
 		payload['val_tpl'] = "{{{{ value_json.{}.{} }}}}".format(LDS_PAYLOAD_NAME, \
 			params['json_value'])
+	if 'object_id' in params:
+		payload['obj_id'] = params['object_id']
 	if 'command' in params:
 		payload['~'] = command_base_topic
 		payload['cmd_t'] = '~/{}'.format(params['command'])
@@ -729,42 +741,51 @@ payload['dev'] = {
 mqtt_client.publish(discovery_topic, json.dumps(payload), 1, retain=True)
 
 
-#  -----------------------------------------
-#  timer and timer funcs for period handling
+#  -------------------------------------------------------
+#  timer and timer functionss for handling reporting cycle
 # 
-def periodTimeoutHandler():
-	print_line('- PERIOD TIMER INTERRUPT -', debug=True)
+def reporting_handler():
+	print_line('- REPORTING TIMER INTERRUPT -', debug=True)
 	handle_interrupt(TIMER_INTERRUPT)     #  '0' means we have a timer interrupt!
-	startPeriodTimer()
+	start_reporting_timer()
 
 
-def startPeriodTimer():
-	global endPeriodTimer
-	global periodTimeRunningStatus
-	stopPeriodTimer()
-	endPeriodTimer = threading.Timer(interval_in_minutes * 60.0, periodTimeoutHandler)
-	endPeriodTimer.start()
-	periodTimeRunningStatus = True
-	print_line('- started PERIOD timer - every {} seconds'.format(interval_in_minutes * 60.0), debug=True)
+def start_reporting_timer():
+	global reporting_timer
+	#global reporting_cycle_timer_running_status
+	#stop_reporting_cycle_timer()
+	reporting_timer.cancel()
+	#timer_running_status = False
+	#end_reporting_cycle_timer = threading.Timer(reporting_interval_in_minutes * 60.0, reporting_cycle_timeout_handler)
+	reporting_timer = threading.Timer(reporting_interval_in_minutes * 60.0,reporting_handler)
+	#end_reporting_cycle_timer.start()
+	reporting_timer.start()
+	#reporting_cycle_timer_running_status = True
+	#timer_running_status = True
+	print_line('- started reporting cycle timer - every {} seconds'.format(
+		reporting_interval_in_minutes * 60.0), debug=True)
 
 
-def stopPeriodTimer():
-	global endPeriodTimer
-	global periodTimeRunningStatus
-	endPeriodTimer.cancel()
-	periodTimeRunningStatus = False
-	print_line('- stopped PERIOD timer', debug=True)
+
+# def stop_reporting_cycle_timer():
+# 	global end_reporting_cycle_timer
+# 	global reporting_cycle_timer_running_status
+# 	end_reporting_cycle_timer.cancel()
+# 	reporting_cycle_timer_running_status = False
+# 	print_line('- stopped reporting cycle timer', debug=True)
 
 
-def isPeriodTimerRunning():
-	global periodTimeRunningStatus
-	return periodTimeRunningStatus
+# def is_reporting_cycle_timer_running():
+# 	global reporting_cycle_timer_running_status
+# 	return reporting_cycle_timer_running_status
 
 
 #  TIMER
-endPeriodTimer = threading.Timer(interval_in_minutes * 60.0, periodTimeoutHandler)
+reporting_timer = threading.Timer(
+										reporting_interval_in_minutes * 60.0,
+										reporting_handler)
 #  BOOL tracking state of TIMER
-periodTimeRunningStatus = False
+#reporting_timer_running_status = False
 reported_first_time = False
 
 
@@ -778,7 +799,7 @@ RPI_FQDN = "FQDN"
 RPI_OS_RELEASE = "OS_Release"
 RPI_OS_VERSION = "OS_Version"
 RPI_UPTIME = "Up_Time"
-RPI_OS_LAST_UPDATE = "OS_Last_Update"
+# RPI_OS_LAST_UPDATE = "OS_Last_Update"
 RPI_OS_LAST_UPGRADE = "OS_Last_Upgrade"
 RPI_DRIVE_INSTALLED = "Drive_Size_Installed"
 RPI_DRIVE_USED = "Drive_Size_Used"
@@ -801,7 +822,7 @@ SCRIPT_REPORT_INTERVAL = "Reporter_Interval_[min]"
 
 def sendStatus(timestamp, nothing):
 	"""
-    """
+  """
 	global rpi_security_status
 	rpiData = OrderedDict()
 	rpiData[SCRIPT_TIMESTAMP] = timestamp.astimezone().replace(microsecond=0).isoformat()
@@ -810,7 +831,7 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_FQDN] = rpi_fqdn
 	rpiData[RPI_OS_RELEASE] = rpi_os_release
 	rpiData[RPI_OS_VERSION] = rpi_os_version
-	rpiData[RPI_OS_LAST_UPDATE] = '{} ago - {}'.format(format_seconds(rpi_time_since_last_os_update), rpi_security[0][1])
+	# rpiData[RPI_OS_LAST_UPDATE] = '{} ago - {}'.format(format_seconds(rpi_time_since_last_os_update), rpi_security[0][1])
 	rpiData[RPI_OS_LAST_UPGRADE] = rpi_timestamp_of_last_os_upgrade
 	rpiData[RPI_UPTIME] = rpi_uptime
 	rpiData[RPI_DRIVE_INSTALLED] = '{} {}'.format(rpi_drive_size, rpi_drive_size_unit)
@@ -823,7 +844,7 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_CPU_LOAD_1M] = rpi_cpu_load_1m
 	rpiData[RPI_CPU_LOAD_5M] = rpi_cpu_load_5m
 	rpiData[RPI_SCRIPT] = rpi_mqtt_script
-	rpiData[SCRIPT_REPORT_INTERVAL] = interval_in_minutes
+	rpiData[SCRIPT_REPORT_INTERVAL] = reporting_interval_in_minutes
 	rpiData[RPI_CPU] = rpi_cpu_model
 	rpiData[RPI_DRIVE_MOUNTED] = rpi_drive_mounted
 	rpiData[RPI_NETWORK] = rpi_network_interfaces
@@ -868,8 +889,6 @@ def publishSecurityStatus(status, topic):
 
 def update_dynamic_values():
 	global rpi_uptime, rpi_cpu_temp, rpi_gpu_temp
-	global rpi_time_since_last_os_update
-	global rpi_timestamp_of_last_os_upgrade
 	global rpi_memory_used, rpi_drive_used
 	global rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m
 	rpi_uptime = rpi.get_uptime()
@@ -877,11 +896,8 @@ def update_dynamic_values():
 	rpi_cpu_temp, rpi_gpu_temp = rpi.get_device_temperatures()
 	print_line('rpi_cpu_temp = [{}]'.format(rpi_cpu_temp), debug=True)
 	print_line('rpi_gpu_temp = [{}]'.format(rpi_gpu_temp), debug=True)
-	rpi_time_since_last_os_update = rpi.get_timestamp_of_last_os_update_run()
-	print_line('rpi_time_since_last_os_update formatted = [{}]'.format(format_seconds(rpi_time_since_last_os_update)), debug=True)
-	rpi_timestamp_of_last_os_upgrade = strftime('%Y-%m-%d %H:%M:%S', localtime(rpi.get_timestamp_of_last_os_upgrade_in_seconds()))
-	print_line('rpi_timestamp_of_last_os_upgrade = [{}]'.format(
-		rpi_timestamp_of_last_os_upgrade), debug=True)
+	# rpi_time_since_last_os_update = rpi.get_timestamp_of_last_os_update_run()
+	# print_line('rpi_time_since_last_os_update formatted = [{}]'.format(format_seconds(rpi_time_since_last_os_update)), debug=True)
 	rpi_memory_used = rpi.get_device_memory_used()
 	print_line('rpi_memory_used = [{}%]'.format(rpi_memory_used), debug=True)
 	rpi_drive_used = rpi.get_device_drive_used()
@@ -897,27 +913,25 @@ def handle_interrupt(channel):
 	global reported_first_time
 	sourceID = "<< INTR(" + str(channel) + ")"
 	current_timestamp = datetime.now(local_tz)
-	print_line(sourceID + " >> Time to report! {}".format(current_timestamp.strftime('%H:%M:%S - %Y/%m/%d')), \
-		verbose=True)
+	print_line(sourceID + " >> Time to report! {}".format(
+		current_timestamp.strftime('%H:%M:%S - %Y/%m/%d')), verbose=True)
 	update_dynamic_values()
 	if (opt_stall == False or reported_first_time == False and opt_stall == True):
 		#  report our new detection to MQTT
 		_thread.start_new_thread(sendStatus, (current_timestamp, ''))
 		reported_first_time = True
 	else:
-		print_line(sourceID + " >> Time to report! {} but SKIPPED (Test: stall)".format(\
+		print_line(sourceID + " >> Time to report! {} but SKIPPED (Test: stall)".format(
 			current_timestamp.strftime('%H:%M:%S - %Y/%m/%d')), verbose=True)
 
 
-def afterMQTTConnect():
-	print_line('* afterMQTTConnect()', verbose=True)
-	#  start interval timer
-	startPeriodTimer()
-	#  do first report
-	handle_interrupt(0)
 
+print_line('* afterMQTTConnect()', verbose=True)
+#  start reporting timer
+start_reporting_timer()
+#  do first report
+handle_interrupt(0)
 
-afterMQTTConnect()
 
 #  ------------------------------------------------------------
 #  now just hang in forever, until script is stopped externally
@@ -925,12 +939,17 @@ afterMQTTConnect()
 try:
 	while True:
 		#  the INTERVAL timer does the work
-		sleep(10000)
+		sleep(3600)
+
+
 
 finally:
-	publishShuttingDownStatus()
+	#  publish shutdown message to mqtt broker
+	publish_shutting_down_status()
 	#  cleanup timers
-	stopPeriodTimer()
-	stopAliveTimer()
+	reporting_timer.cancel()
+	#stop_reporting_cycle_timer()
+	#stopAliveTimer()
+	mqtt_alive_timer.cancel()
 	mqtt_client.disconnect()
 	print_line('* MQTT Disconnect()', verbose=True, debug=True)
