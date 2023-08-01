@@ -649,8 +649,8 @@ for [command, _] in commands.items():
 		icon_name = 'mdi:update'
 	detectorValues.update({
 		command: dict(
-			title='{}'.format(command),
-			object_id='{} {} command'.format(rpi_hostname, command),
+			title='{}'.format(command.replace('_', ' ')),
+			object_id='{}_{}_command'.format(rpi_hostname, command),
 			topic_category='button',
 			no_title_prefix='yes',
 			icon=icon_name,
