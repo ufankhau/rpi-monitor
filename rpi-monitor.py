@@ -395,6 +395,7 @@ rpi_uptime = ''
 
 #  ----------------
 #  Load Static Data
+#
 rpi_hostname, rpi_fqdn = rpi.get_hostname()
 if sensor_name == default_sensor_name:
 	sensor_name = 'rpi-{}'.format(rpi_hostname)
@@ -439,7 +440,7 @@ print_line('rpi_timestamp_of_last_os_upgrade = [{}]'.format(
 rpi_os_nbr_of_pending_updates, rpi_os_pending_updates_content = rpi.get_os_pending_updates()
 print_line('rpi_os_nbr_of_updates = [{}]'.format(rpi_os_nbr_of_pending_updates), debug=True)
 print_line('rpi_os_update_content = [{}]'.format(rpi_os_pending_updates_content), debug=True)
-time_of_last_update_run = round(time())
+#time_of_last_update_run = round(time())
 
 
 #  -----------------------------------------------------
@@ -943,6 +944,7 @@ try:
 		sleep(timespan_update_check_in_seconds+1)
 
 		#  check for pending updates
+		print_line('* check for pending updates ...', console=True, sd_notify=True)
 		rpi_os_nbr_of_pending_updates, rpi_os_pending_updates_content = rpi.get_os_pending_updates()
 		# 
 		if (rpi_os_nbr_of_pending_updates != 0):
