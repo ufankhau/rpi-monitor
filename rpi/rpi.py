@@ -281,7 +281,6 @@ def get_network_interfaces():
     interface its IP and MAC address (if allocated), where the string returns the MAC address of the first physical	interface in lower characters.
     """
     mac_address = ""
-    print(ipaddr)
     cmd_string = ipaddr+" addr show | "+egrep+" 'eth0:|wlan0:' | "+awk+" '{print $2}' | "+cut+" -d':' -f1"
     out = subprocess.Popen(cmd_string,
 			               shell=True,
@@ -387,6 +386,7 @@ def get_uptime():
     return (
         stdout.decode("utf-8")
         .replace(" days,", "d")
+				.replace(" day,", "d")
         .replace(" min", "")
         .replace(":", "h")
         .replace(",", "m")
