@@ -42,8 +42,7 @@ import os.path
 import argparse
 import threading
 import subprocess
-#from time import time, sleep, localtime, strftime
-from time import sleep, localtime, strftime
+from time import time, sleep, localtime, strftime
 from collections import OrderedDict
 #from colorama import init as colorama_init
 from colorama import Fore, Style
@@ -286,12 +285,12 @@ reporting_interval_in_minutes = config['Daemon'].getint(
 
 #  period in hours between checking for pending updates for the OS running on 
 #  the Raspberry Pi, [default: 6]
-min_update_check_in_hours = 1
-max_update_check_in_hours = 24
-default_update_check_in_hours = 6
-OS_update_check_in_hours = config['Daemon'].getint(
-	'OS_update_check_in_days', default_update_check_in_hours)
-max_time_since_last_update = OS_update_check_in_hours*60*60
+min_timespan_update_check_in_hours = 4
+max_timespan_update_check_in_hours = 24
+default_timespan_update_check_in_hours = 6
+timespan_update_check_in_hours = config['Daemon'].getint(
+	'timespan_update_check_in_hours', default_timespan_update_check_in_hours)
+timespan_update_check_in_seconds = timespan_update_check_in_hours*60*60
 
 #  maximum time since last upgrade of OS to consider heahlth of Raspberry OS as "Safe"
 # min_upgrade_days = 1
@@ -314,10 +313,10 @@ discovery_prefix = config['MQTT'].get('discovery_prefix', default_discovery_pref
 
 
 #  Check Configuration
-if (OS_update_check_in_hours < min_update_check_in_hours) or (OS_update_check_in_hours > max_update_check_in_hours):
+if (timespan_update_check_in_hours < min_timespan_update_check_in_hours) or (timespan_update_check_in_hours > max_timespan_update_check_in_hours):
 	print_line('ERROR: invalid "OS_update_check_in_hours" found in configuration file: '+\
 		'"config.ini"! Must be within range [{}-{}]. Fix and try again .... aborting'\
-		.format(min_update_check_in_hours, max_update_check_in_hours), error=True, sd_notify=True)
+		.format(min_timespan_update_check_in_hours, max_timespan_update_check_in_hours), error=True, sd_notify=True)
 	sys.exit(1)
 # if (OS_upgrade_days < min_upgrade_days) or (OS_upgrade_days > max_upgrade_days):
 # 	print_line('ERROR: invalid "OS_upgrade_days" found in configuration file: '+\
@@ -382,6 +381,7 @@ rpi_cpu_load_15m = 0.0
 rpi_cpu_temp = 0.0
 rpi_drive_used = 0
 rpi_gpu_temp = 0.0
+rpi_last_update_run = 0
 rpi_os_nbr_of_updates = 0
 rpi_os_update_content = []
 rpi_ram_used = 0
@@ -390,8 +390,6 @@ rpi_security = [
 	['OS Upgrade Status', 'safe']
 ]
 rpi_security_status = 'off'
-rpi_time_since_last_os_update = 0       # in seconds
-rpi_timestamp_of_last_os_upgrade = ''
 rpi_uptime = ''
 
 
@@ -433,14 +431,15 @@ rpi_network_interfaces, rpi_mac_address = rpi.get_network_interfaces()
 print_line('rpi_interfaces = [{}]'.format(rpi_network_interfaces), debug=True)
 print_line('rpi_mac_address = [{}]'.format(rpi_mac_address), debug=True)
 
-# handling of update(s) and its content
-rpi_os_nbr_of_pending_updates, rpi_os_pending_update_content = rpi.get_os_number_of_updates()
-print_line('rpi_os_nbr_of_updates = [{}]'.format(rpi_os_nbr_of_pending_updates), debug=True)
-print_line('rpi_os_update_content = [{}]'.format(rpi_os_pending_update_content), debug=True)
-
 rpi_timestamp_of_last_os_upgrade = strftime('%Y-%m-%d %H:%M:%S', localtime(rpi.get_timestamp_of_last_os_upgrade_in_seconds()))
 print_line('rpi_timestamp_of_last_os_upgrade = [{}]'.format(
 	rpi_timestamp_of_last_os_upgrade), debug=True)
+
+# handling of pending update(s)
+rpi_os_nbr_of_pending_updates, rpi_os_pending_updates_content = rpi.get_os_pending_updates()
+print_line('rpi_os_nbr_of_updates = [{}]'.format(rpi_os_nbr_of_pending_updates), debug=True)
+print_line('rpi_os_update_content = [{}]'.format(rpi_os_pending_updates_content), debug=True)
+time_of_last_update_run = round(time())
 
 
 #  -----------------------------------------------------
@@ -796,6 +795,7 @@ SCRIPT_TIMESTAMP = "Timestamp"
 RPI_MODEL = "Raspberry_Model"
 RPI_HOSTNAME = "Hostname"
 RPI_FQDN = "FQDN"
+RPI_OS_PENDING_UPDATES = "OS_Pending_Updates"
 RPI_OS_RELEASE = "OS_Release"
 RPI_OS_VERSION = "OS_Version"
 RPI_UPTIME = "Up_Time"
@@ -817,7 +817,7 @@ RPI_OS_UPDATE = rpi_security[0][0]
 RPI_OS_UPGRADE = rpi_security[1][0]
 RPI_SECURITY_STATUS = "Security_Status"
 RPI_CPU = "CPU"
-SCRIPT_REPORT_INTERVAL = "Reporter_Interval_[min]"
+SCRIPT_REPORT_INTERVAL = "Reporter_Interval"
 
 
 def sendStatus(timestamp, nothing):
@@ -831,6 +831,7 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_FQDN] = rpi_fqdn
 	rpiData[RPI_OS_RELEASE] = rpi_os_release
 	rpiData[RPI_OS_VERSION] = rpi_os_version
+	rpiData[RPI_OS_PENDING_UPDATES] = rpi_os_nbr_of_pending_updates
 	# rpiData[RPI_OS_LAST_UPDATE] = '{} ago - {}'.format(format_seconds(rpi_time_since_last_os_update), rpi_security[0][1])
 	rpiData[RPI_OS_LAST_UPGRADE] = rpi_timestamp_of_last_os_upgrade
 	rpiData[RPI_UPTIME] = rpi_uptime
@@ -844,7 +845,7 @@ def sendStatus(timestamp, nothing):
 	rpiData[RPI_CPU_LOAD_1M] = rpi_cpu_load_1m
 	rpiData[RPI_CPU_LOAD_5M] = rpi_cpu_load_5m
 	rpiData[RPI_SCRIPT] = rpi_mqtt_script
-	rpiData[SCRIPT_REPORT_INTERVAL] = reporting_interval_in_minutes
+	rpiData[SCRIPT_REPORT_INTERVAL] = '{} min'.format(reporting_interval_in_minutes)
 	rpiData[RPI_CPU] = rpi_cpu_model
 	rpiData[RPI_DRIVE_MOUNTED] = rpi_drive_mounted
 	rpiData[RPI_NETWORK] = rpi_network_interfaces
@@ -925,11 +926,11 @@ def handle_interrupt(channel):
 			current_timestamp.strftime('%H:%M:%S - %Y/%m/%d')), verbose=True)
 
 
-
 print_line('* afterMQTTConnect()', verbose=True)
 #  start reporting timer
 start_reporting_timer()
 #  do first report
+print_line('* first reporting!', debug=True, verbose=True)
 handle_interrupt(0)
 
 
@@ -938,8 +939,20 @@ handle_interrupt(0)
 #  ------------------------------------------------------------
 try:
 	while True:
-		#  the INTERVAL timer does the work
-		sleep(3600)
+		#  the reporting timer does the work
+		sleep(timespan_update_check_in_seconds+1)
+
+		#  check for pending updates
+		rpi_os_nbr_of_pending_updates, rpi_os_pending_updates_content = rpi.get_os_pending_updates()
+		# 
+		if (rpi_os_nbr_of_pending_updates != 0):
+			topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
+			_thread.start_new_thread(publishSecurityStatus, ('on', topic))
+
+			# format rpi_os_pending_updates_content
+
+
+
 
 
 

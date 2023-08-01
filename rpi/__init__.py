@@ -42,7 +42,6 @@ from .rpi import get_cpu_clock_speed
 from .rpi import get_device_drive_used
 from .rpi import get_device_memory_used
 from .rpi import get_device_temperatures
-from .rpi import get_os_number_of_updates
-from .rpi import get_timestamp_of_last_os_update_run
+from .rpi import get_os_pending_updates
 from .rpi import get_timestamp_of_last_os_upgrade_in_seconds
 from .rpi import get_uptime

@@ -8,7 +8,7 @@ from time import time
 
 apt_available = True
 try:
-    import apt
+  import apt
 except ImportError:
 	apt_available = False
 
@@ -438,10 +438,10 @@ def get_device_drive_used():
 	return int(stdout.decode('utf-8'))
 
 
-def get_os_number_of_updates():
+def get_os_pending_updates():
 	"""
-	Return number of changes ready to be applied to the operating system together
-	with list of changes.
+	Return number of pending updates to be applied to the operating system together
+	with a list of affected modules.
     """
 	if apt_available:
 		cache = apt.Cache()
