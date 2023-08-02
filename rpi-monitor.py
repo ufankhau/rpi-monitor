@@ -864,16 +864,23 @@ def sendStatus(timestamp, nothing):
 	rpiSecurityTop[LDS_PAYLOAD_NAME] = rpiSecurity
 	topic = "home/nodes/binary_sensor/{}".format(sensor_name.lower())
 	_thread.start_new_thread(publishMonitorData, (rpiSecurity, topic))
-	rpi_security_status = 'off'
-	for i in range(len(rpi_security)):
-		if rpi_security[i][1] != 'safe':
-			rpi_security_status = 'on'
-			topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
-			_thread.start_new_thread(publishSecurityStatus, ('on', topic))
-			break
-	if rpi_security_status == 'off':
-		topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
+
+	topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
+	if (rpi_os_nbr_of_pending_updates != 0):
+		_thread.start_new_thread(publishSecurityStatus, ('on', topic))
+	else:
 		_thread.start_new_thread(publishSecurityStatus, ('off', topic))
+
+	# rpi_security_status = 'off'
+	# for i in range(len(rpi_security)):
+	# 	if rpi_security[i][1] != 'safe':
+	# 		rpi_security_status = 'on'
+	# 		topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
+	# 		_thread.start_new_thread(publishSecurityStatus, ('on', topic))
+	# 		break
+	# if rpi_security_status == 'off':
+	# 	topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
+	# 	_thread.start_new_thread(publishSecurityStatus, ('off', topic))
 
 
 
@@ -947,15 +954,8 @@ try:
 		print_line('* check for pending updates ...', console=True, sd_notify=True)
 		rpi_os_nbr_of_pending_updates, rpi_os_pending_updates_content = rpi.get_os_pending_updates()
 		# 
-		if (rpi_os_nbr_of_pending_updates != 0):
-			topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
-			_thread.start_new_thread(publishSecurityStatus, ('on', topic))
 
 			# format rpi_os_pending_updates_content
-
-
-
-
 
 
 finally:

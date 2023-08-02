@@ -7,14 +7,12 @@
 
 
 [Commands]
-
 #shutdown = /usr/bin/sudo /usr/sbin/shutdown -h now 'shutdown rqst via MQTT'
 #reboot = /usr/bin/sudo /usr/sbin/shutdown -r now 'reboot rqst via MQTT'
 #apply_update = /usr/bin/sudo /opt/rpi-monitor/rpi-update 'os upgrade rqst via MQTT'
 
 
 [Daemon]
-
 # Enable or Disable an endless execution loop (default: True)
 #enabled = True
 
@@ -30,7 +28,6 @@
 
 
 [MQTT]
-
 # The hostname or IP address of the MQTT broker to connect to (Default: localhost)
 # Also read from the MQTT_HOSTNAME environment variable
 #hostname = <hostname>
