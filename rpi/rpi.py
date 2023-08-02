@@ -453,10 +453,10 @@ def get_os_pending_updates():
 			module = change.name
 			installed_version = change.installed.version
 			new_version = change.candidate.version
-			print(change.name, type(change.name))
-			print(installed_version, type(installed_version))
-			print(new_version, type(new_version))
-			#pending_modules[module] = '{} -> {}'.format(installed_version, new_version)
+			# print(change.name, type(change.name))
+			# print(installed_version, type(installed_version))
+			# print(new_version, type(new_version))
+			pending_modules[module] = '{} -> {}'.format(installed_version, new_version)
 
 		return (len(changes), pending_modules)
 
