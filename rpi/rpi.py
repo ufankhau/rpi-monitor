@@ -452,7 +452,7 @@ def get_os_pending_updates():
 		for change in changes:
 			module = change.name
 			print(change)
-			print(change.version_list)
+			print(change.provides_list)
 		return (len(changes), pending_modules)
 
 
