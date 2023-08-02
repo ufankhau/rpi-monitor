@@ -451,7 +451,7 @@ def get_os_pending_updates():
 		changes = cache.get_changes()
 		for change in changes:
 			print(change)
-			print(type(change))
+			print(change.current_ver)
 		return (len(changes), pending_modules)
 
 
