@@ -451,9 +451,13 @@ def get_os_pending_updates():
 		changes = cache.get_changes()
 		for change in changes:
 			module = change.name
+			installed_version = change.installed.split('=')[1]
+			new_version = change.candidate.split('=')[1]
 			print(change.name)
 			print(change.candidate)
 			print(change.installed)
+			pending_modules[module] = '{} -> {}'.format(installed_version, new_version)
+			
 		return (len(changes), pending_modules)
 
 
