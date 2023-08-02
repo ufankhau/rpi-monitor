@@ -449,11 +449,9 @@ def get_os_pending_updates():
 		cache.open(None)
 		cache.upgrade()
 		changes = cache.get_changes()
-		for change in changes:
-			module = change.split('/')[0]
-			old_version = change.split()[-1].replace(']', '')
-			new_version = change.split()[1]
-			pending_modules[module] = '{} -> {}'.format(old_version, new_version)
+		for change in changes.packages:
+			module = change.shortname()
+			print(module)
 		return (len(changes), pending_modules)
 
 
