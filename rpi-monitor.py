@@ -382,8 +382,9 @@ rpi_cpu_temp = 0.0
 rpi_drive_used = 0
 rpi_gpu_temp = 0.0
 rpi_last_update_run = 0
-rpi_os_nbr_of_updates = 0
-rpi_os_update_content = []
+#rpi_pending_update_modules = OrderedDict()
+rpi_os_nbr_of_pending_updates = 0
+rpi_os_pending_updates_content = OrderedDict()
 rpi_ram_used = 0
 rpi_security = [
 	['OS Update Status', 'safe'],
@@ -816,7 +817,8 @@ RPI_SCRIPT = "Reporter"
 RPI_NETWORK = "Network_Interface(s)"
 RPI_OS_UPDATE = rpi_security[0][0]
 RPI_OS_UPGRADE = rpi_security[1][0]
-RPI_SECURITY_STATUS = "Security_Status"
+RPI_PENDING_UPDATES = "Pending Updates"
+#RPI_SECURITY_STATUS = "Security_Status"
 RPI_CPU = "CPU"
 SCRIPT_REPORT_INTERVAL = "Reporter_Interval"
 
@@ -857,13 +859,16 @@ def sendStatus(timestamp, nothing):
 	_thread.start_new_thread(publishMonitorData, (rpiTopDict, values_topic))
 
 	# prepare and send update for binary_sensor(s)
-	rpiSecurity = OrderedDict()
-	rpiSecurity[RPI_OS_UPDATE] = rpi_security[0][1]
-	rpiSecurity[RPI_OS_UPGRADE] = rpi_security[1][1]
-	rpiSecurityTop = OrderedDict()
-	rpiSecurityTop[LDS_PAYLOAD_NAME] = rpiSecurity
+	# rpiSecurity = OrderedDict()
+	# rpiSecurity[RPI_OS_UPDATE] = rpi_security[0][1]
+	# rpiSecurity[RPI_OS_UPGRADE] = rpi_security[1][1]
+	#rpiSecurityTop = OrderedDict()
+	#rpiSecurityTop[LDS_PAYLOAD_NAME] = rpiSecurity
+
+	rpi_pending_updates = OrderedDict()
+	rpi_pending_updates[RPI_PENDING_UPDATES] = rpi_os_pending_updates_content
 	topic = "home/nodes/binary_sensor/{}".format(sensor_name.lower())
-	_thread.start_new_thread(publishMonitorData, (rpiSecurity, topic))
+	_thread.start_new_thread(publishMonitorData, (rpi_pending_updates, topic))
 
 	topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
 	if (rpi_os_nbr_of_pending_updates != 0):

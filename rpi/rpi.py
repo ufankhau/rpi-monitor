@@ -441,14 +441,21 @@ def get_device_drive_used():
 def get_os_pending_updates():
 	"""
 	Return number of pending updates to be applied to the operating system together
-	with a list of affected modules.
-    """
+	with a dicionary of upgradable modules.
+  """
+	update_modules = OrderedDict()
 	if apt_available:
 		cache = apt.Cache()
 		cache.open(None)
 		cache.upgrade()
 		changes = cache.get_changes()
-		return (len(changes), changes)
+		updates = changes.split('\n')
+		for update in updates:
+			module = update.split('/')[0]
+			old_version = update.split()[-1].replace(']', '')
+			new_version = update.split()[1]
+			update_modules[module] = '{} -> {}'.format(old_version, new_version)
+		return (len(changes), update_modules)
 
 
 def get_timestamp_of_last_os_update_run():
