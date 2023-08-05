@@ -804,7 +804,7 @@ detectorValues = OrderedDict(
             LD_OS_UPDATE_STATUS,
             dict(
                 title="{} Operating System".format(rpi_hostname),
-                topic_categroy="binary_sensor",
+                topic_category="binary_sensor",
                 device_class="update",
                 icon="mdi:package-up",
                 binary="True",
