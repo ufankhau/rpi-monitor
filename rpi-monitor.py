@@ -862,7 +862,7 @@ for [sensor, params] in detectorValues.items():
         discovery_prefix, params["topic_category"], device_name.lower(), sensor
     )
     sensor_base_topic = "{}/{}/{}".format(
-        base_topic, params["topic_category"], default_device_name.lower()
+        base_topic, params["topic_category"], device_name.lower()
     )
     # values_topic = '{}/{}'.format(sensor_base_topic, LD_MONITOR)
 
