@@ -45,13 +45,13 @@
 #discovery_prefix = homeassistant
 
 # NOTE: The MQTT topic used for this device is constructed as:
-#  {base_topic}/{sensor_name}
+#  {base_topic}/{device_name}
 #
 # The MQTT base topic under which to publish the Raspberry Pi sensor data topics.
 #base_topic = home/nodes
 
-# The MQTT name for this Raspberry Pi as a sensor
-#sensor_name = rpi-{hostname}
+# The MQTT name for this Raspberry Pi as a device
+#device_name = rpi-{hostname}
 
 # The MQTT broker authentification credentials (Default: no authentication)
 # Will also read from MQTT_USERNAME and MQTT_PASSWORD environment variables
