@@ -643,6 +643,7 @@ lwt_online_val = "online"
 lwt_offline_val = "offline"
 
 # MQTT subscription
+command_base_topic = "{}/command/{}".format(base_topic, device_name.lower())
 
 
 print_line("Connecting to MQTT broker ...", verbose=True)
@@ -812,7 +813,7 @@ detectorValues = OrderedDict(
     ]
 )
 
-command_base_topic = "{}/command/{}".format(base_topic, device_name.lower())
+
 for [command, _] in commands.items():
     print_line("- REGISTER command: [{}]".format(command), debug=True)
     icon_name = "mdi:gesture-tap"
