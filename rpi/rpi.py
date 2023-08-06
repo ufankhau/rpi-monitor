@@ -455,6 +455,7 @@ def get_uptime():
         .replace(" min", "")
         .replace(":", "h")
         .replace(",", "m")
+        .strip()
     )
 
 

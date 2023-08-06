@@ -956,6 +956,7 @@ def sendStatus(timestamp, nothing):
 
 
 def publish_monitor_data(latestData, topic):
+    """"""
     print_line(
         'Publishing to MQTT topic  "{}, Data:{}"'.format(topic, json.dumps(latestData))
     )
@@ -1022,6 +1023,10 @@ print_line("* afterMQTTConnect()", verbose=True)
 start_reporting_timer()
 #  do first report
 print_line("* first reporting!", debug=True, verbose=True)
+(
+    rpi_os_nbr_of_pending_updates,
+    rpi_os_pending_updates_content,
+) = rpi.get_os_pending_updates()
 handle_interrupt(0)
 
 
@@ -1030,6 +1035,10 @@ handle_interrupt(0)
 #
 try:
     while True:
+        #  the reporting timer does the work
+        #  ... sleep until next check for pending updates ...
+        sleep(timespan_update_check_in_seconds)
+
         #  check for pending updates
         print_line("* check for pending updates ...", console=True, sd_notify=True)
         (
@@ -1045,10 +1054,6 @@ try:
         _thread.start_new_thread(
             publish_monitor_data, (rpi_os_pending_updates_content, binary_attributes)
         )
-
-        #  the reporting timer does the work
-        #  ... sleep until next check for pending updates ...
-        sleep(timespan_update_check_in_seconds)
 
 finally:
     #  publish shutdown message to mqtt broker
