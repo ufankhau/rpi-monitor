@@ -518,9 +518,8 @@ def get_os_pending_updates():
             installed_version = change.installed.version
             new_version = change.candidate.version
             pending_modules[module] = "{} -> {}".format(installed_version, new_version)
-        pending_modules = OrderedDict(sorted(pending_modules.items))
 
-    return (len(changes), pending_modules)
+    return (len(changes), OrderedDict(sorted(pending_modules.items())))
 
 
 def get_timestamp_of_last_os_update_run():
