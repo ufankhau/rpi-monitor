@@ -172,8 +172,8 @@ if opt_stall:
     print_line("Test: Stall (no-re-reporting) enabled", debug=True)
 
 
-#  -----------------------------------------------------------------
-#  MQTT - Callback Functions that are Called in Response to an Event
+#  ---------------------------------------------------------------
+#  MQTT - Callback Functions that are Called in Response to Events
 #
 mqtt_client_connected = False
 print_line(
@@ -322,6 +322,19 @@ def on_message(client, userdata, message):
     else:
         print_line("* Failed to locate shell Command!", error=True)
         os._exit(1)
+
+
+def publish_to_mqtt(topic: str, latestData, qos=0, retain=False):
+    """
+    MQTT helper routine to publish data to the MQTT broker
+    """
+    print_line(
+        'Publishing to MQTT topic  "{}, Data:{}"'.format(topic, json.dumps(latestData))
+    )
+    mqtt_client.publish(
+        "{}".format(topic), payload=json.dumps(latestData), qos=qos, retain=retain
+    )
+    sleep(0.5)
 
 
 #  -----------------------
@@ -784,8 +797,6 @@ binary_state = "{}/state".format(binary_base_topic)
 binary_attributes = "{}/attributes".format(binary_base_topic)
 
 
-# command_topic_rel = '~/set'
-
 #  auto-discovery of sensors, binary sensors, commands
 for [sensor, params] in detectorValues.items():
     discovery_topic = "{}/{}/{}/{}/config".format(
@@ -857,7 +868,8 @@ for [sensor, params] in detectorValues.items():
             "identifiers": ["{}".format(uniqID)],
         }
 
-    mqtt_client.publish(discovery_topic, json.dumps(payload), 1, retain=True)
+    # mqtt_client.publish(discovery_topic, json.dumps(payload), 1, retain=True)
+    publish_to_mqtt(discovery_topic, payload, qos=1, retain=True)
 
 
 #  -------------------------------------------------------
@@ -954,22 +966,13 @@ def sendStatus(timestamp, nothing):
     rpiTopDict = OrderedDict()
     rpiTopDict[LDS_PAYLOAD_NAME] = rpiData
 
-    _thread.start_new_thread(publish_monitor_data, (rpiTopDict, values_topic))
+    _thread.start_new_thread(publish_to_mqtt, (values_topic, rpiTopDict, 1))
 
 
-def publish_monitor_data(latestData, topic):
-    """"""
-    print_line(
-        'Publishing to MQTT topic  "{}, Data:{}"'.format(topic, json.dumps(latestData))
-    )
-    mqtt_client.publish("{}".format(topic), json.dumps(latestData), 1, retain=False)
-    sleep(0.5)
-
-
-def publish_binary_state(status, topic):
-    print_line('Publishing to MQTT topic "{}, Data:{}"'.format(topic, status))
-    mqtt_client.publish("{}".format(topic), payload="{}".format(status), retain=False)
-    sleep(0.5)
+# def publish_binary_state(status, topic):
+#     print_line('Publishing to MQTT topic "{}, Data:{}"'.format(topic, status))
+#     mqtt_client.publish("{}".format(topic), payload="{}".format(status), retain=False)
+#     sleep(0.5)
 
 
 def update_dynamic_values():
@@ -1029,9 +1032,16 @@ print_line("* first reporting!", debug=True, verbose=True)
     rpi_os_nbr_of_pending_updates,
     rpi_os_pending_updates_content,
 ) = rpi.get_os_pending_updates()
+
+if rpi_os_nbr_of_pending_updates > 0:
+    _thread.start_new_thread(publish_to_mqtt, (binary_state, "on"))
+else:
+    _thread.start_new_thread(publish_to_mqtt, (binary_state, "off"))
+
 _thread.start_new_thread(
-    publish_monitor_data, (rpi_os_pending_updates_content, binary_attributes)
+    publish_to_mqtt, (binary_attributes, rpi_os_pending_updates_content)
 )
+
 handle_interrupt(0)
 
 
@@ -1052,12 +1062,12 @@ try:
         ) = rpi.get_os_pending_updates()
 
         if rpi_os_nbr_of_pending_updates > 0:
-            _thread.start_new_thread(publish_binary_state, ("on", binary_state))
+            _thread.start_new_thread(publish_to_mqtt, (binary_state, "on"))
         else:
-            _thread.start_new_thread(publish_binary_state, ("off", binary_state))
+            _thread.start_new_thread(publish_to_mqtt, (binary_state, "off"))
 
         _thread.start_new_thread(
-            publish_monitor_data, (rpi_os_pending_updates_content, binary_attributes)
+            publish_to_mqtt, (binary_attributes, rpi_os_pending_updates_content)
         )
 
 finally:
