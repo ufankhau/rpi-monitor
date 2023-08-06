@@ -459,10 +459,15 @@ def get_uptime():
     )
 
 
-def get_cpu_load():
+def get_cpu_load(core_cnt=1):
     """
-    Return tuple of three float numbers rounded to 1 decimal, representing the 1m, 5m
-    and 15min average cpu load of the Raspberry Pi.
+    Return tuple of three float numbers rounded to 1 decimal representing the 1m, 5m
+    and 15min average cpu load of the Raspberry Pi expressed in percentage (e.g. 52.7)
+
+    Argument:
+
+        core_cnt: number of core(s) of the CPU (default = 1)
+
     """
     cmd_string = "{} /proc/loadavg".format(cat)
     out = subprocess.Popen(
@@ -471,9 +476,9 @@ def get_cpu_load():
     stdout, _ = out.communicate()
     loadavg = stdout.decode("utf-8").split()[0:3]
     return (
-        round(float(loadavg[0]) * 100, 1),
-        round(float(loadavg[1]) * 100, 1),
-        round(float(loadavg[2]) * 100, 1),
+        round((float(loadavg[0]) / core_cnt) * 100, 1),
+        round((float(loadavg[1]) / core_cnt) * 100, 1),
+        round((float(loadavg[2]) / core_cnt) * 100, 1),
     )
 
 

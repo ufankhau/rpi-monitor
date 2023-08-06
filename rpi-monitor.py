@@ -984,7 +984,9 @@ def update_dynamic_values():
     print_line("rpi_memory_used = [{}%]".format(rpi_memory_used), debug=True)
     rpi_drive_used = rpi.get_device_drive_used()
     print_line("rpi_drive_used = [{}%]".format(rpi_drive_used), debug=True)
-    rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m = rpi.get_cpu_load()
+    rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m = rpi.get_cpu_load(
+        rpi_number_of_cpu_cores
+    )
     print_line(
         "rpi_cpu_loads 1m|5m|15m = [{}|{}|{}]".format(
             rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m
