@@ -212,7 +212,7 @@ def get_device_memory_installed():
 def get_device_drive_size():
     """
     Return size of the filesystem in form of a tuple of two integers. The first value
-    is the size, the second value an index for the units to be applied (0 = 'kB', 
+    is the size, the second value an index for the units to be applied (0 = 'kB',
     1 = 'MB', 2 = 'GB', 3 = 'TB')
 
     The function uses the helper routine next_power_of_two().
@@ -236,7 +236,7 @@ def get_device_drive_size():
 
 def get_drives_mounted():
     """
-    Return list of filesystem(s) mounted to the Raspberry Pi. Each item in the list 
+    Return list of filesystem(s) mounted to the Raspberry Pi. Each item in the list
     represents a mounted drive in the form of "mounted device, mount point".
     """
     fs_mounted = []
@@ -460,7 +460,7 @@ def get_uptime():
 
 def get_cpu_load():
     """
-    Return tuple of three float numbers rounded to 1 decimal, representing the 1m, 5m 
+    Return tuple of three float numbers rounded to 1 decimal, representing the 1m, 5m
     and 15min average cpu load of the Raspberry Pi.
     """
     cmd_string = "{} /proc/loadavg".format(cat)
@@ -507,7 +507,7 @@ def get_os_pending_updates():
     Return number of pending updates to be applied to the operating system together
     with a dicionary of upgradable modules.
     """
-    pending_modules = OrderedDict()
+    pending_modules = {}
     if apt_available:
         cache = apt.Cache()
         cache.open(None)
@@ -517,12 +517,9 @@ def get_os_pending_updates():
             module = change.name
             installed_version = change.installed.version
             new_version = change.candidate.version
-            # print(change.name, type(change.name))
-            # print(installed_version, type(installed_version))
-            # print(new_version, type(new_version))
             pending_modules[module] = "{} -> {}".format(installed_version, new_version)
 
-        return (len(changes), pending_modules)
+        return (len(changes), OrderedDict(sorted(pending_modules.items)))
 
 
 def get_timestamp_of_last_os_update_run():
@@ -530,7 +527,7 @@ def get_timestamp_of_last_os_update_run():
     Return date and time of last run of 'sudo apt-get update' command on Raspberry Pi.
     """
     #  'sudo apt-get update' writes to the following directory (so date changes on
-	#   update)
+    #   update)
     apt_listdir_filespec = "/var/lib/apt/lists/partial"
     date_of_last_update_run_in_seconds = os.path.getmtime(apt_listdir_filespec)
     date_now_in_seconds = time()

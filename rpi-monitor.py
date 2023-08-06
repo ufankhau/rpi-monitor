@@ -32,7 +32,7 @@
 #  import necessary libraries
 #
 import _thread
-from datetime import datetime, timedelta
+from datetime import datetime
 from tzlocal import get_localzone
 import sys
 import ssl
@@ -42,7 +42,7 @@ import os.path
 import argparse
 import threading
 import subprocess
-from time import time, sleep, localtime, strftime
+from time import sleep, localtime, strftime
 from collections import OrderedDict
 
 # from colorama import init as colorama_init
@@ -119,31 +119,6 @@ def print_line(
     timestamp_sd = strftime("%b %d %H:%M:%S", localtime())
     if sd_notify:
         sd_notifier.notify("STATUS={} - {}.".format(timestamp_sd, unidecode(text)))
-
-
-#  Delta Time
-# def format_seconds(num: int):
-# """
-# Format integer representing seconds into string of day(s) hour(s) and minute(s).
-
-# Examples:
-
-# 	93845	--> 1d 2h04m \n
-# 	434220 --> 	5d 37m
-# """
-# days = num // 86400
-# hours = (num - days * 86400) // 3600
-# minutes = (num - days * 86400 - hours * 3600) // 60
-
-# if days != 0 and hours != 0:
-# 	deltatime = "{}d {}h{:02d}m".format(days, hours, minutes)
-# elif days != 0 and hours == 0:
-# 	deltatime = "{}d {}m".format(days, minutes)
-# elif days == 0 and hours == 0:
-# 	deltatime = "{}m".format(minutes)
-# else:
-# 	deltatime = "{}h{:02d}m".format(hours, minutes)
-# return deltatime
 
 
 #  check, that python 3 is available
@@ -269,7 +244,7 @@ def on_connect(client, userdata, flags, rc):
 
 def on_disconnect(client, userdata, mid):
     """
-    Callback function triggered by MQTT client in a disconnection event
+    Callback function triggered by MQTT client in a disconnect event
     """
     global mqtt_client_connected
     mqtt_client_connected = False
@@ -283,7 +258,7 @@ def on_disconnect(client, userdata, mid):
 
 def on_publish(client, userdata, mid):
     """
-    Callback function triggered by MQTT broker in a publish event
+    Callback function triggered by MQTT broker in a PUBLISH event
     """
     print_line("* Data successfully published.", debug=True)
     print_line(
@@ -303,7 +278,10 @@ def on_subscribe(client, userdata, mid, granted_qos):
 
 
 def on_message(client, userdata, message):
-    """ """
+    """
+    Callback function triggered by MQTT client in a event receiving a MESSAGE
+    from the broker
+    """
     sh_cmd_loc = rpi.get_command_location("sh")
     if sh_cmd_loc != "":
         payload = message.payload.decode("utf-8")
@@ -390,13 +368,6 @@ timespan_update_check_in_hours = config["Daemon"].getint(
 )
 timespan_update_check_in_seconds = timespan_update_check_in_hours * 60 * 60
 
-#  maximum time since last upgrade of OS to consider heahlth of Raspberry OS as "Safe"
-# min_upgrade_days = 1
-# max_upgrade_days = 14
-# default_upgrade_days = 7
-# OS_upgrade_days = config['Daemon'].getint('OS_upgrade_days', default_upgrade_days)
-# max_time_since_upgrade = OS_upgrade_days*24*60*60
-
 
 #  Read [MQTT] Section of config.ini
 default_base_topic = "home/nodes"
@@ -417,19 +388,15 @@ if (timespan_update_check_in_hours < min_timespan_update_check_in_hours) or (
     timespan_update_check_in_hours > max_timespan_update_check_in_hours
 ):
     print_line(
-        'ERROR: invalid "OS_update_check_in_hours" found in configuration '
-        + 'file: "config.ini"! Must be within range [{}-{}]. Fix and try again ....'.format(
+        'ERROR: invalid "OS_update_check_in_hours" found in configuration file:'
+        + ' "config.ini"! Must be within range [{}-{}]. Fix and try again ....'.format(
             min_timespan_update_check_in_hours, max_timespan_update_check_in_hours
         ),
         error=True,
         sd_notify=True,
     )
     sys.exit(1)
-# if (OS_upgrade_days < min_upgrade_days) or (OS_upgrade_days > max_upgrade_days):
-# 	print_line('ERROR: invalid "OS_upgrade_days" found in configuration file: '+\
-# 		'"config.ini"! Must be within range [{}-{}]. Fix and try again .... aborting'\
-# 		.format(min_upgrade_days, max_upgrade_days), error=True, sd_notify=True)
-# 	sys.exit(1)
+
 if (reporting_interval_in_minutes < min_reporting_interval_in_minutes) or (
     reporting_interval_in_minutes > max_reporting_interval_in_minutes
 ):
@@ -487,7 +454,6 @@ rpi_memory_installed = 0
 rpi_memory_installed_unit = ""
 
 #  ... with dynamic content
-# rpi_cpu_clock_speed = 0
 rpi_cpu_load_1m = 0.0
 rpi_cpu_load_5m = 0.0
 rpi_cpu_load_15m = 0.0
@@ -495,13 +461,10 @@ rpi_cpu_temp = 0.0
 rpi_drive_used = 0
 rpi_gpu_temp = 0.0
 rpi_last_update_run = 0
-# rpi_pending_update_modules = OrderedDict()
 rpi_os_nbr_of_pending_updates = 0
 rpi_os_pending_updates_content = OrderedDict()
 rpi_os_upgradable = False
 rpi_ram_used = 0
-# rpi_security = [["OS Update Status", "safe"], ["OS Upgrade Status", "safe"]]
-# rpi_security_status = "off"
 rpi_uptime = ""
 
 
@@ -560,19 +523,6 @@ print_line(
     debug=True,
 )
 
-# # handling of pending update(s)
-# (
-#     rpi_os_nbr_of_pending_updates,
-#     rpi_os_pending_updates_content,
-# ) = rpi.get_os_pending_updates()
-# print_line(
-#     "rpi_os_nbr_of_updates = [{}]".format(rpi_os_nbr_of_pending_updates), debug=True
-# )
-# print_line(
-#     "rpi_os_update_content = [{}]".format(rpi_os_pending_updates_content), debug=True
-# )
-# time_of_last_update_run = round(time())
-
 
 #  ---------------------------------------------------------
 #  timer and timer functions for ALIVE MQTT notices handling
@@ -599,35 +549,18 @@ def mqtt_alive_handler():
 
 def start_alive_timer():
     global mqtt_alive_timer
-    # global aliveTimerRunningStatus
-    # stopAliveTimer()
     mqtt_alive_timer.cancel()
     print_line("- stopped MQTT timer", debug=True)
     mqtt_alive_timer = threading.Timer(ALIVE_TIMEOUT_IN_SECONDS, mqtt_alive_handler)
     mqtt_alive_timer.start()
-    # aliveTimerRunningStatus = True
     print_line(
         "- started MQTT timer - every {} seconds".format(ALIVE_TIMEOUT_IN_SECONDS),
         debug=True,
     )
 
 
-# def stopAliveTimer():
-# 	global mqtt_alive_timer
-# 	global aliveTimerRunningStatus
-# 	mqtt_alive_timer.cancel()
-# 	aliveTimerRunningStatus = False
-# 	print_line('- stopped MQTT timer', debug=True)
-
-
-# def isAliveTimerRunning():
-# 	global aliveTimerRunningStatus
-# 	return aliveTimerRunningStatus
-
-#  our MQTT ALIVE TIMER
+#  MQTT ALIVE TIMER
 mqtt_alive_timer = threading.Timer(ALIVE_TIMEOUT_IN_SECONDS, mqtt_alive_handler)
-#  our BOOL tracking state of ALIVE TIMER
-# aliveTimerRunningStatus = False
 
 
 #  ----------------------
@@ -687,6 +620,7 @@ except ConnectionError:
     sys.exit(1)
 else:
     mqtt_client.publish(lwt_sensor_topic, payload=lwt_online_val, retain=False)
+    mqtt_client.publish(lwt_binary_sensor_topic, payload=lwt_online_val, retain=False)
     mqtt_client.publish(lwt_command_topic, payload=lwt_online_val, retain=False)
     mqtt_client.loop_start()
 
@@ -704,11 +638,7 @@ sd_notifier.notify("READY=1")
 
 #  ---------------------------------------
 #  perform MQTT discovery announcement ...
-#  ---------------------------------------
-
-#  what RPi device are we on?
-#  get hostnames so we can setup MQTT
-
+#
 mac_basic = rpi_mac_address.lower().replace(":", "")
 mac_left = mac_basic[:6]
 mac_right = mac_basic[6:]
@@ -734,7 +664,7 @@ else:
     cpu_icon = "mdi:cpu-64-bit"
 
 #  Publish MQTT auto discovery ....
-#  table of key items to be published for sensors:
+#  table of key items to be published for sensors, binary_sensors and commands:
 detectorValues = OrderedDict(
     [
         (
@@ -844,14 +774,12 @@ print_line(
 )
 print_line("- detectorValues=[{}]".format(detectorValues), debug=True)
 
-# sensor_base_topic = '{}/sensor/{}'.format(base_topic, sensor_name.lower())
 values_topic_rel = "{}/{}".format("~", LD_MONITOR)
 values_topic = "{}/sensor/{}/{}".format(base_topic, device_name.lower(), LD_MONITOR)
 activity_topic_rel = "{}/status".format("~")
-# activity_topic = '{}/status'.format(sensor_base_topic)
 binary_base_topic = "{}/binary_sensor/{}".format(base_topic, device_name.lower())
 binary_state = "{}/state".format(binary_base_topic)
-binary_attribute = "{}/attributes".format(binary_base_topic)
+binary_attributes = "{}/attributes".format(binary_base_topic)
 
 
 # command_topic_rel = '~/set'
@@ -864,7 +792,6 @@ for [sensor, params] in detectorValues.items():
     sensor_base_topic = "{}/{}/{}".format(
         base_topic, params["topic_category"], device_name.lower()
     )
-    # values_topic = '{}/{}'.format(sensor_base_topic, LD_MONITOR)
 
     payload = OrderedDict()
     payload["name"] = "{}".format(params["title"].title())
@@ -930,25 +857,6 @@ for [sensor, params] in detectorValues.items():
 
     mqtt_client.publish(discovery_topic, json.dumps(payload), 1, retain=True)
 
-#  auto-discovery of binary_sensor
-# discovery_topic = '{}/binary_sensor/{}/config'.format(
-# 	discovery_prefix, device_name.lower())
-# payload = OrderedDict()
-# payload['name'] = "{} Operating System".format(rpi_hostname.title())
-# payload['uniq_id'] = "{}_{}".format(uniqID, LD_SECURITY_STATUS)
-# payload['dev_cla'] = "update"
-# payload['ic'] = 'mdi:package-up'
-# payload['pl_on'] = "on"
-# payload['pl_off'] = "off"
-# payload['pl_avail'] = lwt_online_val
-# payload['pl_not_avail'] = lwt_offline_val
-# payload['state_topic'] = "home/nodes/binary_sensor/{}/status".format(device_name.lower())
-# payload['json_attr_t'] = "home/nodes/binary_sensor/{}".format(device_name.lower())
-# payload['dev'] = {
-# 	'identifiers' : ["{}".format(uniqID)]
-# }
-# mqtt_client.publish(discovery_topic, json.dumps(payload), 1, retain=True)
-
 
 #  -------------------------------------------------------
 #  timer and timer functionss for handling reporting cycle
@@ -961,18 +869,11 @@ def reporting_handler():
 
 def start_reporting_timer():
     global reporting_timer
-    # global reporting_cycle_timer_running_status
-    # stop_reporting_cycle_timer()
     reporting_timer.cancel()
-    # timer_running_status = False
-    # end_reporting_cycle_timer = threading.Timer(reporting_interval_in_minutes * 60.0, reporting_cycle_timeout_handler)
     reporting_timer = threading.Timer(
         reporting_interval_in_minutes * 60.0, reporting_handler
     )
-    # end_reporting_cycle_timer.start()
     reporting_timer.start()
-    # reporting_cycle_timer_running_status = True
-    # timer_running_status = True
     print_line(
         "- started reporting cycle timer - every {} seconds".format(
             reporting_interval_in_minutes * 60.0
@@ -981,25 +882,11 @@ def start_reporting_timer():
     )
 
 
-# def stop_reporting_cycle_timer():
-# 	global end_reporting_cycle_timer
-# 	global reporting_cycle_timer_running_status
-# 	end_reporting_cycle_timer.cancel()
-# 	reporting_cycle_timer_running_status = False
-# 	print_line('- stopped reporting cycle timer', debug=True)
-
-
-# def is_reporting_cycle_timer_running():
-# 	global reporting_cycle_timer_running_status
-# 	return reporting_cycle_timer_running_status
-
-
 #  TIMER
 reporting_timer = threading.Timer(
     reporting_interval_in_minutes * 60.0, reporting_handler
 )
 #  BOOL tracking state of TIMER
-# reporting_timer_running_status = False
 reported_first_time = False
 
 
@@ -1014,24 +901,19 @@ RPI_OS_PENDING_UPDATES = "OS_Pending_Updates"
 RPI_OS_RELEASE = "OS_Release"
 RPI_OS_VERSION = "OS_Version"
 RPI_UPTIME = "Up_Time"
-# RPI_OS_LAST_UPDATE = "OS_Last_Update"
 RPI_OS_LAST_UPGRADE = "OS_Last_Upgrade"
 RPI_DRIVE_INSTALLED = "Drive_Size_Installed"
 RPI_DRIVE_USED = "Drive_Size_Used"
 RPI_DRIVE_MOUNTED = "Drive(s)_Mounted"
 RPI_MEMORY_INSTALLED = "Memory_Installed"
 RPI_MEMORY_USED = "Memory_Used"
-# RPI_CPU_CLOCK_SPEED = "CPU_Clock_Speed"
 RPI_CPU_TEMP = "Temp_CPU"
 RPI_CPU_LOAD_1M = "CPU_Load_1min"
 RPI_CPU_LOAD_5M = "CPU_Load_5min"
 RPI_GPU_TEMP = "Temp_GPU"
 RPI_SCRIPT = "Reporter"
 RPI_NETWORK = "Network_Interface(s)"
-# RPI_OS_UPDATE = rpi_security[0][0]
-# RPI_OS_UPGRADE = rpi_security[1][0]
 RPI_PENDING_UPDATES_MODULES = "Pending Updates"
-# RPI_SECURITY_STATUS = "Security_Status"
 RPI_CPU = "CPU"
 SCRIPT_REPORT_INTERVAL = "Reporter_Interval"
 
@@ -1049,7 +931,6 @@ def sendStatus(timestamp, nothing):
     rpiData[RPI_OS_RELEASE] = rpi_os_release
     rpiData[RPI_OS_VERSION] = rpi_os_version
     rpiData[RPI_OS_PENDING_UPDATES] = rpi_os_nbr_of_pending_updates
-    # rpiData[RPI_OS_LAST_UPDATE] = '{} ago - {}'.format(format_seconds(rpi_time_since_last_os_update), rpi_security[0][1])
     rpiData[RPI_OS_LAST_UPGRADE] = rpi_timestamp_of_last_os_upgrade
     rpiData[RPI_UPTIME] = rpi_uptime
     rpiData[RPI_DRIVE_INSTALLED] = "{} {}".format(rpi_drive_size, rpi_drive_size_unit)
@@ -1060,7 +941,6 @@ def sendStatus(timestamp, nothing):
     rpiData[RPI_MEMORY_USED] = rpi_memory_used
     rpiData[RPI_CPU_TEMP] = rpi_cpu_temp
     rpiData[RPI_GPU_TEMP] = rpi_gpu_temp
-    # rpiData[RPI_CPU_CLOCK_SPEED] = '{} MHz'.format(rpi_cpu_clock_speed)
     rpiData[RPI_CPU_LOAD_1M] = rpi_cpu_load_1m
     rpiData[RPI_CPU_LOAD_5M] = rpi_cpu_load_5m
     rpiData[RPI_SCRIPT] = rpi_mqtt_script
@@ -1073,35 +953,6 @@ def sendStatus(timestamp, nothing):
     rpiTopDict[LDS_PAYLOAD_NAME] = rpiData
 
     _thread.start_new_thread(publish_monitor_data, (rpiTopDict, values_topic))
-
-    # prepare and send update for binary_sensor(s)
-    # rpiSecurity = OrderedDict()
-    # rpiSecurity[RPI_OS_UPDATE] = rpi_security[0][1]
-    # rpiSecurity[RPI_OS_UPGRADE] = rpi_security[1][1]
-    # rpiSecurityTop = OrderedDict()
-    # rpiSecurityTop[LDS_PAYLOAD_NAME] = rpiSecurity
-
-    # rpi_pending_updates = OrderedDict()
-    # rpi_pending_updates[RPI_PENDING_UPDATES] = rpi_os_pending_updates_content
-    # topic = "home/nodes/binary_sensor/{}".format(device_name.lower())
-    # _thread.start_new_thread(publishMonitorData, (rpi_pending_updates, topic))
-
-    # topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
-    # if (rpi_os_nbr_of_pending_updates != 0):
-    # 	_thread.start_new_thread(publishSecurityStatus, ('on', lwt_binary_sensor_topic))
-    # else:
-    # 	_thread.start_new_thread(publishSecurityStatus, ('off', lwt_binary_sensor_topic))
-
-    # rpi_security_status = 'off'
-    # for i in range(len(rpi_security)):
-    # 	if rpi_security[i][1] != 'safe':
-    # 		rpi_security_status = 'on'
-    # 		topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
-    # 		_thread.start_new_thread(publishSecurityStatus, ('on', topic))
-    # 		break
-    # if rpi_security_status == 'off':
-    # 	topic = "home/nodes/binary_sensor/{}/status".format(sensor_name.lower())
-    # 	_thread.start_new_thread(publishSecurityStatus, ('off', topic))
 
 
 def publish_monitor_data(latestData, topic):
@@ -1127,8 +978,6 @@ def update_dynamic_values():
     rpi_cpu_temp, rpi_gpu_temp = rpi.get_device_temperatures()
     print_line("rpi_cpu_temp = [{}]".format(rpi_cpu_temp), debug=True)
     print_line("rpi_gpu_temp = [{}]".format(rpi_gpu_temp), debug=True)
-    # rpi_time_since_last_os_update = rpi.get_timestamp_of_last_os_update_run()
-    # print_line('rpi_time_since_last_os_update formatted = [{}]'.format(format_seconds(rpi_time_since_last_os_update)), debug=True)
     rpi_memory_used = rpi.get_device_memory_used()
     print_line("rpi_memory_used = [{}%]".format(rpi_memory_used), debug=True)
     rpi_drive_used = rpi.get_device_drive_used()
@@ -1140,11 +989,6 @@ def update_dynamic_values():
         ),
         debug=True,
     )
-    # rpi_cpu_clock_speed = rpi.get_cpu_clock_speed()
-    # print_line('rpi_cpu_clock_speed = [{}] MHz'.format(rpi_cpu_clock_speed), debug=True)
-
-
-#  ---------------------------------------------------------------
 
 
 def handle_interrupt(channel):
@@ -1183,7 +1027,7 @@ handle_interrupt(0)
 
 #  ------------------------------------------------------------
 #  now just hang in forever, until script is stopped externally
-#  ------------------------------------------------------------
+#
 try:
     while True:
         #  check for pending updates
@@ -1194,13 +1038,12 @@ try:
         ) = rpi.get_os_pending_updates()
 
         if rpi_os_nbr_of_pending_updates > 0:
-            # topic = 'home/nodes/binary_sensor/{}/state'.format(device_name.lower())
             _thread.start_new_thread(publish_binary_state, ("on", binary_state))
         else:
             _thread.start_new_thread(publish_binary_state, ("off", binary_state))
 
         _thread.start_new_thread(
-            publish_monitor_data, (rpi_os_pending_updates_content, binary_attribute)
+            publish_monitor_data, (rpi_os_pending_updates_content, binary_attributes)
         )
 
         #  the reporting timer does the work
@@ -1212,8 +1055,6 @@ finally:
     publish_shutting_down_status()
     #  cleanup timers
     reporting_timer.cancel()
-    # stop_reporting_cycle_timer()
-    # stopAliveTimer()
     mqtt_alive_timer.cancel()
     mqtt_client.disconnect()
     print_line("* MQTT Disconnect()", verbose=True, debug=True)
