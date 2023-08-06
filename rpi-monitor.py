@@ -184,7 +184,7 @@ mqtt_client_should_attempt_reconnect = True
 
 def on_connect(client, userdata, flags, rc):
     """
-    Callback function triggered by MQTT client in a connection event
+    Callback function triggered by MQTT client in a CONNECT event
     """
     global mqtt_client_connected
     print_line("on_connect() - client, userdata, flags, rc", debug=True)
@@ -244,7 +244,7 @@ def on_connect(client, userdata, flags, rc):
 
 def on_disconnect(client, userdata, mid):
     """
-    Callback function triggered by MQTT client in a disconnect event
+    Callback function triggered by MQTT client in a DISCONNECT event
     """
     global mqtt_client_connected
     mqtt_client_connected = False
@@ -258,18 +258,20 @@ def on_disconnect(client, userdata, mid):
 
 def on_publish(client, userdata, mid):
     """
-    Callback function triggered by MQTT broker in a PUBLISH event
+    Callback function triggered by MQTT client in a PUBLISH event
     """
-    print_line("* Data successfully published.", debug=True)
-    print_line(
-        "(client | userdata | mid): {} | {} | {}".format(client, userdata, mid),
-        debug=True,
-    )
+    # print_line("* Data successfully published.", debug=True)
+    # print_line(
+    #     "(client | userdata | mid): {} | {} | {}".format(client, userdata, mid),
+    #     debug=True,
+    # )
     pass
 
 
 def on_subscribe(client, userdata, mid, granted_qos):
-    """ """
+    """
+    Callback function
+    """
     print_line(
         "on_subscribe() - {} - {}".format(str(mid), str(granted_qos)),
         debug=True,
@@ -279,8 +281,8 @@ def on_subscribe(client, userdata, mid, granted_qos):
 
 def on_message(client, userdata, message):
     """
-    Callback function triggered by MQTT client in a event receiving a MESSAGE
-    from the broker
+    Callback function triggered by MQTT client in a event of receiving
+    a MESSAGE from the broker
     """
     sh_cmd_loc = rpi.get_command_location("sh")
     if sh_cmd_loc != "":
@@ -427,7 +429,7 @@ print_line("Configuration accepted", debug=True, sd_notify=True)
 #  List of Constants
 ALIVE_TIMEOUT_IN_SECONDS = 60
 TIMER_INTERRUPT = -1
-TEST_INTERRUPT = -2
+# TEST_INTERRUPT = -2
 
 mem_units = {0: "kB", 1: "MB", 2: "GB", 3: "TB"}
 
@@ -529,16 +531,16 @@ print_line(
 #
 def publish_alive_status():
     print_line("- SEND: yes, still alive - ", debug=True)
-    mqtt_client.publish(lwt_sensor_topic, payload=lwt_online_val, retain=False)
-    mqtt_client.publish(lwt_binary_sensor_topic, payload=lwt_online_val, retain=False)
-    mqtt_client.publish(lwt_command_topic, payload=lwt_online_val, retain=False)
+    mqtt_client.publish(lwt_device_topic, payload=lwt_online_val, retain=False)
+    # mqtt_client.publish(lwt_binary_sensor_topic, payload=lwt_online_val, retain=False)
+    # mqtt_client.publish(lwt_command_topic, payload=lwt_online_val, retain=False)
 
 
 def publish_shutting_down_status():
     print_line("- SEND: shutting down -", debug=True)
-    mqtt_client.publish(lwt_sensor_topic, payload=lwt_offline_val, retain=False)
-    mqtt_client.publish(lwt_binary_sensor_topic, payload=lwt_offline_val, retain=False)
-    mqtt_client.publish(lwt_command_topic, payload=lwt_offline_val, retain=False)
+    mqtt_client.publish(lwt_device_topic, payload=lwt_offline_val, retain=False)
+    # mqtt_client.publish(lwt_binary_sensor_topic, payload=lwt_offline_val, retain=False)
+    # mqtt_client.publish(lwt_command_topic, payload=lwt_offline_val, retain=False)
 
 
 def mqtt_alive_handler():
@@ -567,11 +569,11 @@ mqtt_alive_timer = threading.Timer(ALIVE_TIMEOUT_IN_SECONDS, mqtt_alive_handler)
 #  MQTT Setup and Startup
 #
 #  MQTT connection
-lwt_sensor_topic = "{}/sensor/{}/status".format(base_topic, device_name.lower())
-lwt_binary_sensor_topic = "{}/binary_sensor/{}/status".format(
-    base_topic, device_name.lower()
-)
-lwt_command_topic = "{}/command/{}/status".format(base_topic, device_name.lower())
+lwt_device_topic = "{}/{}/status".format(base_topic, device_name.lower())
+# lwt_binary_sensor_topic = "{}/binary_sensor/{}/status".format(
+#    base_topic, device_name.lower()
+# )
+# lwt_command_topic = "{}/command/{}/status".format(base_topic, device_name.lower())
 lwt_online_val = "online"
 lwt_offline_val = "offline"
 
@@ -588,9 +590,9 @@ mqtt_client.on_publish = on_publish
 mqtt_client.on_subscribe = on_subscribe
 mqtt_client.on_message = on_message
 
-mqtt_client.will_set(lwt_sensor_topic, payload=lwt_offline_val, retain=True)
-mqtt_client.will_set(lwt_binary_sensor_topic, payload=lwt_offline_val, retain=True)
-mqtt_client.will_set(lwt_command_topic, payload=lwt_offline_val, retain=True)
+mqtt_client.will_set(lwt_device_topic, payload=lwt_offline_val, retain=True)
+# mqtt_client.will_set(lwt_binary_sensor_topic, payload=lwt_offline_val, retain=True)
+# mqtt_client.will_set(lwt_command_topic, payload=lwt_offline_val, retain=True)
 
 if config["MQTT"].getboolean("tls", False):
     mqtt_client.tls_set(
@@ -619,9 +621,9 @@ except ConnectionError:
     )
     sys.exit(1)
 else:
-    mqtt_client.publish(lwt_sensor_topic, payload=lwt_online_val, retain=False)
-    mqtt_client.publish(lwt_binary_sensor_topic, payload=lwt_online_val, retain=False)
-    mqtt_client.publish(lwt_command_topic, payload=lwt_online_val, retain=False)
+    mqtt_client.publish(lwt_device_topic, payload=lwt_online_val, retain=False)
+    # mqtt_client.publish(lwt_binary_sensor_topic, payload=lwt_online_val, retain=False)
+    # mqtt_client.publish(lwt_command_topic, payload=lwt_online_val, retain=False)
     mqtt_client.loop_start()
 
     while not mqtt_client_connected:  #  wait in loop
@@ -776,7 +778,7 @@ print_line("- detectorValues=[{}]".format(detectorValues), debug=True)
 
 values_topic_rel = "{}/{}".format("~", LD_MONITOR)
 values_topic = "{}/sensor/{}/{}".format(base_topic, device_name.lower(), LD_MONITOR)
-activity_topic_rel = "{}/status".format("~")
+activity_topic = "{}/{}/status".format(base_topic, device_name.lower())
 binary_base_topic = "{}/binary_sensor/{}".format(base_topic, device_name.lower())
 binary_state = "{}/state".format(binary_base_topic)
 binary_attributes = "{}/attributes".format(binary_base_topic)
@@ -825,7 +827,7 @@ for [sensor, params] in detectorValues.items():
         payload["pl_off"] = "off"
         payload["json_attr_t"] = "~/attributes"
 
-    payload["avty_t"] = activity_topic_rel
+    payload["avty_t"] = activity_topic
     payload["pl_avail"] = lwt_online_val
     payload["pl_not_avail"] = lwt_offline_val
     # if 'trigger_type' in params:
@@ -1027,6 +1029,9 @@ print_line("* first reporting!", debug=True, verbose=True)
     rpi_os_nbr_of_pending_updates,
     rpi_os_pending_updates_content,
 ) = rpi.get_os_pending_updates()
+_thread.start_new_thread(
+    publish_monitor_data, (rpi_os_pending_updates_content, binary_attributes)
+)
 handle_interrupt(0)
 
 
