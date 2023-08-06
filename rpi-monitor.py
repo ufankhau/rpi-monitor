@@ -834,8 +834,8 @@ for [sensor, params] in detectorValues.items():
 
     if "binary" in params:
         payload["stat_t"] = "~/state"
-        payload["pl_on"] = "on"
-        payload["pl_off"] = "off"
+        payload["pl_on"] = "{}".format("on")
+        payload["pl_off"] = "{}".format("off")
         payload["json_attr_t"] = "~/attributes"
 
     payload["avty_t"] = activity_topic
