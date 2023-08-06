@@ -1034,9 +1034,9 @@ print_line("* first reporting!", debug=True, verbose=True)
 ) = rpi.get_os_pending_updates()
 
 if rpi_os_nbr_of_pending_updates > 0:
-    _thread.start_new_thread(publish_to_mqtt, (binary_state, "on"))
+    _thread.start_new_thread(publish_to_mqtt, (binary_state, {"on"}))
 else:
-    _thread.start_new_thread(publish_to_mqtt, (binary_state, "off"))
+    _thread.start_new_thread(publish_to_mqtt, (binary_state, {"off"}))
 
 _thread.start_new_thread(
     publish_to_mqtt, (binary_attributes, rpi_os_pending_updates_content)
@@ -1062,9 +1062,9 @@ try:
         ) = rpi.get_os_pending_updates()
 
         if rpi_os_nbr_of_pending_updates > 0:
-            _thread.start_new_thread(publish_to_mqtt, (binary_state, "on"))
+            _thread.start_new_thread(publish_to_mqtt, (binary_state, {"on"}))
         else:
-            _thread.start_new_thread(publish_to_mqtt, (binary_state, "off"))
+            _thread.start_new_thread(publish_to_mqtt, (binary_state, {"off"}))
 
         _thread.start_new_thread(
             publish_to_mqtt, (binary_attributes, rpi_os_pending_updates_content)
