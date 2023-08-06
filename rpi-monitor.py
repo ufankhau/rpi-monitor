@@ -969,10 +969,10 @@ def sendStatus(timestamp, nothing):
     _thread.start_new_thread(publish_to_mqtt, (values_topic, rpiTopDict, 1))
 
 
-# def publish_binary_state(status, topic):
-#     print_line('Publishing to MQTT topic "{}, Data:{}"'.format(topic, status))
-#     mqtt_client.publish("{}".format(topic), payload="{}".format(status), retain=False)
-#     sleep(0.5)
+def publish_binary_state(topic, status):
+    print_line('Publishing to MQTT topic "{}, Data:{}"'.format(topic, status))
+    mqtt_client.publish("{}".format(topic), payload="{}".format(status), retain=False)
+    sleep(0.5)
 
 
 def update_dynamic_values():
@@ -1034,9 +1034,9 @@ print_line("* first reporting!", debug=True, verbose=True)
 ) = rpi.get_os_pending_updates()
 
 if rpi_os_nbr_of_pending_updates > 0:
-    _thread.start_new_thread(publish_to_mqtt, (binary_state, {"on"}))
+    _thread.start_new_thread(publish_binary_state, (binary_state, "on"))
 else:
-    _thread.start_new_thread(publish_to_mqtt, (binary_state, {"off"}))
+    _thread.start_new_thread(publish_binary_state, (binary_state, "off"))
 
 _thread.start_new_thread(
     publish_to_mqtt, (binary_attributes, rpi_os_pending_updates_content)
@@ -1062,9 +1062,9 @@ try:
         ) = rpi.get_os_pending_updates()
 
         if rpi_os_nbr_of_pending_updates > 0:
-            _thread.start_new_thread(publish_to_mqtt, (binary_state, {"on"}))
+            _thread.start_new_thread(publish_binary_state, (binary_state, "on"))
         else:
-            _thread.start_new_thread(publish_to_mqtt, (binary_state, {"off"}))
+            _thread.start_new_thread(publish_binary_state, (binary_state, "off"))
 
         _thread.start_new_thread(
             publish_to_mqtt, (binary_attributes, rpi_os_pending_updates_content)
