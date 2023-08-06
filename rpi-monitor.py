@@ -324,16 +324,12 @@ def on_message(client, userdata, message):
         os._exit(1)
 
 
-def publish_to_mqtt(topic: str, latestData, qos=0, retain=False):
+def publish_to_mqtt(topic: str, payload: str, qos=0, retain=False):
     """
     MQTT helper routine to publish data to the MQTT broker
     """
-    print_line(
-        'Publishing to MQTT topic  "{}, Data:{}"'.format(topic, json.dumps(latestData))
-    )
-    mqtt_client.publish(
-        "{}".format(topic), payload=json.dumps(latestData), qos=qos, retain=retain
-    )
+    print_line('Publishing to MQTT topic  "{}, Data:{}"'.format(topic, payload))
+    mqtt_client.publish("{}".format(topic), payload=payload, qos=qos, retain=retain)
     sleep(0.5)
 
 
@@ -869,7 +865,7 @@ for [sensor, params] in detectorValues.items():
         }
 
     # mqtt_client.publish(discovery_topic, json.dumps(payload), 1, retain=True)
-    publish_to_mqtt(discovery_topic, payload, qos=1, retain=True)
+    publish_to_mqtt(discovery_topic, payload=json.dumps(payload), qos=1, retain=True)
 
 
 #  -------------------------------------------------------
@@ -966,7 +962,7 @@ def sendStatus(timestamp, nothing):
     rpiTopDict = OrderedDict()
     rpiTopDict[LDS_PAYLOAD_NAME] = rpiData
 
-    _thread.start_new_thread(publish_to_mqtt, (values_topic, rpiTopDict, 1))
+    _thread.start_new_thread(publish_to_mqtt, (values_topic, json.dumps(rpiTopDict), 1))
 
 
 def publish_binary_state(topic, status):
@@ -1034,12 +1030,12 @@ print_line("* first reporting!", debug=True, verbose=True)
 ) = rpi.get_os_pending_updates()
 
 if rpi_os_nbr_of_pending_updates > 0:
-    _thread.start_new_thread(publish_binary_state, (binary_state, "on"))
+    _thread.start_new_thread(publish_to_mqtt, (binary_state, "on"))
 else:
-    _thread.start_new_thread(publish_binary_state, (binary_state, "off"))
+    _thread.start_new_thread(publish_to_mqtt, (binary_state, "off"))
 
 _thread.start_new_thread(
-    publish_to_mqtt, (binary_attributes, rpi_os_pending_updates_content)
+    publish_to_mqtt, (binary_attributes, json.dumps(rpi_os_pending_updates_content))
 )
 
 handle_interrupt(0)
@@ -1062,12 +1058,13 @@ try:
         ) = rpi.get_os_pending_updates()
 
         if rpi_os_nbr_of_pending_updates > 0:
-            _thread.start_new_thread(publish_binary_state, (binary_state, "on"))
+            _thread.start_new_thread(publish_to_mqtt, (binary_state, "on"))
         else:
-            _thread.start_new_thread(publish_binary_state, (binary_state, "off"))
+            _thread.start_new_thread(publish_to_mqtt, (binary_state, "off"))
 
         _thread.start_new_thread(
-            publish_to_mqtt, (binary_attributes, rpi_os_pending_updates_content)
+            publish_to_mqtt,
+            (binary_attributes, json.dumps(rpi_os_pending_updates_content)),
         )
 
 finally:
