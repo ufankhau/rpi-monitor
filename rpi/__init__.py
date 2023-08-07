@@ -2,7 +2,7 @@
 # helper functions
 """
 Module provides a set of functions to retrieve static and dynamic information
-of a Raspberry Pi such as:
+from a Raspberry Pi:
 - device name
 """
 
@@ -18,7 +18,7 @@ from .rpi import get_device_drive_size
 from .rpi import get_drives_mounted
 from .rpi import get_os_bit_length
 from .rpi import get_os_release
-from .rpi import get_os_version
+from .rpi import get_os_kernel_version
 from .rpi import get_network_interfaces
 
 # functions to get dynamic data

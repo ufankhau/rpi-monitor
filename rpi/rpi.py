@@ -273,24 +273,23 @@ def get_os_bit_length():
 
 def get_os_release():
     """
-    Return name of OS/Linux release as a string.
+    Return name of OS/Linux release (distributor id and codename) as a string.
     """
-    cmd_string = (
-        cat
-        + " /etc/os-release | "
-        + egrep
-        + " -i 'pretty_name' | "
-        + awk
-        + " -F'\"' '{print $2}'"
-    )
+    cmd_string = cat + " /etc/os-release | " + egrep + " -w 'ID|VERSION_CODENAME'"
     out = subprocess.Popen(
         cmd_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
     )
     stdout, _ = out.communicate()
-    return stdout.decode("utf-8").strip()
+    lines = stdout.decode("utf-8").split("\n")
+    for line in lines:
+        if "id" in line:
+            distributor = line.split("=")[1].strip().title()
+        elif "codename" in line:
+            codename = line.split("=")[1].strip().title()
+    return "{} {}".format(distributor, codename)
 
 
-def get_os_version():
+def get_os_kernel_version():
     """
     Return OS kernel version as a string.
     """

@@ -47,7 +47,7 @@
 # NOTE: The MQTT topic used for this device is constructed as:
 #  {base_topic}/{device_name}
 #
-# The MQTT base topic under which to publish the Raspberry Pi sensor data topics.
+# The MQTT base topic under which to publish the Raspberry Pi device data topics.
 #base_topic = home/nodes
 
 # The MQTT name for this Raspberry Pi as a device

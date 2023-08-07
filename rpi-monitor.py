@@ -460,7 +460,7 @@ rpi_network_interfaces = OrderedDict()
 rpi_number_of_cpu_cores = 0
 rpi_os_bit_length = 0
 rpi_os_release = ""
-rpi_os_version = ""
+rpi_os_kernel_version = ""
 rpi_memory_installed = 0
 rpi_memory_installed_unit = ""
 
@@ -497,8 +497,8 @@ rpi_os_bit_length = rpi.get_os_bit_length()
 print_line("rpi_os_bit_length = [{}]".format(rpi_os_bit_length), debug=True)
 rpi_os_release = "{} | {}-bit".format(rpi.get_os_release(), rpi_os_bit_length)
 print_line("rpi_os_release = [{}]".format(rpi_os_release), debug=True)
-rpi_os_version = rpi.get_os_version()
-print_line("rpi_os_version = [{}]".format(rpi_os_version), debug=True)
+rpi_os_kernel_version = rpi.get_os_kernel_version()
+print_line("rpi_os_kernel_version = [{}]".format(rpi_os_kernel_version), debug=True)
 rpi_memory_installed, unit = rpi.get_device_memory_installed()
 rpi_memory_installed_unit = mem_units[unit]
 print_line(
@@ -541,15 +541,11 @@ print_line(
 def publish_alive_status():
     print_line("- SEND: yes, still alive - ", debug=True)
     mqtt_client.publish(lwt_device_topic, payload=lwt_online_val, retain=False)
-    # mqtt_client.publish(lwt_binary_sensor_topic, payload=lwt_online_val, retain=False)
-    # mqtt_client.publish(lwt_command_topic, payload=lwt_online_val, retain=False)
 
 
 def publish_shutting_down_status():
     print_line("- SEND: shutting down -", debug=True)
     mqtt_client.publish(lwt_device_topic, payload=lwt_offline_val, retain=False)
-    # mqtt_client.publish(lwt_binary_sensor_topic, payload=lwt_offline_val, retain=False)
-    # mqtt_client.publish(lwt_command_topic, payload=lwt_offline_val, retain=False)
 
 
 def mqtt_alive_handler():
@@ -579,10 +575,6 @@ mqtt_alive_timer = threading.Timer(ALIVE_TIMEOUT_IN_SECONDS, mqtt_alive_handler)
 #
 #  MQTT connection
 lwt_device_topic = "{}/{}/status".format(base_topic, device_name.lower())
-# lwt_binary_sensor_topic = "{}/binary_sensor/{}/status".format(
-#    base_topic, device_name.lower()
-# )
-# lwt_command_topic = "{}/command/{}/status".format(base_topic, device_name.lower())
 lwt_online_val = "online"
 lwt_offline_val = "offline"
 
@@ -600,8 +592,6 @@ mqtt_client.on_subscribe = on_subscribe
 mqtt_client.on_message = on_message
 
 mqtt_client.will_set(lwt_device_topic, payload=lwt_offline_val, retain=True)
-# mqtt_client.will_set(lwt_binary_sensor_topic, payload=lwt_offline_val, retain=True)
-# mqtt_client.will_set(lwt_command_topic, payload=lwt_offline_val, retain=True)
 
 if config["MQTT"].getboolean("tls", False):
     mqtt_client.tls_set(
@@ -631,16 +621,14 @@ except ConnectionError:
     sys.exit(1)
 else:
     mqtt_client.publish(lwt_device_topic, payload=lwt_online_val, retain=False)
-    # mqtt_client.publish(lwt_binary_sensor_topic, payload=lwt_online_val, retain=False)
-    # mqtt_client.publish(lwt_command_topic, payload=lwt_online_val, retain=False)
     mqtt_client.loop_start()
 
-    while not mqtt_client_connected:  #  wait in loop
+    while not mqtt_client_connected:  # wait in loop
         print_line(
             "* Wait on mqtt_client_connected=[{}]".format(mqtt_client_connected),
             debug=True,
         )
-        sleep(1.0)  #  some slack to establish the connection
+        sleep(1.0)
 
     start_alive_timer()
 
@@ -857,14 +845,13 @@ for [sensor, params] in detectorValues.items():
             "manufacturer": "Raspbery Pi (Trading) Ltd.",
             "name": params["device_ident"],
             "model": "{}".format(rpi_model),
-            "sw_version": "{} {}".format(rpi_os_release, rpi_os_version),
+            "sw_version": "{} | {}".format(rpi_os_release, rpi_os_kernel_version),
         }
     else:
         payload["dev"] = {
             "identifiers": ["{}".format(uniqID)],
         }
 
-    # mqtt_client.publish(discovery_topic, json.dumps(payload), 1, retain=True)
     publish_to_mqtt(discovery_topic, payload=json.dumps(payload), qos=1, retain=True)
 
 
@@ -909,7 +896,7 @@ RPI_HOSTNAME = "Hostname"
 RPI_FQDN = "FQDN"
 RPI_OS_PENDING_UPDATES = "OS_Pending_Updates"
 RPI_OS_RELEASE = "OS_Release"
-RPI_OS_VERSION = "OS_Version"
+RPI_OS_KERNEL_VERSION = "OS_Kernel_Version"
 RPI_UPTIME = "Up_Time"
 RPI_OS_LAST_UPGRADE = "OS_Last_Upgrade"
 RPI_DRIVE_INSTALLED = "Drive_Size_Installed"
@@ -929,8 +916,7 @@ SCRIPT_REPORT_INTERVAL = "Reporter_Interval"
 
 
 def sendStatus(timestamp, nothing):
-    """ """
-    global rpi_security_status
+    """"""
     rpiData = OrderedDict()
     rpiData[SCRIPT_TIMESTAMP] = (
         timestamp.astimezone().replace(microsecond=0).isoformat()
@@ -939,7 +925,7 @@ def sendStatus(timestamp, nothing):
     rpiData[RPI_HOSTNAME] = rpi_hostname
     rpiData[RPI_FQDN] = rpi_fqdn
     rpiData[RPI_OS_RELEASE] = rpi_os_release
-    rpiData[RPI_OS_VERSION] = rpi_os_version
+    rpiData[RPI_OS_KERNEL_VERSION] = rpi_os_kernel_version
     rpiData[RPI_OS_PENDING_UPDATES] = rpi_os_nbr_of_pending_updates
     rpiData[RPI_OS_LAST_UPGRADE] = rpi_timestamp_of_last_os_upgrade
     rpiData[RPI_UPTIME] = rpi_uptime
@@ -965,10 +951,10 @@ def sendStatus(timestamp, nothing):
     _thread.start_new_thread(publish_to_mqtt, (values_topic, json.dumps(rpiTopDict), 1))
 
 
-def publish_binary_state(topic, status):
-    print_line('Publishing to MQTT topic "{}, Data:{}"'.format(topic, status))
-    mqtt_client.publish("{}".format(topic), payload="{}".format(status), retain=False)
-    sleep(0.5)
+# def publish_binary_state(topic, status):
+#     print_line('Publishing to MQTT topic "{}, Data:{}"'.format(topic, status))
+#     mqtt_client.publish("{}".format(topic), payload="{}".format(status), retain=False)
+#     sleep(0.5)
 
 
 def update_dynamic_values():
