@@ -282,9 +282,9 @@ def get_os_release():
     stdout, _ = out.communicate()
     lines = stdout.decode("utf-8").split("\n")
     for line in lines:
-        if "id" in line:
+        if "ID" in line:
             distributor = line.split("=")[1].strip().title()
-        elif "codename" in line:
+        elif "CODENAME" in line:
             codename = line.split("=")[1].strip().title()
     return "{} {}".format(distributor, codename)
 
