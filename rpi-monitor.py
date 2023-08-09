@@ -648,9 +648,9 @@ uniqID = "RPi-{}Mon{}".format(mac_left, mac_right)
 
 #  Raspberry Pi (rpi) monitor device with 6 sensors and 1 binary sensor
 #  constants
-LD_MONITOR = "Monitor"  #  sensor
-LD_CPU_TEMP = "Temperatur"  #  sensor
-LD_DISK_USED = "Disk_Used"  #  sensor
+LD_MONITOR = "monitor"  #  sensor
+LD_CPU_TEMP = "temperatur"  #  sensor
+LD_DISK_USED = "disk_used"  #  sensor
 LD_CPU_USAGE_1M = "cpu_load_1m"  #  sensor
 LD_CPU_USAGE_5M = "cpu_load_5m"  #  sensor
 LD_MEM_USED = "mem_used"  #  sensor
