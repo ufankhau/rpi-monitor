@@ -686,7 +686,7 @@ detectorValues = OrderedDict(
                 device_class="temperature",
                 unit="°C",
                 icon="mdi:thermometer",
-                json_value="Temp_CPU",
+                json_value="Temperature_CPU",
             ),
         ),
         (
