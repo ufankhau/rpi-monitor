@@ -802,8 +802,10 @@ for [sensor, params] in detectorValues.items():
 
     if "json_value" in params:
         payload["stat_t"] = values_topic_rel
-        payload["val_tpl"] = "{{{{ value_json.{}.{} }}}}".format(
-            LDS_PAYLOAD_NAME, params["json_value"]
+        payload[
+            "val_tpl"
+        ] = "{{{{ value_json.{}.{} | replace({}, '') | trim() }}}}".format(
+            LDS_PAYLOAD_NAME, params["json_value"], params["unit"]
         )
 
     if "object_id" in params:
@@ -817,10 +819,10 @@ for [sensor, params] in detectorValues.items():
         payload["~"] = sensor_base_topic
 
     if "binary" in params:
-        payload["stat_t"] = "~/state"
+        payload["stat_t"] = binary_state
         payload["pl_on"] = "{}".format("on")
         payload["pl_off"] = "{}".format("off")
-        payload["json_attr_t"] = "~/attributes"
+        payload["json_attr_t"] = binary_attributes
 
     payload["avty_t"] = activity_topic
     payload["pl_avail"] = lwt_online_val
@@ -856,19 +858,26 @@ for [sensor, params] in detectorValues.items():
 
 
 #  -------------------------------------------------------
-#  timer and timer functionss for handling reporting cycle
+#  timer and timer functions for handling reporting cycle
 #
 def reporting_handler():
+    """
+    Callback function called by threading timer after its expiration
+    """
     print_line("- REPORTING TIMER INTERRUPT -", debug=True)
     handle_interrupt(TIMER_INTERRUPT)  #  '0' means we have a timer interrupt!
     start_reporting_timer()
 
 
 def start_reporting_timer():
-    global reporting_timer
+    """
+    Function to manage reporting timer (cancel expired threading timer, create and start
+    new one with interval equal 'reporting_interval_in_minutes' converted to seconds)
+    """
+    global reporting_timer, reporting_interval_in_minutes
     reporting_timer.cancel()
     reporting_timer = threading.Timer(
-        reporting_interval_in_minutes * 60.0, reporting_handler
+        interval=reporting_interval_in_minutes * 60.0, function=reporting_handler
     )
     reporting_timer.start()
     print_line(
@@ -910,7 +919,7 @@ RPI_CPU_LOAD_5M = "CPU_Load_5min"
 RPI_GPU_TEMP = "Temp_GPU"
 RPI_SCRIPT = "Reporter"
 RPI_NETWORK = "Network_Interface(s)"
-RPI_PENDING_UPDATES_MODULES = "Pending Updates"
+# RPI_PENDING_UPDATES_MODULES = "Pending Updates"
 RPI_CPU = "CPU"
 SCRIPT_REPORT_INTERVAL = "Reporter_Interval"
 
@@ -918,32 +927,32 @@ SCRIPT_REPORT_INTERVAL = "Reporter_Interval"
 def sendStatus(timestamp, nothing):
     """"""
     rpiData = OrderedDict()
-    rpiData[SCRIPT_TIMESTAMP] = (
-        timestamp.astimezone().replace(microsecond=0).isoformat()
+    rpiData["Timestamp"] = timestamp.astimezone().replace(microsecond=0).isoformat()
+    rpiData["Raspberry_Model"] = rpi_model
+    rpiData["Hostname"] = rpi_hostname
+    rpiData["FQDN"] = rpi_fqdn
+    rpiData["OS_Release"] = rpi_os_release
+    rpiData["OS_Kernel_Version"] = rpi_os_kernel_version
+    rpiData["OS_Pending_Updates"] = rpi_os_nbr_of_pending_updates
+    rpiData["OS_Last_Upgrade"] = rpi_timestamp_of_last_os_upgrade
+    rpiData["Uptime"] = rpi_uptime
+    rpiData["Drive_Size_Installed"] = "{} {}".format(
+        rpi_drive_size, rpi_drive_size_unit
     )
-    rpiData[RPI_MODEL] = rpi_model
-    rpiData[RPI_HOSTNAME] = rpi_hostname
-    rpiData[RPI_FQDN] = rpi_fqdn
-    rpiData[RPI_OS_RELEASE] = rpi_os_release
-    rpiData[RPI_OS_KERNEL_VERSION] = rpi_os_kernel_version
-    rpiData[RPI_OS_PENDING_UPDATES] = rpi_os_nbr_of_pending_updates
-    rpiData[RPI_OS_LAST_UPGRADE] = rpi_timestamp_of_last_os_upgrade
-    rpiData[RPI_UPTIME] = rpi_uptime
-    rpiData[RPI_DRIVE_INSTALLED] = "{} {}".format(rpi_drive_size, rpi_drive_size_unit)
-    rpiData[RPI_DRIVE_USED] = rpi_drive_used
-    rpiData[RPI_MEMORY_INSTALLED] = "{} {}".format(
+    rpiData["Drive_Size_Used"] = rpi_drive_used
+    rpiData["Memory_Installed"] = "{} {}".format(
         rpi_memory_installed, rpi_memory_installed_unit
     )
-    rpiData[RPI_MEMORY_USED] = rpi_memory_used
-    rpiData[RPI_CPU_TEMP] = rpi_cpu_temp
-    rpiData[RPI_GPU_TEMP] = rpi_gpu_temp
+    rpiData["Memory_Used"] = rpi_memory_used
+    rpiData["Temperature_CPU"] = rpi_cpu_temp
+    rpiData["Temperature_GPU"] = rpi_gpu_temp
     rpiData[RPI_CPU_LOAD_1M] = rpi_cpu_load_1m
     rpiData[RPI_CPU_LOAD_5M] = rpi_cpu_load_5m
-    rpiData[RPI_SCRIPT] = rpi_mqtt_script
-    rpiData[SCRIPT_REPORT_INTERVAL] = "{} min".format(reporting_interval_in_minutes)
-    rpiData[RPI_CPU] = rpi_cpu_model
-    rpiData[RPI_DRIVE_MOUNTED] = rpi_drive_mounted
-    rpiData[RPI_NETWORK] = rpi_network_interfaces
+    rpiData["Reporter_Version"] = rpi_mqtt_script
+    rpiData["Reporter_Interval"] = "{} min".format(reporting_interval_in_minutes)
+    rpiData["CPU"] = rpi_cpu_model
+    rpiData["Drive(s)_Mounted"] = rpi_drive_mounted
+    rpiData["Network_Interface(s)"] = rpi_network_interfaces
 
     rpiTopDict = OrderedDict()
     rpiTopDict[LDS_PAYLOAD_NAME] = rpiData
@@ -951,15 +960,8 @@ def sendStatus(timestamp, nothing):
     _thread.start_new_thread(publish_to_mqtt, (values_topic, json.dumps(rpiTopDict), 1))
 
 
-# def publish_binary_state(topic, status):
-#     print_line('Publishing to MQTT topic "{}, Data:{}"'.format(topic, status))
-#     mqtt_client.publish("{}".format(topic), payload="{}".format(status), retain=False)
-#     sleep(0.5)
-
-
 def update_dynamic_values():
-    global rpi_uptime, rpi_cpu_temp, rpi_gpu_temp
-    global rpi_memory_used, rpi_drive_used
+    global rpi_uptime, rpi_cpu_temp, rpi_gpu_temp, rpi_memory_used, rpi_drive_used
     global rpi_cpu_load_1m, rpi_cpu_load_5m, rpi_cpu_load_15m
     rpi_uptime = rpi.get_uptime()
     print_line("rpi_uptime = [{}]".format(rpi_uptime), debug=True)
