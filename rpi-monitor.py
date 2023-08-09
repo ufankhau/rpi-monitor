@@ -944,7 +944,7 @@ def sendStatus(timestamp, nothing):
         rpi_memory_installed, rpi_memory_installed_unit
     )
     rpiData["Memory_Used"] = rpi_memory_used
-    rpiData["Temperature_CPU"] = rpi_cpu_temp
+    rpiData["Temperature_CPU"] = "{} °C".format(rpi_cpu_temp)
     rpiData["Temperature_GPU"] = rpi_gpu_temp
     rpiData[RPI_CPU_LOAD_1M] = rpi_cpu_load_1m
     rpiData[RPI_CPU_LOAD_5M] = rpi_cpu_load_5m
