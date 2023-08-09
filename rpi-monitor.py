@@ -804,7 +804,7 @@ for [sensor, params] in detectorValues.items():
         payload["stat_t"] = values_topic_rel
         payload[
             "val_tpl"
-        ] = "{{{{ value_json.{}.{} | replace('%', '') | replace('°C', '' | trim() }}}}".format(
+        ] = "{{{{ value_json.{}.{} | replace(' %', '') | replace(' °C', '') }}}}".format(
             LDS_PAYLOAD_NAME, params["json_value"]
         )
 
