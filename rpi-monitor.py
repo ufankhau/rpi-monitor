@@ -647,9 +647,10 @@ print_line(
 uniqID = "RPi-{}Mon{}".format(mac_left, mac_right)
 
 #  Raspberry Pi (rpi) monitor device with 6 sensors and 1 binary sensor
-LD_MONITOR = "monitor"  #  sensor
-LD_CPU_TEMP = "temperatur"  #  sensor
-LD_DISK_USED = "disk_used"  #  sensor
+#  constants
+LD_MONITOR = "Monitor"  #  sensor
+LD_CPU_TEMP = "Temperatur"  #  sensor
+LD_DISK_USED = "Disk_Used"  #  sensor
 LD_CPU_USAGE_1M = "cpu_load_1m"  #  sensor
 LD_CPU_USAGE_5M = "cpu_load_5m"  #  sensor
 LD_MEM_USED = "mem_used"  #  sensor
@@ -681,7 +682,7 @@ detectorValues = OrderedDict(
         (
             LD_CPU_TEMP,
             dict(
-                title="{} CPU Temp".format(rpi_hostname),
+                title="{} Temperature".format(rpi_hostname),
                 topic_category="sensor",
                 device_class="temperature",
                 unit="°C",
@@ -944,8 +945,8 @@ def sendStatus(timestamp, nothing):
     rpiData["Memory_Used"] = rpi_memory_used
     rpiData["Temperature_CPU"] = rpi_cpu_temp
     rpiData["Temperature_GPU"] = rpi_gpu_temp
-    rpiData[RPI_CPU_LOAD_1M] = rpi_cpu_load_1m
-    rpiData[RPI_CPU_LOAD_5M] = rpi_cpu_load_5m
+    rpiData["CPU_Load_1min"] = rpi_cpu_load_1m
+    rpiData["CPU_Load_5min"] = rpi_cpu_load_5m
     rpiData["Reporter_Version"] = rpi_mqtt_script
     rpiData["Reporter_Interval"] = "{} min".format(reporting_interval_in_minutes)
     rpiData["CPU"] = rpi_cpu_model
