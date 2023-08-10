@@ -518,7 +518,8 @@ print_line("drives_mounted = [{}]".format(drives_mounted), debug=True)
 for line in drives_mounted:
     if line != "none":
         line_parts = line.split(",")
-        rpi_drives_mounted[line_parts[0]] = "->_{}".format(line_parts[1])
+        mount_pt = "-> {}".format(line_parts[1])
+        rpi_drives_mounted[line_parts[0]] = mount_pt
     else:
         rpi_drives_mounted = "none"
 print_line("rpi_drive_mounted = [{}]".format(rpi_drives_mounted), debug=True)
