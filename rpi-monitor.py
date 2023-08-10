@@ -449,7 +449,7 @@ mem_units = {0: "kB", 1: "MB", 2: "GB", 3: "TB"}
 #  ... with static content
 rpi_cpu_model = {}
 rpi_fqdn = ""
-rpi_drive_mounted = ""
+rpi_drives_mounted = OrderedDict()
 rpi_drive_size = 0
 rpi_drive_size_unit = ""
 rpi_hostname = ""
@@ -513,15 +513,15 @@ print_line(
     "rpi_device_drive_size = [{}{}]".format(rpi_drive_size, rpi_drive_size_unit),
     debug=True,
 )
-drive_mounted = rpi.get_drives_mounted()
-print_line("fs_mounted = [{}]".format(drive_mounted), debug=True)
-for line in drive_mounted:
+drives_mounted = rpi.get_drives_mounted()
+print_line("fs_mounted = [{}]".format(drives_mounted), debug=True)
+for line in drives_mounted:
     if line != "none":
         line_parts = line.split(",")
-        rpi_drive_mounted[line_parts[0]] = "-\> {}".format(line_parts[1])
+        rpi_drives_mounted[line_parts[0]] = "-\> {}".format(line_parts[1])
     else:
-        rpi_drive_mounted = "none"
-print_line("rpi_drive_mounted = [{}]".format(rpi_drive_mounted), debug=True)
+        rpi_drives_mounted = "none"
+print_line("rpi_drive_mounted = [{}]".format(rpi_drives_mounted), debug=True)
 rpi_network_interfaces, rpi_mac_address = rpi.get_network_interfaces()
 print_line("rpi_interfaces = [{}]".format(rpi_network_interfaces), debug=True)
 print_line("rpi_mac_address = [{}]".format(rpi_mac_address), debug=True)
@@ -950,7 +950,7 @@ def sendStatus(timestamp, nothing):
     rpiData["Reporter_Version"] = rpi_mqtt_script
     rpiData["Reporter_Interval"] = "{} min".format(reporting_interval_in_minutes)
     rpiData["CPU"] = rpi_cpu_model
-    rpiData["Drive(s)_Mounted"] = rpi_drive_mounted
+    rpiData["Drive(s)_Mounted"] = rpi_drives_mounted
     rpiData["Network_Interface(s)"] = rpi_network_interfaces
 
     rpiTopDict = OrderedDict()
