@@ -247,13 +247,13 @@ def get_drives_mounted():
         cmd_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
     )
     stdout, _ = out.communicate()
-    lines = stdout.decode("utf-8")
+    lines = stdout.decode("utf-8").split("\n")
     for line in lines:
         line.strip()
         if len(line) > 0:
             line_parts = line.split()
             fs_mounted.append("{}, {}".format(line_parts[0], line_parts[5]))
-        else:
+        elif len(fs_mounted) == 0:
             fs_mounted.append("none")
 
     return fs_mounted
