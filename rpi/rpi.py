@@ -247,7 +247,7 @@ def get_drives_mounted():
         cmd_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
     )
     stdout, _ = out.communicate()
-    lines = stdout.decode("utf-8").split("\n")
+    lines = stdout.decode("utf-8")
     for line in lines:
         line.strip()
         if len(line) > 0:
