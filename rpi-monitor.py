@@ -514,11 +514,11 @@ print_line(
     debug=True,
 )
 drives_mounted = rpi.get_drives_mounted()
-print_line("fs_mounted = [{}]".format(drives_mounted), debug=True)
+print_line("drives_mounted = [{}]".format(drives_mounted), debug=True)
 for line in drives_mounted:
     if line != "none":
         line_parts = line.split(",")
-        rpi_drives_mounted[line_parts[0]] = "-\> {}".format(line_parts[1])
+        rpi_drives_mounted[line_parts[0]] = "-> {}".format(line_parts[1])
     else:
         rpi_drives_mounted = "none"
 print_line("rpi_drive_mounted = [{}]".format(rpi_drives_mounted), debug=True)
