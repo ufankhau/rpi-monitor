@@ -522,7 +522,9 @@ def get_os_pending_updates():
             module = change.name
             installed_version = change.installed.version
             new_version = change.candidate.version
-            pending_modules[module] = "{} -> {}".format(installed_version, new_version)
+            pending_modules[module] = "{} \u2192 {}".format(
+                installed_version, new_version
+            )
 
     return (len(changes), OrderedDict(sorted(pending_modules.items())))
 
