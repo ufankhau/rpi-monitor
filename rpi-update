@@ -32,3 +32,6 @@ fi
 # cleaning up and freeing up memory cache
 /usr/bin/apt-get clean
 /usr/bin/sync; echo 1 > /proc/sys/vm/drop_caches
+
+# restart rpi-monitor.service daemon
+/usr/bin/systemctl restart rpi-monitor.service >> $logfn
