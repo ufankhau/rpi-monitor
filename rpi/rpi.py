@@ -516,7 +516,7 @@ def get_os_pending_updates():
     if apt_available:
         cache = apt.Cache()
         # let's update the package list
-        cache.update()
+        # cache.update()
         # We need to re-open the cache because it needs to read the package list
         cache.open(None)
         cache.upgrade()
