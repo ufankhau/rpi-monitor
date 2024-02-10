@@ -73,7 +73,8 @@ uname = get_command_location("uname")
 ipaddr = get_command_location("ip")
 uptime = get_command_location("uptime")
 getconf = get_command_location("getconf")
-
+sort = get_command_location("sort")
+head = get_command_location("head")
 
 #  *******************************************************************
 #  Set of Functions to Retrieve Static Information from a Raspberry Pi
@@ -219,13 +220,11 @@ def get_device_drive_size():
     """
     cmd_string = (
         df
-        + " -k | "
-        + tail
-        + " -n +2 | "
-        + egrep
-        + " -i 'root' | "
-        + awk
-        + " '{print $2}'"
+        + " -k --output=size | "
+        + sort
+        + " -nr | "
+        + head
+        + " -n1"
     )
     out = subprocess.Popen(
         cmd_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
@@ -240,8 +239,13 @@ def get_drives_mounted():
     represents a mounted drive in the form of "mounted device, mount point".
     """
     fs_mounted = []
-    cmd_string = "{} | {} -n +2 | {} -v 'tmpfs|boot|root|overlay|udev'".format(
-        df, tail, egrep
+    cmd_string = (
+        df
+        + " | "
+        + tail
+        + " -n +2 | "
+        + egrep
+        + " -v 'tmpfs|boot|root|overlay|udev'"
     )
     out = subprocess.Popen(
         cmd_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
