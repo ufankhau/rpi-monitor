@@ -245,7 +245,7 @@ def get_drives_mounted():
         + tail
         + " -n +2 | "
         + egrep
-        + " -v 'tmpfs|boot|root|overlay|udev'"
+        + " -v 'tmpfs|boot|root|overlay|udev||'"
     )
     out = subprocess.Popen(
         cmd_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT

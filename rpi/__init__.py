@@ -2,8 +2,7 @@
 # helper functions
 """
 Module provides a set of functions to retrieve static and dynamic information
-from a Raspberry Pi:
-- device name
+from a Raspberry Pi device:
 """
 
 from .rpi import next_power_of_two
