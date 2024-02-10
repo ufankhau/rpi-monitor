@@ -502,7 +502,16 @@ def get_device_drive_used():
     Return percentage of filesystem size used as integer.
     """
     cmd_string = (
-        df + " | " + egrep + " root | " + awk + " '{print $5}' | " + cut + " -d'%' -f1"
+        df
+        + " --output=size,pcent | " 
+        + sort 
+        + " -nr | "
+        + head
+        + " -n1 | "
+        + awk 
+        + " '{print $2}' | " 
+        + cut 
+        + " -d'%' -f1"
     )
     out = subprocess.Popen(
         cmd_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
