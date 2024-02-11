@@ -75,6 +75,7 @@ uptime = get_command_location("uptime")
 getconf = get_command_location("getconf")
 sort = get_command_location("sort")
 head = get_command_location("head")
+findmnt = get_command_location('findmnt')
 
 #  *******************************************************************
 #  Set of Functions to Retrieve Static Information from a Raspberry Pi
@@ -240,12 +241,12 @@ def get_drives_mounted():
     """
     fs_mounted = []
     cmd_string = (
-        df
-        + " | "
+        findmnt
+        + " -s | "
         + tail
         + " -n +2 | "
         + egrep
-        + " -v 'tmpfs|boot|root|overlay|udev||'"
+        + " -v 'defaults'"
     )
     out = subprocess.Popen(
         cmd_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
@@ -256,7 +257,7 @@ def get_drives_mounted():
         line.strip()
         if len(line) > 0:
             line_parts = line.split()
-            fs_mounted.append("{}, {}".format(line_parts[0], line_parts[5]))
+            fs_mounted.append("{}, {}".format(line_parts[1], line_parts[0]))
         elif len(fs_mounted) == 0:
             fs_mounted.append("none")
 
