@@ -223,11 +223,11 @@ def get_device_drive_size():
     """
     cmd_string = (
         df
-        + " -k --output=size | "
-        + sort
-        + " -nr | "
-        + head
-        + " -n1"
+        + " -k SIZE | "
+        + egrep
+        + " '/dev/root' | "
+        + awk
+        + " '{print $2}' "
     )
     out = subprocess.Popen(
         cmd_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
