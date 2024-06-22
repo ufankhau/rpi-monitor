@@ -61,21 +61,23 @@ def get_command_location(arg: str):
 
 
 #  Get Locations of Executables on the Filesystem of the Raspberry Pi
-cat = get_command_location("cat")
 awk = get_command_location("awk")
-egrep = get_command_location("egrep")
+cat = get_command_location("cat")
 cut = get_command_location("cut")
-tail = get_command_location("tail")
-hostname = get_command_location("hostname")
-lscpu = get_command_location("lscpu")
 df = get_command_location("df")
-uname = get_command_location("uname")
-ipaddr = get_command_location("ip")
-uptime = get_command_location("uptime")
-getconf = get_command_location("getconf")
-sort = get_command_location("sort")
-head = get_command_location("head")
+egrep = get_command_location("egrep")
 findmnt = get_command_location('findmnt')
+getconf = get_command_location("getconf")
+head = get_command_location("head")
+hostname = get_command_location("hostname")
+ipaddr = get_command_location("ip")
+lsblk = get_command_location('lsblk')
+lscpu = get_command_location("lscpu")
+sort = get_command_location("sort")
+tail = get_command_location("tail")
+uname = get_command_location("uname")
+uptime = get_command_location("uptime")
+
 
 #  *******************************************************************
 #  Set of Functions to Retrieve Static Information from a Raspberry Pi
@@ -503,14 +505,12 @@ def get_device_drive_used():
     Return percentage of filesystem size used as integer.
     """
     cmd_string = (
-        df
-        + " --output=size,pcent | " 
-        + sort 
-        + " -nr | "
-        + head
-        + " -n1 | "
+        lsblk
+        + " -fo FSUSE% | " 
+        + tail 
+        + " -1 | "
         + awk 
-        + " '{print $2}' | " 
+        + " '{print $1}' | " 
         + cut 
         + " -d'%' -f1"
     )
