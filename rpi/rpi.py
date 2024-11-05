@@ -224,8 +224,12 @@ def get_device_drive_size():
     cmd_string = (
         df
         + " -k | "
-        + egrep
-        + " '/dev/root' | "
+        + tail
+        + " -n +2 | "
+        + sort
+        + " -k 2 -r | "
+        + head
+        + " -n 1 | "
         + awk
         + " '{print $2}' "
     )
