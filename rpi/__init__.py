@@ -1,10 +1,10 @@
 # import the necessary packages
-# helper functions
 """
 Module provides a set of functions to retrieve static and dynamic information
 from a Raspberry Pi device:
 """
 
+# helper functions
 from .rpi import next_power_of_two
 from .rpi import get_command_location
 

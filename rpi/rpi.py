@@ -227,7 +227,7 @@ def get_device_drive_size():
         + tail
         + " -n +2 | "
         + sort
-        + " -k 2 -r | "
+        + " -k 6 | "
         + head
         + " -n 1 | "
         + awk
