@@ -19,7 +19,7 @@ def next_power_of_two(x: int):
     """
     Calculate smallest power of 2 greater than or equal to x. Reduce result to < 1024 by
     deviding it by 1024 as often as possible. Return in a tuple last quotient together
-    with thenumber of divisions possible.
+    with the number of divisions possible.
 
     Examples:
 
