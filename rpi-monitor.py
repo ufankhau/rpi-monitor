@@ -44,8 +44,6 @@ import threading
 import subprocess
 from time import sleep, localtime, strftime
 from collections import OrderedDict
-
-# from colorama import init as colorama_init
 from colorama import Fore, Style
 from configparser import ConfigParser
 from unidecode import unidecode
@@ -53,7 +51,7 @@ import paho.mqtt.client as mqtt
 import sdnotify
 import rpi
 
-script_version = "1.7.1"
+script_version = "1.7.2"
 script_name = "rpi-monitor.py"
 script_info = "{} v{}".format(script_name, script_version)
 project_name = "rpi-monitor"
@@ -672,10 +670,8 @@ detectorValues = OrderedDict(
             LD_MONITOR,
             OrderedDict(
                 topic_category="sensor",
-                #title="{} Monitor".format(rpi_hostname),
                 title="Monitor",
                 device_class="timestamp",
-                #device_ident="Raspberry Pi {}".format(rpi_hostname.title()),
                 device_ident="{}".format(rpi_hostname.title()),
                 icon="mdi:raspberry-pi",
                 json_attr="yes",
@@ -685,7 +681,6 @@ detectorValues = OrderedDict(
         (
             LD_CPU_TEMP,
             dict(
-                #title="{} Temperature".format(rpi_hostname),
                 title="Temperature",
                 topic_category="sensor",
                 device_class="temperature",
@@ -697,7 +692,6 @@ detectorValues = OrderedDict(
         (
             LD_CPU_USAGE_1M,
             dict(
-                #title="{} CPU Load (1 min)".format(rpi_hostname.title()),
                 title="CPU Load (1 min)",
                 topic_category="sensor",
                 unit="%",
@@ -708,7 +702,6 @@ detectorValues = OrderedDict(
         (
             LD_CPU_USAGE_5M,
             dict(
-                #title="{} CPU Load (5 min)".format(rpi_hostname.title()),
                 title="CPU Load (5 min)",
                 topic_category="sensor",
                 unit="%",
@@ -719,7 +712,6 @@ detectorValues = OrderedDict(
         (
             LD_MEM_USED,
             dict(
-                #title="{} Memory Usage".format(rpi_hostname),
                 title="Memory Usage",
                 topic_category="sensor",
                 unit="%",
@@ -730,7 +722,6 @@ detectorValues = OrderedDict(
         (
             LD_DISK_USED,
             dict(
-                #title="{} Disk Usage".format(rpi_hostname),
                 title="Disk Usage",
                 topic_category="sensor",
                 unit="%",
@@ -741,7 +732,6 @@ detectorValues = OrderedDict(
         (
             LD_OS_UPDATE_STATUS,
             dict(
-                #title="{} Operating System".format(rpi_hostname),
                 title="Operating System",
                 topic_category="binary_sensor",
                 device_class="update",
@@ -835,10 +825,6 @@ for [sensor, params] in detectorValues.items():
     payload["avty_t"] = activity_topic
     payload["pl_avail"] = lwt_online_val
     payload["pl_not_avail"] = lwt_offline_val
-    # if 'trigger_type' in params:
-    # 	payload['type'] = params['trigger_type']
-    # if 'trigger_subtype' in params:
-    # 	payload['subtype'] = params['trigger_subtype']
 
     if "icon" in params:
         payload["ic"] = params["icon"]
@@ -927,7 +913,6 @@ RPI_CPU_LOAD_5M = "CPU_Load_5min"
 RPI_GPU_TEMP = "Temp_GPU"
 RPI_SCRIPT = "Reporter"
 RPI_NETWORK = "Network_Interface(s)"
-# RPI_PENDING_UPDATES_MODULES = "Pending Updates"
 RPI_CPU = "CPU"
 SCRIPT_REPORT_INTERVAL = "Reporter_Interval"
 
