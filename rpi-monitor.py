@@ -672,9 +672,11 @@ detectorValues = OrderedDict(
             LD_MONITOR,
             OrderedDict(
                 topic_category="sensor",
-                title="{} Monitor".format(rpi_hostname),
+                #title="{} Monitor".format(rpi_hostname),
+                title="Monitor",
                 device_class="timestamp",
-                device_ident="Raspberry Pi {}".format(rpi_hostname.title()),
+                #device_ident="Raspberry Pi {}".format(rpi_hostname.title()),
+                device_ident="{}".format(rpi_hostname.title()),
                 icon="mdi:raspberry-pi",
                 json_attr="yes",
                 json_value="Timestamp",
@@ -683,7 +685,8 @@ detectorValues = OrderedDict(
         (
             LD_CPU_TEMP,
             dict(
-                title="{} Temperature".format(rpi_hostname),
+                #title="{} Temperature".format(rpi_hostname),
+                title="Temperature",
                 topic_category="sensor",
                 device_class="temperature",
                 unit="°C",
@@ -694,7 +697,8 @@ detectorValues = OrderedDict(
         (
             LD_CPU_USAGE_1M,
             dict(
-                title="{} CPU Load (1 min)".format(rpi_hostname.title()),
+                #title="{} CPU Load (1 min)".format(rpi_hostname.title()),
+                title="CPU Load (1 min)",
                 topic_category="sensor",
                 unit="%",
                 icon=cpu_icon,
@@ -704,7 +708,8 @@ detectorValues = OrderedDict(
         (
             LD_CPU_USAGE_5M,
             dict(
-                title="{} CPU Load (5 min)".format(rpi_hostname.title()),
+                #title="{} CPU Load (5 min)".format(rpi_hostname.title()),
+                title="CPU Load (5 min)",
                 topic_category="sensor",
                 unit="%",
                 icon=cpu_icon,
@@ -714,7 +719,8 @@ detectorValues = OrderedDict(
         (
             LD_MEM_USED,
             dict(
-                title="{} Memory Usage".format(rpi_hostname),
+                #title="{} Memory Usage".format(rpi_hostname),
+                title="Memory Usage",
                 topic_category="sensor",
                 unit="%",
                 icon="mdi:memory",
@@ -724,7 +730,8 @@ detectorValues = OrderedDict(
         (
             LD_DISK_USED,
             dict(
-                title="{} Disk Usage".format(rpi_hostname),
+                #title="{} Disk Usage".format(rpi_hostname),
+                title="Disk Usage",
                 topic_category="sensor",
                 unit="%",
                 icon="mdi:sd",
@@ -734,7 +741,8 @@ detectorValues = OrderedDict(
         (
             LD_OS_UPDATE_STATUS,
             dict(
-                title="{} Operating System".format(rpi_hostname),
+                #title="{} Operating System".format(rpi_hostname),
+                title="Operating System",
                 topic_category="binary_sensor",
                 device_class="update",
                 icon="mdi:package-up",
