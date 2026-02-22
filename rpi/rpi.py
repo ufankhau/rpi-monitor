@@ -512,7 +512,7 @@ def get_device_drive_used():
         lsblk
         + " -fo LABEL,FSUSE% | " 
         + egrep 
-        + "rootfs | "
+        + " rootfs | "
         + awk 
         + " '{print $2}' | "
         + cut
