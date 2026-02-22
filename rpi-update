@@ -14,18 +14,20 @@ timestamp()
 }
 
 # main body
-echo "$(timestamp)" >> $logfn
+echo "$(timestamp) ***" >> $logfn
 echo "$(timestamp) *** upgrade ${osName} on ${name^}" >> $logfn
 echo "$(timestamp) ***" >> $logfn
 /usr/bin/apt-get upgrade -y >> $logfn
 if [[ $? = 0 ]]; then
     echo "$(timestamp) ***" >> $logfn
     echo "$(timestamp) *** upgrade successfully completed!" >> $logfn
-    echo "$(timestamp)" >> $logfn
+    echo "$(timestamp) ***" >> $logfn
+    echo -e "\n\n" >> $logfn
 else
     echo "$(timestamp) ***" >> $logfn
     echo "$(timestamp) *** ERROR occured during upgrade, please check!" >> $logfn
-    echo "$(timestamp)" >> $logfn
+    echo "$(timestamp) ***" >> $logfn
+    echo -e "\n\n" >> $logfn
     exit 5
 fi
 
