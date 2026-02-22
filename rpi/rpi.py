@@ -510,12 +510,12 @@ def get_device_drive_used():
     """
     cmd_string = (
         lsblk
-        + " -fo FSUSE% | " 
-        + tail 
-        + " -1 | "
+        + " -fo LABEL,FSUSE% | " 
+        + egrep 
+        + "rootfs | "
         + awk 
-        + " '{print $1}' | " 
-        + cut 
+        + " '{print $2}' | "
+        + cut
         + " -d'%' -f1"
     )
     out = subprocess.Popen(
