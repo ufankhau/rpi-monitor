@@ -51,7 +51,7 @@ import paho.mqtt.client as mqtt
 import sdnotify
 import rpi
 
-script_version = "1.7.2"
+script_version = "1.8.1"
 script_name = "rpi-monitor.py"
 script_info = "{} v{}".format(script_name, script_version)
 project_name = "rpi-monitor"
@@ -180,19 +180,19 @@ print_line(
 mqtt_client_should_attempt_reconnect = True
 
 
-def on_connect(client, userdata, flags, rc):
+def on_connect(client, userdata, flags, reason_code, properties):
     """
     Callback function triggered by MQTT client in a CONNECT event
     """
     global mqtt_client_connected
-    print_line("on_connect() - client, userdata, flags, rc", debug=True)
+    print_line("on_connect() - client, userdata, flags, reason_code, propterties", debug=True)
     print_line(
-        "Data received (client, userdata, flags, rc): ({}, {}, {}, {})".format(
-            client, userdata, flags, rc
+        "Data received (client, userdata, flags, reason_code, properties): ({}, {}, {}, {}, {})".format(
+            client, userdata, flags, reason_code, properties
         ),
         debug=True,
     )
-    if rc == 0:
+    if reason_code == 0:
         print_line("* MQTT connection established", console=True, sd_notify=True)
         print_line("")  #  blank line
         mqtt_client_connected = True
@@ -219,13 +219,13 @@ def on_connect(client, userdata, flags, rc):
     else:
         print_line(
             "! Connection error with result code {} - {}".format(
-                str(rc), mqtt.connack_string(rc)
+                str(reason_code), mqtt.connack_string(reason_code)
             ),
             error=True,
         )
         print_line(
             "MQTT Connection error with result code {} - {}".format(
-                str(rc), mqtt.connack_string(rc)
+                str(reason_code), mqtt.connack_string(reason_code)
             ),
             error=True,
             sd_notify=True,
@@ -240,41 +240,42 @@ def on_connect(client, userdata, flags, rc):
         os._exit(1)
 
 
-def on_disconnect(client, userdata, mid):
+def on_disconnect(client, userdata, flags, reason_code, properties):
     """
     Callback function triggered by MQTT client in a DISCONNECT event
     """
     global mqtt_client_connected
     mqtt_client_connected = False
-    print_line("* MQTT connection lost", console=True, sd_notify=True)
+    print_line("* MQTT connection disconnected", console=True, sd_notify=True)
     print_line(
         "on_disconnect() mqtt_client_connected = [{}]".format(mqtt_client_connected),
         debug=True,
     )
-    pass
+    #pass
 
 
-def on_publish(client, userdata, mid):
+def on_publish(client, userdata, mid, reason_codes, properties):
     """
     Callback function triggered by MQTT client in a PUBLISH event
     """
     # print_line("* Data successfully published.", debug=True)
     # print_line(
-    #     "(client | userdata | mid): {} | {} | {}".format(client, userdata, mid),
+    #     "(client | userdata | mid | reason codes | properties): {} | {} | {} | {} | {}".format(client, userdata, mid, reason_codes, properties),
     #     debug=True,
     # )
     pass
 
 
-def on_subscribe(client, userdata, mid, granted_qos):
+def on_subscribe(client, userdata, mid, reason_codes, properties):
     """
     Callback function
     """
-    print_line(
-        "on_subscribe() - {} - {}".format(str(mid), str(granted_qos)),
-        debug=True,
-        sd_notify=True,
-    )
+    for sub_result in reason_codes:
+        print_line(
+            "on_subscribe() - {} - {}".format(str(mid), str(sub_result)),
+            debug=True,
+            sd_notify=True,
+        )
 
 
 def on_message(client, userdata, message):
@@ -582,7 +583,7 @@ command_base_topic = "{}/command/{}".format(base_topic, device_name.lower())
 
 
 print_line("Connecting to MQTT broker ...", verbose=True)
-mqtt_client = mqtt.Client()
+mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 #  connect callback functions
 mqtt_client.on_connect = on_connect
 mqtt_client.on_disconnect = on_disconnect
